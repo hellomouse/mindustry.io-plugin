@@ -196,12 +196,12 @@ public class serverCommands implements MessageCreateListener {
             if (!hasPermission(r, event)) return;
 
             StringBuilder lijst = new StringBuilder();
-            lijst.append("Players: " + Vars.playerGroup.size()+"\n");
+            lijst.append("Players: ").append(Vars.playerGroup.size()).append("\n");
             for (Player p :Vars.playerGroup.all()){
                 Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
                 String p_ip = info.ip;
                 if (netServer.admins.isAdmin(p.uuid, p.usid)){p_ip = "~hidden~";}
-                lijst.append("* " + p.name.trim() + " : " + p_ip + "\n");
+                lijst.append("* ").append(p.name.trim()).append(" : ").append(p_ip).append("\n");
             }
             new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
         }

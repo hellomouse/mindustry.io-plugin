@@ -145,8 +145,8 @@ public class serverCommands implements MessageCreateListener {
             Role r = getRole(event.getApi(), data.getString("banPlayers_role_id"));
             if (!hasPermission(r, event)) return;
 
-            String[] splitted = event.getMessageContent().split(" ", 2);
-            String playerIp = splitted[splitted.length-1];
+            String[] split = event.getMessageContent().split(" ", 2);
+            String playerIp = split[split.length-1];
             if (playerIp!=null){
                 for (Player p:Vars.playerGroup.all()){
                     Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);

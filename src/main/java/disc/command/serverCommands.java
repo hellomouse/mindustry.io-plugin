@@ -230,7 +230,7 @@ public class serverCommands implements MessageCreateListener {
             } else {
                 return true;
             }
-        } catch (Exception _){
+        } catch (Exception e){
             return false;
         }
     }

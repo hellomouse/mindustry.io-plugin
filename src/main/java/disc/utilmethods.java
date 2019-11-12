@@ -1,5 +1,6 @@
 package disc;
 
+import io.anuke.arc.util.Log;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
@@ -11,12 +12,12 @@ public class utilmethods {
     public TextChannel getTextChannel(DiscordApi api, String id){
         Optional<Channel> dc =  ((Optional<Channel>)api.getChannelById(id));
         if (!dc.isPresent()) {
-            System.out.println("[ERR!] discordplugin: channel not found!");
+            Log.err("[ERR!] discordplugin: channel not found!");
             return null;
         }
         Optional<TextChannel> dtc = dc.get().asTextChannel();
         if (!dtc.isPresent()){
-            System.out.println("[ERR!] discordplugin: textchannel not found!");
+            Log.err("[ERR!] discordplugin: textchannel not found!");
             return null;
         }
         return dtc.get();
@@ -25,7 +26,7 @@ public class utilmethods {
     public Role getRole(DiscordApi api, String id){
         Optional<Role> r1 = api.getRoleById(id);
         if (!r1.isPresent()) {
-            System.out.println("[ERR!] discordplugin: adminrole not found!");
+            Log.err("[ERR!] discordplugin: adminrole not found!");
             return null;
         }
         return r1.get();

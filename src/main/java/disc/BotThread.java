@@ -3,13 +3,10 @@ package disc;
 import disc.command.comCommands;
 import disc.command.serverCommands;
 import org.javacord.api.DiscordApi;
-
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
-
-import java.lang.Thread;
 
 public class BotThread extends Thread{
     public DiscordApi api;
@@ -40,7 +37,7 @@ public class BotThread extends Thread{
             if (r == null || tc ==  null) {
                 try {
                     Thread.sleep(1000);
-                } catch (Exception _) {}
+                } catch (Exception e) {}
             } else {
                 if (data.has("serverdown_name")){
                     String serverNaam = data.getString("serverdown_name");

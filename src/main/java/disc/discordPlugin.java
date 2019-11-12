@@ -2,15 +2,13 @@ package disc;
 
 import io.anuke.arc.Core;
 import io.anuke.arc.Events;
-import io.anuke.arc.util.ArcRuntimeException;
 import io.anuke.arc.util.CommandHandler;
+import io.anuke.arc.util.Log;
 import io.anuke.arc.util.Strings;
 import io.anuke.mindustry.Vars;
 import io.anuke.mindustry.entities.type.Player;
 import io.anuke.mindustry.game.EventType;
-import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.plugin.Plugin;
-//javacord
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -18,22 +16,15 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
-
-//json
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.json.JSONTokener;
 
 import java.awt.*;
-import java.io.PrintWriter;
-import java.lang.Thread;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Optional;
+
+//javacord
+//json
 
 public class discordPlugin extends Plugin{
     private final Long CDT = 300L;
@@ -49,7 +40,7 @@ public class discordPlugin extends Plugin{
             String pureJson = Core.settings.getDataDirectory().child("mods/settings.json").readString();
             alldata = new JSONObject(new JSONTokener(pureJson));
             if (!alldata.has("in-game")){
-                System.out.println("[ERR!] discordplugin: settings.json has an invalid format!\n");
+                Log.err("[ERR!] discordplugin: settings.json has an invalid format!\n");
                 //this.makeSettingsFile("settings.json");
                 return;
             } else {
@@ -57,11 +48,11 @@ public class discordPlugin extends Plugin{
             }
         } catch (Exception e) {
             if (e.getMessage().contains(FileNotFoundErrorMessage)){
-                System.out.println("[ERR!] discordplugin: settings.json file is missing.\nBot can't start.");
+                Log.err("[ERR!] discordplugin: settings.json file is missing.\nBot can't start.");
                 //this.makeSettingsFile("settings.json");
                 return;
             } else {
-                System.out.println("[ERR!] discordplugin: Init Error");
+                Log.err("[ERR!] discordplugin: Init Error");
                 e.printStackTrace();
                 return;
             }
@@ -70,7 +61,7 @@ public class discordPlugin extends Plugin{
             api = new DiscordApiBuilder().setToken(alldata.getString("token")).login().join();
         }catch (Exception e){
             if (e.getMessage().contains("READY packet")){
-                System.out.println("\n[ERR!] discordplugin: invalid token.\n");
+                Log.err("\n[ERR!] discordplugin: invalid token.\n");
             } else {
                 e.printStackTrace();
             }
@@ -84,7 +75,7 @@ public class discordPlugin extends Plugin{
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    tc.sendMessage(event.player.name + " *@mindustry* : " + event.message);
+                    tc.sendMessage(event.player.name + ": `" + event.message + "`");
                 });
             }
         }
@@ -110,7 +101,7 @@ public class discordPlugin extends Plugin{
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(player.name + " *@mindustry* : " + args[0]);
+                    tc.sendMessage(player.name + " *@mindustry* : `" + args[0] + "`");
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
@@ -123,7 +114,6 @@ public class discordPlugin extends Plugin{
                     return;
                 }
 
-                //if (true) return; //some things broke in arc and or Vars.playergroup
 
                 for (Long key : cooldowns.keySet()) {
                     if (key + CDT < System.currentTimeMillis() / 1000L) {
@@ -197,11 +187,9 @@ public class discordPlugin extends Plugin{
                                                 .setFooter("Reported by " + player.name))
                                         .send(tc);
                             }
-                            Call.sendMessage(found.name + "[sky] is reported to discord.");
+                            player.sendMessage(found.name + "[sky] was reported to discord.");
                             cooldowns.put(System.currentTimeMillis() / 1000L, player.uuid);
                         }
-                    } else {
-                        player.sendMessage("[scarlet]Player reported successfully.");
                     }
                 }
             });
@@ -211,12 +199,12 @@ public class discordPlugin extends Plugin{
     public TextChannel getTextChannel(String id){
         Optional<Channel> dc =  ((Optional<Channel>)this.api.getChannelById(id));
         if (!dc.isPresent()) {
-            System.out.println("[ERR!] discordplugin: channel not found!");
+            Log.err("[ERR!] discordplugin: channel not found!");
             return null;
         }
         Optional<TextChannel> dtc = dc.get().asTextChannel();
         if (!dtc.isPresent()){
-            System.out.println("[ERR!] discordplugin: textchannel not found!");
+            Log.err("[ERR!] discordplugin: textchannel not found!");
             return null;
         }
         return dtc.get();
@@ -225,43 +213,9 @@ public class discordPlugin extends Plugin{
     public Role getRole(String id){
         Optional<Role> r1 = this.api.getRoleById(id);
         if (!r1.isPresent()) {
-            System.out.println("[ERR!] discordplugin: adminrole not found!");
+            Log.err("[ERR!] discordplugin: adminrole not found!");
             return null;
         }
         return r1.get();
     }
-    /*
-    private void makeSettingsFile(String _name){
-        JSONObject obj = new JSONObject();
-        obj.put("token", "put your token here");
-
-        JSONObject inGame = new JSONObject();
-        inGame.put("dchannel_id", "");
-        inGame.put("channel_id", "");
-        inGame.put("role_id", "");
-
-        obj.put("in-game", inGame);
-
-        JSONObject discord = new JSONObject();
-        String[] discordFields = {
-                "closeServer_role_id",
-                "gameOver_role_id",
-                "changeMap_role_id",
-                "serverdown_role_id",
-                "serverdown_name"
-        };
-        for (String fname : discordFields){
-            discord.put(fname, "");
-        }
-        obj.put("discord", discord);
-
-        //make file
-        Path path = Paths.get(String.valueOf(Core.settings.getDataDirectory().child("mods/"+_name)));
-        try {
-            PrintWriter writer = new PrintWriter(path.toString(), "UTF-8");
-            writer.println(obj.toString());
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }*/
 }

@@ -1,19 +1,16 @@
 package disc.command;
 
-import io.anuke.arc.ApplicationListener;
 import io.anuke.arc.Core;
 import io.anuke.arc.Events;
-import io.anuke.arc.collection.ObjectSet;
 import io.anuke.arc.files.FileHandle;
-import io.anuke.arc.net.Server;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.EventType.*;
+import io.anuke.arc.util.Log;
 import io.anuke.mindustry.Vars;
 import io.anuke.mindustry.core.GameState;
+import io.anuke.mindustry.entities.type.Player;
+import io.anuke.mindustry.game.EventType.GameOverEvent;
 import io.anuke.mindustry.game.Team;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.maps.Map;
-
 import io.anuke.mindustry.net.Administration;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -23,10 +20,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.json.JSONObject;
 
 import java.util.Optional;
-//change maps
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static io.anuke.mindustry.Vars.netServer;
 
@@ -77,7 +70,7 @@ public class serverCommands implements MessageCreateListener {
             Role r = getRole(event.getApi(), data.getString("changeMap_role_id"));
             if (!hasPermission(r, event)) return;
 
-            //Vars.maps.removeMap(Vars.maps.customMaps().get(0)); //will delete a file
+
             String[] splitted = event.getMessageContent().split(" ", 2);
             if (splitted.length == 1){
                 int index = 1;
@@ -103,7 +96,7 @@ public class serverCommands implements MessageCreateListener {
                     }
                 }
                 if (found == null){
-                    event.getChannel().sendMessage("Map not found...");
+                    event.getChannel().sendMessage("Map not found.");
                     return;
                 };
 
@@ -131,28 +124,6 @@ public class serverCommands implements MessageCreateListener {
                 event.getChannel().sendMessage("Next map selected: " + found.name() + "\nThe current map will change in 10 seconds.");
             }
 
-            /*
-            String[] splittedArg = event.getMessageContent().split(" ");
-            if (splittedArg.length != 2){
-                if (event.isPrivateMessage()) return;
-                event.getChannel().sendMessage("*Invalid command* \nuse `..changemap <name>`");
-            } else if (splittedArg.length == 2) {
-                //find map
-                //https://github.com/Anuken/Mindustry/blob/master/server/src/io/anuke/mindustry/server/ServerControl.java#L142
-                Map map = Vars.maps.all().find(m -> m.name() == splittedArg[1]);
-                if (map == null) {
-                    if (event.isPrivateMessage()) return;
-                    event.getChannel().sendMessage(splittedArg[1] + " map not found.");
-                } else {
-                    Call.onInfoMessage("Next selected map:[accent] " + map.name() + "[]" +
-                            (map.tags.containsKey("author") && !map.tags.get("author").trim().isEmpty() ? " by[accent] " + map.author() + "[]" : "") + ".");
-                    //make maps smaller
-                    //call gameover
-                    //wait x seconds to repopulate maps
-
-                }
-            }*/
-
         } else if (event.getMessageContent().startsWith(".exit")){
             if (!data.has("closeServer_role_id")){
                 if (event.isPrivateMessage()) return;
@@ -165,10 +136,6 @@ public class serverCommands implements MessageCreateListener {
             Vars.net.dispose(); //todo: check
             Core.app.exit();
 
-        /*
-        //testing
-        } else if (event.getMessageContent().startsWith("..test")){
-            Call.sendMessage("/help");*/
         } else if (event.getMessageContent().startsWith(".ban")){
             if (!data.has("banPlayers_role_id")){
                 if (event.isPrivateMessage()) return;
@@ -244,7 +211,7 @@ public class serverCommands implements MessageCreateListener {
     public Role getRole(DiscordApi api, String id){
         Optional<Role> r1 = api.getRoleById(id);
         if (!r1.isPresent()) {
-            System.out.println("[ERR!] discordplugin: role not found!");
+            Log.err("[ERR!] discordplugin: role not found!");
             return null;
         }
         return r1.get();

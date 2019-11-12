@@ -6,9 +6,15 @@ import io.anuke.arc.util.CommandHandler;
 import io.anuke.arc.util.Log;
 import io.anuke.arc.util.Strings;
 import io.anuke.mindustry.Vars;
+import io.anuke.mindustry.content.Blocks;
 import io.anuke.mindustry.entities.type.Player;
+import io.anuke.mindustry.entities.type.TileEntity;
+import io.anuke.mindustry.game.Team;
+import io.anuke.mindustry.gen.Call;
+import io.anuke.mindustry.world.blocks.power.NuclearReactor;
 import io.anuke.mindustry.game.EventType;
 import io.anuke.mindustry.plugin.Plugin;
+import io.anuke.mindustry.world.Tile;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -79,6 +85,19 @@ public class discordPlugin extends Plugin{
                 });
             }
         }
+
+
+        //anti nuke  -- NEEDS TO BE TESTED
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            Tile eT = event.tile;
+            if(eT.block() == Blocks.thoriumReactor){
+                TileEntity core = event.player.getClosestCore();
+                Tile cT = core.tile;
+                if(utils.DistanceBetween(eT.x, eT.y, cT.x, cT.y) <= utils.nukeDistance){ // nuke is too close to core, destroy
+                    Call.beginBreak(Team.crux, eT.x, eT.y);
+                }
+            }
+        });
     }
 
     //register commands that run on the server

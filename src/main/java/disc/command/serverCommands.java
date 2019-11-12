@@ -53,13 +53,13 @@ public class serverCommands implements MessageCreateListener {
             //inExtraRound = false;
             Events.fire(new GameOverEvent(Team.crux));
         } else if(event.getMessageContent().equalsIgnoreCase(".maps")){
-            StringBuilder mapLijst = new StringBuilder();
-            mapLijst.append("List of available maps:\n");
+            StringBuilder mapList = new StringBuilder();
+            mapList.append("List of available maps:\n");
             for (Map m:Vars.maps.customMaps()){
-                mapLijst.append("* "+m.name() + "/ " + m.width + " x " + m.height+"\n");
+                mapList.append("* ").append(m.name()).append("/ ").append(m.width).append(" x ").append(m.height).append("\n");
             }
-            mapLijst.append("Total number of maps: " + Vars.maps.customMaps().size);
-            new MessageBuilder().appendCode("", mapLijst.toString()).send(event.getChannel());
+            mapList.append("Total number of maps: ").append(Vars.maps.customMaps().size);
+            new MessageBuilder().appendCode("", mapList.toString()).send(event.getChannel());
 
         } else if (event.getMessageContent().startsWith(".changemap")){
             if (!data.has("changeMap_role_id")){
@@ -71,12 +71,12 @@ public class serverCommands implements MessageCreateListener {
             if (!hasPermission(r, event)) return;
 
 
-            String[] splitted = event.getMessageContent().split(" ", 2);
-            if (splitted.length == 1){
+            String[] split = event.getMessageContent().split(" ", 2);
+            if (split.length == 1){
                 int index = 1;
                 StringBuilder sb = new StringBuilder();
                 for (Map m: Vars.maps.customMaps()){
-                    sb.append(index++ + " : " + m.name() + "\n");
+                    sb.append(index++).append(" : ").append(m.name()).append("\n");
                 }
                 sb.append("\nUse .changemap <number/name>");
                 new MessageBuilder().appendCode("", sb.toString()).send(event.getChannel());
@@ -84,12 +84,12 @@ public class serverCommands implements MessageCreateListener {
                 //try number
                 Map found = null;
                 try{
-                    splitted[1] = splitted[1].trim();
-                    found = Vars.maps.customMaps().get(Integer.parseInt(splitted[1]) - 1);
+                    split[1] = split[1].trim();
+                    found = Vars.maps.customMaps().get(Integer.parseInt(split[1]) - 1);
                 } catch (Exception e) {
                     //check if map exits
                     for (Map m : Vars.maps.customMaps()) {
-                        if (m.name().equals(splitted[1])) {
+                        if (m.name().equals(split[1])) {
                             found = m;
                             break;
                         }

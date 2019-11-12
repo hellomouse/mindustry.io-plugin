@@ -181,8 +181,16 @@ public class serverCommands implements MessageCreateListener {
             String[] splitted = event.getMessageContent().split(" ", 2);
             String playerIp = splitted[splitted.length-1];
             if (playerIp!=null){
-                netServer.admins.banPlayerIP(playerIp);
-                event.getChannel().sendMessage("Banned `" + playerIp + "` successfully.");
+                for (Player p:Vars.playerGroup.all()){
+                    Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
+                    if (info.ip.equals(playerIp)){
+                        netServer.admins.banPlayerIP(playerIp);
+                        Call.onKick(p.con, "You've been banned by: " + event.getMessageAuthor().getName() + ".");
+                        event.getChannel().sendMessage("Banned `" + playerIp + "` successfully.");
+                    }
+                }
+            } else{
+                event.getChannel().sendMessage("Invalid argument / usage: `.ban {ip}`");
             }
 
         } else if (event.getMessageContent().startsWith(".kick")){
@@ -201,10 +209,12 @@ public class serverCommands implements MessageCreateListener {
                 for (Player p:Vars.playerGroup.all()){
                     Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
                     if (info.ip.equals(playerIp)){
-                        Call.onKick(p.con, "You've been remotely kicked.");
+                        Call.onKick(p.con, "You've been kicked by " + event.getMessageAuthor().getName() + ".");
+                        event.getChannel().sendMessage("Kicked `" + playerIp + "` successfully.");
                     }
                 }
-                event.getChannel().sendMessage("Kicked `" + playerIp + "` successfully.");
+            } else{
+                event.getChannel().sendMessage("Invalid argument / usage: `.kick {ip}`");
             }
 
 
@@ -220,7 +230,6 @@ public class serverCommands implements MessageCreateListener {
 
             StringBuilder lijst = new StringBuilder();
             lijst.append("Players: " + Vars.playerGroup.size()+"\n");
-            //lijst.append("online admins: " + Vars.playerGroup.all().count(p->p.isAdmin)+"\n");
             for (Player p :Vars.playerGroup.all()){
                 Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
                 String p_ip = info.ip;

@@ -4,5 +4,5 @@ The plugin's general purpose is to prevent griefers and make moderation easier. 
 
 ### Credits
 
-The original discordplugin was made by J-VdS, you can visit hist repository here:
+The original discordplugin was made by J-VdS, you can visit his repository here:
 https://github.com/J-VdS/DiscordPlugin

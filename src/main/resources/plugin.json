@@ -1,7 +1,7 @@
 {
-  "name": "DiscordPlugin",
-  "author": "Fishbuilder",
-  "main": "disc.discordPlugin",
-  "description": "interaction with discord",
-  "version": 0.6
+  "name": "ioPlugin",
+  "author": "Fishbuilder (core) / edited by fuzzbuck",
+  "main": "io.discPlugin",
+  "description": "Allows interaction with discord & vice versa, makes moderation easier.",
+  "version": 0.7
 }

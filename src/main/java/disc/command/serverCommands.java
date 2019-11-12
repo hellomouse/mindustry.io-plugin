@@ -223,11 +223,9 @@ public class serverCommands implements MessageCreateListener {
             //lijst.append("online admins: " + Vars.playerGroup.all().count(p->p.isAdmin)+"\n");
             for (Player p :Vars.playerGroup.all()){
                 Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
-                if (netServer.admins.isAdmin(p.uuid, p.usid)) {
-                    lijst.append("* " + p.name.trim() + " : *hidden*" + "\n");
-                } else{
-                    lijst.append("* " + p.name.trim() + " : " + info.ip + "\n");
-                }
+                String p_ip = info.ip;
+                if (netServer.admins.isAdmin(p.uuid, p.usid)){p_ip = "~hidden~";}
+                lijst.append("* " + p.name.trim() + " : " + p_ip + "\n");
             }
             new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
         }

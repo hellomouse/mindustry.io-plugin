@@ -1,5 +1,6 @@
 package disc;
 
+import disc.command.serverCommands;
 import io.anuke.arc.Core;
 import io.anuke.arc.Events;
 import io.anuke.arc.util.CommandHandler;
@@ -82,27 +83,40 @@ public class discordPlugin extends Plugin{
                 Events.on(EventType.PlayerChatEvent.class, event -> {
                     tc.sendMessage(event.player.name + ": `" + event.message + "`");
                 });
+
+                // anti nuke
+
+                Events.on(EventType.BuildSelectEvent.class, event -> {
+                    if (utils.antiNukeEnabled) {
+                        try {
+                            Tile nukeTile = event.builder.buildRequest().tile();
+                            if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
+                                Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
+                                if (coreTile == null) {
+                                    return;
+                                }
+                                double distance = utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
+                                if (distance <= utils.nukeDistance) {
+                                    Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
+                                    Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
+                                    ((Player) event.builder).kill();
+                                    ((Player) event.builder).sendMessage("[scarlet]Too close to the core, please find a better spot.");
+                                    tc.sendMessage(((Player) event.builder).name + " tried nuking the core, but failed horribly and suffered a painful death.");
+                                }
+                            }
+                        } catch (Exception ignored) {}
+                    } else{
+                        Log.info("Caught a nuker, but not preventing since anti nuke is off.");
+                    }
+                });
+
+                Events.on(EventType.LineConfirmEvent.class, event ->{
+
+                });
+
             }
         }
 
-        //anti nuke  -- NEEDS TO BE TESTED
-        Events.on(EventType.BuildSelectEvent.class, event -> {
-            try {
-                Tile nukeTile = event.builder.buildRequest().tile();
-                if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
-                    Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
-                    if (coreTile == null) {
-                        return;
-                    }
-                    double distance = utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
-                    if (distance <= utils.nukeDistance){
-                        Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
-                        Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
-                        ((Player) event.builder).sendMessage("Too close to the core, please find a better spot.");
-                    }
-                }
-            } catch (Exception ignored){}
-        });
     }
 
     //register commands that run on the server

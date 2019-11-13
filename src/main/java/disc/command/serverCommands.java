@@ -1,5 +1,6 @@
 package disc.command;
 
+import disc.utils;
 import io.anuke.arc.Core;
 import io.anuke.arc.Events;
 import io.anuke.arc.files.FileHandle;
@@ -170,8 +171,8 @@ public class serverCommands implements MessageCreateListener {
             Role r = getRole(event.getApi(), data.getString("kickPlayers_role_id"));
             if (!hasPermission(r, event)) return;
 
-            String[] splitted = event.getMessageContent().split(" ", 2);
-            String playerIp = splitted[splitted.length-1];
+            String[] split = event.getMessageContent().split(" ", 2);
+            String playerIp = split[split.length-1];
             if (playerIp!=null){
                 for (Player p:Vars.playerGroup.all()){
                     Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
@@ -186,7 +187,7 @@ public class serverCommands implements MessageCreateListener {
 
 
         } else if (event.getMessageContent().equalsIgnoreCase(".playersinfo")){
-            if (!data.has("banPlayers_role_id")){
+            if (!data.has("spyPlayers_role_id")){
                 if (event.isPrivateMessage()) return;
                 event.getChannel().sendMessage(commandDisabled);
                 return;
@@ -204,6 +205,36 @@ public class serverCommands implements MessageCreateListener {
                 lijst.append("* ").append(p.name.trim()).append(" : ").append(p_ip).append("\n");
             }
             new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
+
+
+        } else if (event.getMessageContent().startsWith(".antinuke")){  // ANTI NUKE TOGGLE
+            if (!data.has("kickPlayers_role_id")){
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage(commandDisabled);
+                return;
+            }
+
+            Role r = getRole(event.getApi(), data.getString("kickPlayers_role_id"));
+            if (!hasPermission(r, event)) return;
+
+            String[] split = event.getMessageContent().split(" ", 2);
+            String toggle = split[split.length-1];
+            Log.info("toggle: " + toggle);
+            if (toggle!=null) {
+                if (toggle.equals("on")) {
+                    utils.antiNukeEnabled = true;
+                    event.getChannel().sendMessage("Anti nuke was enabled.");
+                } else if (toggle.equals("off")) {
+                    utils.antiNukeEnabled = false;
+                    event.getChannel().sendMessage("Anti nuke was disabled.");
+                } else {
+                    if (utils.antiNukeEnabled) {
+                        event.getChannel().sendMessage("Anti nuke is currently enabled. Use the `.antinuke off` command to disable it.");
+                    } else {
+                        event.getChannel().sendMessage("Anti nuke is currently disabled. Use the `.antinuke on` command to enable it.");
+                    }
+                }
+            }
         }
 
     }

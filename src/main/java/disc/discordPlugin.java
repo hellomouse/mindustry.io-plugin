@@ -197,14 +197,19 @@ public class discordPlugin extends Plugin{
 
             });
 
-            handler.<Player>register("rainbow", "Turns you into a rainbow.. and back to normal", (args, player) -> {
-                if (rainbowedPlayers.contains(player)){
-                    try {
-                        rainbowedPlayers.remove(player);
-                        player.mech = Mechs.dart;
-                    } catch(Exception ignore) {}
+            handler.<Player>register("rainbow", "Turns you into a rainbow [Donator only]", (args, player) -> {
+                if(player.isAdmin) { // make it available to donors later
+                    if (rainbowedPlayers.contains(player)) {
+                        try {
+                            rainbowedPlayers.remove(player);
+                            player.mech = Mechs.dart;
+                        } catch (Exception ignore) {
+                        }
+                    } else {
+                        rainbowedPlayers.add(player);
+                    }
                 } else{
-                    rainbowedPlayers.add(player);
+                    player.sendMessage("[scarlet]Only donors can use this command.");
                 }
             });
 
@@ -296,6 +301,7 @@ public class discordPlugin extends Plugin{
             });
         }
     }
+
 
     public TextChannel getTextChannel(String id){
         Optional<Channel> dc =  ((Optional<Channel>)this.api.getChannelById(id));

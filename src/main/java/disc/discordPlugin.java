@@ -11,7 +11,6 @@ import io.anuke.mindustry.entities.type.Player;
 import io.anuke.mindustry.entities.type.TileEntity;
 import io.anuke.mindustry.game.Team;
 import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.world.blocks.power.NuclearReactor;
 import io.anuke.mindustry.game.EventType;
 import io.anuke.mindustry.plugin.Plugin;
 import io.anuke.mindustry.world.Tile;
@@ -86,17 +85,23 @@ public class discordPlugin extends Plugin{
             }
         }
 
-
         //anti nuke  -- NEEDS TO BE TESTED
-        Events.on(EventType.BlockBuildEndEvent.class, event -> {
-            Tile eT = event.tile;
-            if(eT.block() == Blocks.thoriumReactor){
-                TileEntity core = event.player.getClosestCore();
-                Tile cT = core.tile;
-                if(utils.DistanceBetween(eT.x, eT.y, cT.x, cT.y) <= utils.nukeDistance){ // nuke is too close to core, destroy
-                    Call.beginBreak(Team.crux, eT.x, eT.y);
+        Events.on(EventType.BuildSelectEvent.class, event -> {
+            try {
+                Tile nukeTile = event.builder.buildRequest().tile();
+                if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
+                    Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
+                    if (coreTile == null) {
+                        return;
+                    }
+                    double distance = utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
+                    if (distance <= utils.nukeDistance){
+                        Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
+                        Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
+                        ((Player) event.builder).sendMessage("Too close to the core, please find a better spot.");
+                    }
                 }
-            }
+            } catch (Exception ignored){}
         });
     }
 

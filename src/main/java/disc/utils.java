@@ -1,5 +1,6 @@
 package disc;
 
+
 public class utils {
     static int nukeDistance = 15;
     public static Boolean antiNukeEnabled = true;;

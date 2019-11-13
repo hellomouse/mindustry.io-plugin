@@ -8,12 +8,14 @@ import io.anuke.arc.util.Log;
 import io.anuke.arc.util.Strings;
 import io.anuke.mindustry.Vars;
 import io.anuke.mindustry.content.Blocks;
+import io.anuke.mindustry.content.Mechs;
 import io.anuke.mindustry.entities.type.Player;
 import io.anuke.mindustry.entities.type.TileEntity;
 import io.anuke.mindustry.game.Team;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.game.EventType;
 import io.anuke.mindustry.plugin.Plugin;
+import io.anuke.mindustry.type.Mech;
 import io.anuke.mindustry.world.Tile;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -26,8 +28,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Random;
+
+import static java.lang.Thread.sleep;
 
 //javacord
 //json
@@ -39,9 +45,10 @@ public class discordPlugin extends Plugin{
     private JSONObject data; //token, channel_id, role_id
     private DiscordApi api = null;
     private HashMap<Long, String> cooldowns = new HashMap<Long, String>(); //uuid
+    private ArrayList<Player> rainbowedPlayers = new ArrayList<>();
 
     //register event handlers and create variables in the constructor
-    public discordPlugin() {
+    public discordPlugin() throws InterruptedException {
         try {
             String pureJson = Core.settings.getDataDirectory().child("mods/settings.json").readString();
             alldata = new JSONObject(new JSONTokener(pureJson));
@@ -110,10 +117,55 @@ public class discordPlugin extends Plugin{
                     }
                 });
 
-                Events.on(EventType.LineConfirmEvent.class, event ->{
-
+                Events.on(EventType.PlayerLeave.class, event -> {
+                    if (rainbowedPlayers.contains(event.player)){
+                        try {
+                            rainbowedPlayers.remove(event.player);
+                        } catch(Exception ignore) {}
+                    }
                 });
 
+                Thread loopThread = new Thread(() -> {
+                    Random rand = new Random();
+                    while (true) {
+                        for (Player p : rainbowedPlayers) {
+                            int n = rand.nextInt(8);
+                            n += 1;
+                            switch (n) {
+                                case 1:
+                                    p.mech = Mechs.alpha;
+                                    break;
+                                default:
+                                    p.mech = Mechs.dart;
+                                    break;
+                                case 3:
+                                    p.mech = Mechs.delta;
+                                    break;
+                                case 4:
+                                    p.mech = Mechs.glaive;
+                                    break;
+                                case 5:
+                                    p.mech = Mechs.javelin;
+                                    break;
+                                case 6:
+                                    p.mech = Mechs.omega;
+                                    break;
+                                case 7:
+                                    p.mech = Mechs.tau;
+                                    break;
+                                case 8:
+                                    p.mech = Mechs.trident;
+                                    break;
+                            }
+                        }
+                        try {
+                            sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                loopThread.start();
             }
         }
 
@@ -143,6 +195,17 @@ public class discordPlugin extends Plugin{
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
+            });
+
+            handler.<Player>register("rainbow", "Turns you into a rainbow.. and back to normal", (args, player) -> {
+                if (rainbowedPlayers.contains(player)){
+                    try {
+                        rainbowedPlayers.remove(player);
+                        player.mech = Mechs.dart;
+                    } catch(Exception ignore) {}
+                } else{
+                    rainbowedPlayers.add(player);
+                }
             });
 
             handler.<Player>register("gr", "[player] [reason...]", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
@@ -256,4 +319,5 @@ public class discordPlugin extends Plugin{
         }
         return r1.get();
     }
+
 }

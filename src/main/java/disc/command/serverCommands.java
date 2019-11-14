@@ -186,8 +186,8 @@ public class serverCommands implements MessageCreateListener {
             }
 
 
-        } else if (event.getMessageContent().equalsIgnoreCase(".playersinfo")){
-            if (!data.has("spyPlayers_role_id")){
+        } else if (event.getMessageContent().equalsIgnoreCase(".playersinfo")) {
+            if (!data.has("spyPlayers_role_id")) {
                 if (event.isPrivateMessage()) return;
                 event.getChannel().sendMessage(commandDisabled);
                 return;
@@ -196,16 +196,42 @@ public class serverCommands implements MessageCreateListener {
             Role r = getRole(event.getApi(), data.getString("spyPlayers_role_id"));
             if (!hasPermission(r, event)) return;
 
-            StringBuilder lijst = new StringBuilder();
-            lijst.append("Players: ").append(Vars.playerGroup.size()).append("\n");
-            for (Player p :Vars.playerGroup.all()){
+            StringBuilder list = new StringBuilder();
+            list.append("Players: ").append(Vars.playerGroup.size()).append("\n");
+            for (Player p : Vars.playerGroup.all()) {
                 Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
                 String p_ip = info.ip;
-                if (netServer.admins.isAdmin(p.uuid, p.usid)){p_ip = "~hidden~";}
-                lijst.append("* ").append(p.name.trim()).append(" : ").append(p_ip).append("\n");
+                if (netServer.admins.isAdmin(p.uuid, p.usid)) {
+                    p_ip = "~hidden~";
+                }
+                list.append("* ").append(p.name.trim()).append(" : ").append(p_ip).append("\n");
             }
-            new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
+            new MessageBuilder().appendCode("", list.toString()).send(event.getChannel());
 
+        } else if (event.getMessageContent().startsWith(".bans")){ // give a list of banned players & ips
+            if (!data.has("banPlayers_role_id")){
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage(commandDisabled);
+                return;
+            }
+
+            Role r = getRole(event.getApi(), data.getString("kickPlayers_role_id"));
+            if (!hasPermission(r, event)) return;
+
+            StringBuilder list = new StringBuilder();
+            list.append("Banned players: ").append(Vars.playerGroup.size()).append("\n\n");
+            for (Administration.PlayerInfo p_info : Vars.netServer.admins.getBanned()){
+                list.append("Banned ip:").append(p_info.lastIP).append("\nAll known ips:");
+                for (String ip : p_info.ips){
+                    list.append(ip).append("\n");
+                }
+                list.append("\nAll known usernames:");
+                for (String username : p_info.names){
+                    list.append(username).append("\n");
+                }
+                list.append("\n\n---------------------\n\n"); // space between players
+            }
+            new MessageBuilder().appendCode("", list.toString()).send(event.getChannel());
 
         } else if (event.getMessageContent().startsWith(".antinuke")){  // ANTI NUKE TOGGLE
             if (!data.has("kickPlayers_role_id")){

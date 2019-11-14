@@ -161,6 +161,29 @@ public class serverCommands implements MessageCreateListener {
                 event.getChannel().sendMessage("Invalid argument / usage: `.ban {ip}`");
             }
 
+        }else if (event.getMessageContent().startsWith(".unban")){
+            if (!data.has("banPlayers_role_id")){
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage(commandDisabled);
+                return;
+            }
+            Role r = getRole(event.getApi(), data.getString("banPlayers_role_id"));
+            if (!hasPermission(r, event)) return;
+
+            String[] split = event.getMessageContent().split(" ", 2);
+            String playerIp = split[split.length-1];
+            if (playerIp!=null){
+                for (Player p:Vars.playerGroup.all()){
+                    Administration.TraceInfo info = new Administration.TraceInfo(p.con.address, p.uuid, p.con.modclient, p.con.mobile);
+                    if (info.ip.equals(playerIp)){
+                        netServer.admins.unbanPlayerIP(playerIp);
+                        event.getChannel().sendMessage("Unbanned `" + playerIp + "` successfully.");
+                    }
+                }
+            } else{
+                event.getChannel().sendMessage("Invalid argument / usage: `.unban {ip}`");
+            }
+
         } else if (event.getMessageContent().startsWith(".kick")){
 
             if (!data.has("kickPlayers_role_id")){

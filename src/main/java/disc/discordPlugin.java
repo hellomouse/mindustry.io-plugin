@@ -244,7 +244,6 @@ public class discordPlugin extends Plugin{
                     Player found = null;
                     if (args[0].length() > 1 && args[0].startsWith("#") && Strings.canParseInt(args[0].substring(1))) {
                         int id = Strings.parseInt(args[0].substring(1));
-                        //found = Vars.playerGroup.find(p -> p.id == id);
                         for (Player p: Vars.playerGroup.all()){
                             if (p.id == id){
                                 found = p;
@@ -258,7 +257,6 @@ public class discordPlugin extends Plugin{
                                 break;
                             }
                         }
-                        //found = Vars.playerGroup.find(p -> p.name.equalsIgnoreCase(args[0]));
                     }
                     if (found != null) {
                         if (found.isAdmin) {

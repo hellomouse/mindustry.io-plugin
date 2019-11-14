@@ -2,7 +2,7 @@ package disc;
 
 
 public class utils {
-    static int nukeDistance = 15;
+    static int nukeDistance = 25;
     public static Boolean antiNukeEnabled = true;;
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {

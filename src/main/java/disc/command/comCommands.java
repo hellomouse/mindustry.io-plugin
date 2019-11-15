@@ -2,6 +2,7 @@ package disc.command;
 
 //mindustry + arc
 
+import disc.utils;
 import io.anuke.mindustry.Vars;
 import io.anuke.mindustry.content.Items;
 import io.anuke.mindustry.entities.type.Player;
@@ -30,7 +31,7 @@ public class comCommands implements MessageCreateListener {
             for (Player p :Vars.playerGroup.all()){
                 lijst.append("* ").append(p.name.trim()).append("\n");
             }
-            new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
+            new MessageBuilder().appendCode("", utils.escapeBackticks(lijst.toString())).send(event.getChannel());
         }
         //info
         else if (event.getMessageContent().equalsIgnoreCase(".info")){
@@ -40,7 +41,7 @@ public class comCommands implements MessageCreateListener {
                 lijst.append("Wave: ").append(Vars.state.wave).append("\n");
                 lijst.append("Enemies: ").append(Vars.state.enemies).append("\n");
                 lijst.append("Players: ").append(Vars.playerGroup.size()).append('\n');
-                new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
+                new MessageBuilder().appendCode("", utils.escapeBackticks(lijst.toString())).send(event.getChannel());
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
@@ -68,7 +69,7 @@ public class comCommands implements MessageCreateListener {
                 lijst.append("Phase fabric: ").append(core.get(Items.phasefabric)).append("\n");
                 lijst.append("Surge alloy: ").append(core.get(Items.surgealloy)).append("\n");
 
-                new MessageBuilder().appendCode("", lijst.toString()).send(event.getChannel());
+                new MessageBuilder().appendCode("", utils.escapeBackticks(lijst.toString())).send(event.getChannel());
             }
 
 

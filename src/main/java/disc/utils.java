@@ -10,14 +10,6 @@ public class utils {
     }
 
     public static String escapeBackticks(String string){
-        return string.replaceAll("`", "`\u200b`\u200b`");
-    }
-
-    public static String zeroWidthInterpolated(String string){
-        String ret = "";
-        for(int i = 0; i < string.length(); i++){
-            ret += string.charAt(i) + '\u200b';
-        }
-        return ret;
+        return string.replaceAll("`", "");
     }
 }

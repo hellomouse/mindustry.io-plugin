@@ -88,7 +88,7 @@ public class discordPlugin extends Plugin{
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    tc.sendMessage(event.player.name + ": `" + event.message + "`");
+                    tc.sendMessage(utils.zeroWidthInterpolated(event.player.name + ": `" + event.message + "`"));
                 });
 
                 // anti nuke
@@ -191,7 +191,7 @@ public class discordPlugin extends Plugin{
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(player.name + " *@mindustry* : `" + args[0] + "`");
+                    tc.sendMessage(utils.zeroWidthInterpolated(player.name + " *@mindustry* : `" + args[0] + "`"));
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 

@@ -347,7 +347,7 @@ public class serverCommands implements MessageCreateListener {
             Vars.maps.reload();
             event.getChannel().sendMessage(ml.get(0).getFileName() + " added succesfully!");
         
-        } else if (event.getMessageContent().startsWith("..removemap")) {
+        } else if (event.getMessageContent().startsWith(".removemap")) {
             if (!data.has("mapConfig_role_id")) {
                 if (event.isPrivateMessage()) return;
                 event.getChannel().sendMessage(commandDisabled);

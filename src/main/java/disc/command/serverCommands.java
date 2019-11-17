@@ -1,10 +1,13 @@
 package disc.command;
 
 import disc.utils;
+
 import io.anuke.arc.Core;
 import io.anuke.arc.Events;
 import io.anuke.arc.files.FileHandle;
 import io.anuke.arc.util.Log;
+import io.anuke.arc.collection.Array;
+
 import io.anuke.mindustry.Vars;
 import io.anuke.mindustry.core.GameState;
 import io.anuke.mindustry.entities.type.Player;
@@ -12,15 +15,23 @@ import io.anuke.mindustry.game.EventType.GameOverEvent;
 import io.anuke.mindustry.game.Team;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.maps.Map;
+import io.anuke.mindustry.io.SaveIO;
 import io.anuke.mindustry.net.Administration;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.entity.message.MessageAttachment;
+
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.zip.InflaterInputStream;
 
 import static io.anuke.mindustry.Vars.netServer;
 
@@ -30,6 +41,7 @@ public class serverCommands implements MessageCreateListener {
     final String noPermission = "You don't have permissions to use this command!";
 
     private JSONObject data;
+    private long lastMapChange = 0L;
 
 
     public serverCommands(JSONObject _data){
@@ -70,6 +82,12 @@ public class serverCommands implements MessageCreateListener {
             }
             Role r = getRole(event.getApi(), data.getString("changeMap_role_id"));
             if (!hasPermission(r, event)) return;
+            
+            if (System.currentTimeMillis() / 1000L - this.lastMapChange < this.minMapChangeTime) {
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage(String.format("This commands has a %d s cooldown.", this.minMapChangeTime));
+                return;
+            }
 
 
             String[] split = event.getMessageContent().split(" ", 2);
@@ -123,6 +141,7 @@ public class serverCommands implements MessageCreateListener {
                 Vars.maps.reload();
 
                 event.getChannel().sendMessage("Next map selected: " + found.name() + "\nThe current map will change in 10 seconds.");
+                this.lastMapChange = System.currentTimeMillis() / 1000L;
             }
 
         } else if (event.getMessageContent().startsWith(".exit")){
@@ -283,7 +302,50 @@ public class serverCommands implements MessageCreateListener {
                         event.getChannel().sendMessage("Anti nuke is currently disabled. Use the `.antinuke on` command to enable it.");
                     }
                 }
+            } 
+            
+        } else if (event.getMessageContent().equals(".uploadmap")) {
+            if (!data.has("uploadmap_role_id")) {
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage(commandDisabled);
+                return;
             }
+            Role r = getRole(event.getApi(), data.getString("uploadmap_role_id"));
+            if (!hasPermission(r, event)) return;
+
+            Array<MessageAttachment> ml = new Array<MessageAttachment>();
+            for (MessageAttachment ma : event.getMessageAttachments()) {
+                if (ma.getFileName().split("\\.", 2)[1].trim().equals("msav")) {
+                    ml.add(ma);
+                }
+            }
+            if (ml.size != 1) {
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage("You need to add 1 valid .msav file!");
+                return;
+            } else if (Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName()).exists()) {
+                if (event.isPrivateMessage()) return;
+                event.getChannel().sendMessage("There is already a map with this name on the server!");
+                return;
+            }
+            //more custom filename checks possible
+
+            CompletableFuture<byte[]> cf = ml.get(0).downloadAsByteArray();
+            FileHandle fh = Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName());
+
+            try {
+                byte[] data = cf.get();
+                if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
+                    if (event.isPrivateMessage()) return;
+                    event.getChannel().sendMessage("invalid .msav file!");
+                    return;
+                }
+                fh.writeBytes(cf.get(), false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Vars.maps.reload();
+            event.getChannel().sendMessage(ml.get(0).getFileName() + " added succesfully!");
         }
 
     }

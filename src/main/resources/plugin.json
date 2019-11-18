@@ -1,7 +1,7 @@
 {
   "name": "ioPlugin",
-  "author": "Fishbuilder (core) / edited by fuzzbuck",
-  "main": "disc.discordPlugin",
+  "author": "Various, see https://github.com/fuzzbuck/mindustry.io-plugin/graphs/contributors",
+  "main": "io.mindustry.plugin.IoPlugin",
   "description": "Allows interaction with discord & vice versa, makes moderation easier.",
   "version": 0.71
 }

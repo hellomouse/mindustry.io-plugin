@@ -1,22 +1,9 @@
-package disc;
+package io.mindustry.plugin;
 
-import disc.command.serverCommands;
-import io.anuke.arc.Core;
-import io.anuke.arc.Events;
-import io.anuke.arc.util.CommandHandler;
-import io.anuke.arc.util.Log;
-import io.anuke.arc.util.Strings;
-import io.anuke.mindustry.Vars;
-import io.anuke.mindustry.content.Blocks;
-import io.anuke.mindustry.content.Mechs;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.entities.type.TileEntity;
-import io.anuke.mindustry.game.Team;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.game.EventType;
-import io.anuke.mindustry.plugin.Plugin;
-import io.anuke.mindustry.type.Mech;
-import io.anuke.mindustry.world.Tile;
+import java.awt.Color;
+import java.util.HashMap;
+import java.util.Optional;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -27,27 +14,29 @@ import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.Random;
+import io.anuke.arc.Core;
+import io.anuke.arc.Events;
+import io.anuke.arc.util.CommandHandler;
+import io.anuke.arc.util.Log;
+import io.anuke.arc.util.Strings;
+import io.anuke.mindustry.Vars;
+import io.anuke.mindustry.content.Blocks;
+import io.anuke.mindustry.entities.type.Player;
+import io.anuke.mindustry.game.EventType;
+import io.anuke.mindustry.gen.Call;
+import io.anuke.mindustry.plugin.Plugin;
+import io.anuke.mindustry.world.Tile;
 
-import static java.lang.Thread.sleep;
-
-//javacord
-//json
-
-public class discordPlugin extends Plugin{
-    private final Long CDT = 300L;
-    private final String FileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
+public class IoPlugin extends Plugin {
+    private final Long cooldownTime = 300L;
+    private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     private JSONObject data; //token, channel_id, role_id
     private DiscordApi api = null;
     private HashMap<Long, String> cooldowns = new HashMap<Long, String>(); //uuid
 
     //register event handlers and create variables in the constructor
-    public discordPlugin() throws InterruptedException {
+    public IoPlugin() throws InterruptedException {
         try {
             String pureJson = Core.settings.getDataDirectory().child("mods/settings.json").readString();
             alldata = new JSONObject(new JSONTokener(pureJson));
@@ -59,7 +48,7 @@ public class discordPlugin extends Plugin{
                 data = alldata.getJSONObject("in-game");
             }
         } catch (Exception e) {
-            if (e.getMessage().contains(FileNotFoundErrorMessage)){
+            if (e.getMessage().contains(fileNotFoundErrorMessage)){
                 Log.err("[ERR!] discordplugin: settings.json file is missing.\nBot can't start.");
                 //this.makeSettingsFile("settings.json");
                 return;
@@ -87,13 +76,13 @@ public class discordPlugin extends Plugin{
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    tc.sendMessage(utils.escapeBackticks(event.player.name + ": `" + event.message + "`"));
+                    tc.sendMessage(Utils.escapeBackticks(event.player.name + ": `" + event.message + "`"));
                 });
 
                 // anti nuke
 
                 Events.on(EventType.BuildSelectEvent.class, event -> {
-                    if (utils.antiNukeEnabled) {
+                    if (Utils.antiNukeEnabled) {
                         try {
                             Tile nukeTile = event.builder.buildRequest().tile();
                             if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
@@ -101,8 +90,8 @@ public class discordPlugin extends Plugin{
                                 if (coreTile == null) {
                                     return;
                                 }
-                                double distance = utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
-                                if (distance <= utils.nukeDistance) {
+                                double distance = Utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
+                                if (distance <= Utils.nukeDistance) {
                                     Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
                                     Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
                                     ((Player) event.builder).kill();
@@ -142,7 +131,7 @@ public class discordPlugin extends Plugin{
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(utils.escapeBackticks(player.name + " *@mindustry* : `" + args[0] + "`"));
+                    tc.sendMessage(Utils.escapeBackticks(player.name + " *@mindustry* : `" + args[0] + "`"));
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
@@ -157,7 +146,7 @@ public class discordPlugin extends Plugin{
 
 
                 for (Long key : cooldowns.keySet()) {
-                    if (key + CDT < System.currentTimeMillis() / 1000L) {
+                    if (key + cooldownTime < System.currentTimeMillis() / 1000L) {
                         cooldowns.remove(key);
                         continue;
                     } else if (player.uuid == cooldowns.get(key)) {

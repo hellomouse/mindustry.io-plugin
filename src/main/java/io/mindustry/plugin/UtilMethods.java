@@ -1,14 +1,15 @@
-package disc;
+package io.mindustry.plugin;
 
-import io.anuke.arc.util.Log;
+import java.util.Optional;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.Role;
 
-import java.util.Optional;
+import io.anuke.arc.util.Log;
 
-public class utilmethods {
+public class UtilMethods {
     public TextChannel getTextChannel(DiscordApi api, String id){
         Optional<Channel> dc =  ((Optional<Channel>)api.getChannelById(id));
         if (!dc.isPresent()) {

@@ -60,7 +60,7 @@ public class ComCommands {
                 }
             }
         });
-        handler.registerCommand(new Command("infores") {
+        handler.registerCommand(new Command("resinfo") {
             {
                 help = "Get resources currently in core";
             }
@@ -72,11 +72,12 @@ public class ComCommands {
                 // the normal player team is "sharded"
                 TeamData data = state.teams.get(Team.sharded);
                 // FIXME: this assumes there's only one core, perhaps sum up resources of all cores?
+                //-- Items are shared between cores, no need.
                 Tile core = data.cores.first();
                 ItemModule items = core.entity.items;
                 List<String> result = new ArrayList<>();
                 result.add("Items in the core:");
-                items.forEach((item, amount) -> result.add(item.localizedName() + ": " + (int)amount));
+                items.forEach((item, amount) -> result.add(item.name + ": " + (int)amount));
                 ctx.reply(new MessageBuilder().appendCode("", String.join("\n", result)));
             }
         });

@@ -99,7 +99,7 @@ public class ServerCommands {
                 // reflective access should be perfectly safe
                 @SuppressWarnings("unchecked")
                 public void run(Context ctx) {
-                    if (ctx.args.length == 1) {
+                    if (ctx.args.length < 2) {
                         ctx.reply("Not enough arguments, use `changemap <number|name>`");
                         return;
                     }
@@ -307,7 +307,7 @@ public class ServerCommands {
                     result.add("Players: " + playerGroup.size());
                     for (Player p : playerGroup.all()) {
                         String p_ip = p.con.address;
-                        if (netServer.admins.isAdmin(p.uuid, p.usid)) {p_ip = "*hidden*";}
+                        if (netServer.admins.isAdmin(p.uuid, p.usid)) p_ip = "*hidden*";
                         result.add(" * " + p.name + " `" + p_ip + "`");
                     }
                     ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(String.join("\n", result))));
@@ -322,7 +322,7 @@ public class ServerCommands {
                     role = mapConfigRole;
                 }
                 public void run(Context ctx) {
-                    Array<MessageAttachment> ml = new Array<MessageAttachment>();
+                    Array<MessageAttachment> ml = new Array<>();
                     for (MessageAttachment ma : ctx.event.getMessageAttachments()) {
                         if (ma.getFileName().split("\\.", 2)[1].trim().equals("msav")) {
                             ml.add(ma);
@@ -361,7 +361,7 @@ public class ServerCommands {
                 }
                 @Override
                 public void run(Context ctx) {
-                    if (ctx.args.length == 1) {
+                    if (ctx.args.length < 2) {
                         ctx.reply("Not enough arguments, use `removemap <number|name>`");
                         return;
                     }

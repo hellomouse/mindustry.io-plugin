@@ -71,7 +71,7 @@ public class ServerCommands {
                         return;
                     }
                     Events.fire(new GameOverEvent(Team.crux));
-                    ctx.reply("Done");
+                    ctx.reply("Done. New game starting in 10 seconds.");
                 }
             });
         }
@@ -105,7 +105,7 @@ public class ServerCommands {
                     }
                     Map found = getMapBySelector(ctx.message.trim());
                     if (found == null) {
-                        ctx.reply("Map not found");
+                        ctx.reply("Map not found!");
                         return;
                     }
 
@@ -200,8 +200,8 @@ public class ServerCommands {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
                                 netServer.admins.banPlayerIP(p.con.address);
+                                ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName());
-                                ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
                             }
                         }
                     } else {
@@ -209,23 +209,25 @@ public class ServerCommands {
                     }
                 }
             });
-            handler.registerCommand(new RoleRestrictedCommand("ban") {
+            handler.registerCommand(new RoleRestrictedCommand("unban") {
                 {
                     help = "Unban a player by ip";
                     role = banRole;
                 }
                 public void run(Context ctx) {
+                    if(ctx.args[1]==null) {ctx.reply("Missing argument (1): <ip>"); return;}
                     String ip = ctx.args[1];
+
                     if (netServer.admins.unbanPlayerIP(ip)) {
                         ctx.reply("Unbanned `" + ip + "` successfully");
                     } else {
-                        ctx.reply("No such ban exists");
+                        ctx.reply("No such ban exists.");
                     }
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("bans") {
                 {
-                    help = "Get all bans";
+                    help = "Get info about all banned players.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -233,12 +235,13 @@ public class ServerCommands {
                     result.add("List of bans:");
                     Array<Administration.PlayerInfo> bans = netServer.admins.getBanned();
                     for (Administration.PlayerInfo playerInfo : bans) {
-                        result.add(" * Last seen IP: " + playerInfo.lastIP);
+                        result.add("\n\n * Last seen IP: " + playerInfo.lastIP);
                         result.add("   All IPs:");
                         for (String ip : playerInfo.ips) result.add("    * " + ip);
                         result.add("   All names:");
-                        for (String name : playerInfo.names) result.add("    * " + name);
+                        for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
                     }
+                    ctx.reply(Utils.constructMessage(result));
                 }
             });
         }
@@ -302,7 +305,11 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     List<String> result = new ArrayList<>();
                     result.add("Players: " + playerGroup.size());
-                    for (Player p : playerGroup.all()) result.add(" * " + p.name + " `" + p.con.address + "`");
+                    for (Player p : playerGroup.all()) {
+                        String p_ip = p.con.address;
+                        if (netServer.admins.isAdmin(p.uuid, p.usid)) {p_ip = "*hidden*";}
+                        result.add(" * " + p.name + " `" + p_ip + "`");
+                    }
                     ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(String.join("\n", result))));
                 }
             });
@@ -311,7 +318,7 @@ public class ServerCommands {
             String mapConfigRole = data.getString("mapConfig_role_id");
             handler.registerCommand(new RoleRestrictedCommand("uploadmap") {
                 {
-                    help = "Upload a new map";
+                    help = "Upload a new map (include .msav file with command message)";
                     role = mapConfigRole;
                 }
                 public void run(Context ctx) {
@@ -336,7 +343,7 @@ public class ServerCommands {
                     try {
                         byte[] data = cf.get();
                         if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
-                            ctx.reply("invalid .msav file!");
+                            ctx.reply("Corrupted .msav file!");
                             return;
                         }
                         fh.writeBytes(cf.get(), false);
@@ -348,6 +355,10 @@ public class ServerCommands {
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("removemap") {
+                {
+                    help = "Remove a map from the playlist (use number|name retrieved from .maps)";
+                    role = mapConfigRole;
+                }
                 @Override
                 public void run(Context ctx) {
                     if (ctx.args.length == 1) {
@@ -361,6 +372,7 @@ public class ServerCommands {
                     }
 
                     maps.removeMap(found);
+                    maps.reload();
                     ctx.reply("Removed map " + found.name());
                 }
             });

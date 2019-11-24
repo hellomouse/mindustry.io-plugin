@@ -1,5 +1,7 @@
 package io.mindustry.plugin;
 
+import java.util.List;
+
 public class Utils {
     static int nukeDistance = 25;
     public static Boolean antiNukeEnabled = true;;
@@ -10,5 +12,13 @@ public class Utils {
 
     public static String escapeBackticks(String string){
         return string.replaceAll("`", "");
+    }
+
+    public static String constructMessage(List<String> array) {
+        StringBuilder result = new StringBuilder("```");
+        for(String string : array){
+            result.append(string).append("\n");
+        }
+        return result + "```";
     }
 }

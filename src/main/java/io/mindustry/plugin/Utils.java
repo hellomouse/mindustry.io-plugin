@@ -1,7 +1,6 @@
-package disc;
+package io.mindustry.plugin;
 
-
-public class utils {
+public class Utils {
     static int nukeDistance = 25;
     public static Boolean antiNukeEnabled = true;;
 

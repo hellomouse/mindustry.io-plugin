@@ -12,12 +12,13 @@ repositories{
 
 ext{
     //the build number that this plugin is made for
-    mindustryVersion = 'v97'
+    mindustryVersion = '496677725e' // v100 doesn't seem to exist on gitpack, use this for now
+    arcVersion = 'v100'
 }
 
 dependencies{
 
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:server:$mindustryVersion"
 

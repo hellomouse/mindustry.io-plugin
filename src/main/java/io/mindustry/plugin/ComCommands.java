@@ -25,6 +25,10 @@ public class ComCommands {
                 help = "Send a message to ingame chat";
             }
             public void run(Context ctx) {
+                if (ctx.message == null) {
+                    ctx.reply("No message given");
+                    return;
+                }
                 Call.sendMessage("[sky]" + ctx.author.getName()+ " @discord >[] " + ctx.message);
             }
         });

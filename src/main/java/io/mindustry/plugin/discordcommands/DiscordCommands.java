@@ -10,14 +10,14 @@ import org.javacord.api.listener.message.MessageCreateListener;
 /** Represents a registry of commands */
 public class DiscordCommands implements MessageCreateListener {
     public final String commandPrefix = ".";
-    private HashMap<String, Command> registry = new HashMap<String, Command>();
+    private HashMap<String, Command> registry = new HashMap<>();
 
     public DiscordCommands() {
         // stuff
     }
     /**
      * Register a command in the CommandRegistry
-     * @param c
+     * @param c The command
      */
     public void registerCommand(Command c) {
         registry.put(c.name.toLowerCase(), c);
@@ -33,8 +33,7 @@ public class DiscordCommands implements MessageCreateListener {
     }
     /**
      * Parse and run a command
-     * @param message Message to parse
-     * @return Whether a command was found
+     * @param event Source event associated with the message
      */
     public void onMessageCreate(MessageCreateEvent event) {
         String message = event.getMessageContent();
@@ -45,8 +44,8 @@ public class DiscordCommands implements MessageCreateListener {
         Log.info("args[0]: " + args[0]);
         String name = args[0];
 
-        String newMessage = message;
-        if (args.length > 1) {newMessage = message.substring(args[0].length() + 1);}
+        String newMessage = null;
+        if (args.length > 1) newMessage = message.substring(commandLength + 1);
         runCommand(name, new Context(event, args, newMessage));
     }
     /**

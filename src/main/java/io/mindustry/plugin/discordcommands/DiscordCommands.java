@@ -3,6 +3,7 @@ package io.mindustry.plugin.discordcommands;
 import java.util.Collection;
 import java.util.HashMap;
 
+import io.anuke.arc.util.Log;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -41,9 +42,12 @@ public class DiscordCommands implements MessageCreateListener {
         String[] args = message.split(" ");
         int commandLength = args[0].length();
         args[0] = args[0].substring(commandPrefix.length());
+        Log.info("args[0]: " + args[0]);
         String name = args[0];
 
-        runCommand(name, new Context(event, args, message.substring(commandLength + 1)));
+        String newMessage = message;
+        if (args.length > 1) {newMessage = message.substring(args[0].length() + 1);}
+        runCommand(name, new Context(event, args, newMessage));
     }
     /**
      * Run a command

@@ -3,6 +3,7 @@ package io.mindustry.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.mindustry.plugin.discordcommands.RoleRestrictedCommand;
 import org.javacord.api.entity.message.MessageBuilder;
 
 import io.anuke.mindustry.entities.type.Player;
@@ -83,5 +84,20 @@ public class ComCommands {
         });
 
         // TODO: add help and list commands or something
+        // primitive help command -- to be improved later
+        handler.registerCommand(new Command("help") {
+            {
+                help = "Display all available commands and their usage";
+            }
+            public void run(Context ctx) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("```\n");
+                for(Command command : handler.getAllCommands()){
+                    sb.append(" * ").append(command.name).append(" : ").append(command.help).append("\n");
+                }
+                sb.append("```");
+                ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(sb.toString())));
+            }
+        });
     }
 }

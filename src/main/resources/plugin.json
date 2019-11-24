@@ -3,5 +3,5 @@
   "author": "Various, see https://github.com/fuzzbuck/mindustry.io-plugin/graphs/contributors",
   "main": "io.mindustry.plugin.IoPlugin",
   "description": "Allows interaction with discord & vice versa, makes moderation easier.",
-  "version": 0.71
+  "version": 0.8
 }

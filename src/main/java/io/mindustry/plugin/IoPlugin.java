@@ -79,9 +79,8 @@ public class IoPlugin extends Plugin {
             if (tc != null) {
                 List<String> messageBuffer = new ArrayList<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    if(messageBuffer.size() < Utils.messageBufferSize) { // if message buffer size is below the expected size
-                        messageBuffer.add(Utils.escapeBackticks(event.player.name) + ": `" + Utils.escapeBackticks(event.message) + "`\n");
-                    } else { // when message buffer gets big enough, send it and clear it to prepare it for loading in new messages
+                    messageBuffer.add(Utils.escapeBackticks(event.player.name) + ": `" + Utils.escapeBackticks(event.message) + "`\n");
+                    if(messageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
                         tc.sendMessage(Utils.stringArrayToString(messageBuffer));
                         messageBuffer.clear();
                     }

@@ -1,7 +1,9 @@
 package io.mindustry.plugin;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import org.javacord.api.DiscordApi;
@@ -75,8 +77,14 @@ public class IoPlugin extends Plugin {
         if (data.has("live_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
+                List<String> messageBuffer = new ArrayList<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    tc.sendMessage(Utils.escapeBackticks(event.player.name + ": `" + event.message + "`"));
+                    if(messageBuffer.size() < Utils.messageBufferSize) { // if message buffer size is below the expected size
+                        messageBuffer.add(Utils.escapeBackticks(event.player.name) + ": `" + Utils.escapeBackticks(event.message) + "`\n");
+                    } else { // when message buffer gets big enough, send it and clear it to prepare it for loading in new messages
+                        tc.sendMessage(Utils.stringArrayToString(messageBuffer));
+                        messageBuffer.clear();
+                    }
                 });
 
                 // anti nuke

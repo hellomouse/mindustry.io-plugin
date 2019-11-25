@@ -1,6 +1,5 @@
 package io.mindustry.plugin;
 
-import io.mindustry.plugin.Utils;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
@@ -201,7 +200,7 @@ public class ServerCommands {
                             if (p.con.address.equals(target) || p.id == id) {
                                 netServer.admins.banPlayerIP(p.con.address);
                                 ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
-                                Call.onKick(p.con, "You've been banned by: " + ctx.author.getName());
+                                Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                             }
                         }
                     } else {
@@ -215,8 +214,8 @@ public class ServerCommands {
                     role = banRole;
                 }
                 public void run(Context ctx) {
-                    if(ctx.args[1]==null) {ctx.reply("Missing argument (1): <ip>"); return;}
-                    String ip = ctx.args[1];
+                    String ip;
+                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .unban <ip>"); return;}
 
                     if (netServer.admins.unbanPlayerIP(ip)) {
                         ctx.reply("Unbanned `" + ip + "` successfully");
@@ -252,8 +251,11 @@ public class ServerCommands {
                     role = data.getString("kickPlayers_role_id");
                 }
                 public void run(Context ctx) {
-                    String target = ctx.args[1];
+                    String target;
+                    if(ctx.args.length==2){ target = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .kick <ip/id>"); return;}
+
                     int id = -1;
+                    boolean success = false;
                     try {
                         id = Integer.parseInt(target);
                     } catch (NumberFormatException ex) {}
@@ -262,8 +264,10 @@ public class ServerCommands {
                             if (p.con.address.equals(target) || p.id == id) {
                                 Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                                 ctx.reply("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
+                                success = true;
                             }
                         }
+                        if (!success){ ctx.reply("No such player ip/id is online."); }
                     } else {
                         ctx.reply("Not enough arguments / usage: `kick <id|ip>`");
                     }

@@ -3,7 +3,6 @@ package io.mindustry.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.mindustry.plugin.discordcommands.RoleRestrictedCommand;
 import org.javacord.api.entity.message.MessageBuilder;
 
 import io.anuke.mindustry.entities.type.Player;
@@ -12,7 +11,6 @@ import io.anuke.mindustry.game.Teams.TeamData;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.world.Tile;
 import io.anuke.mindustry.world.modules.ItemModule;
-import io.mindustry.plugin.Utils;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
@@ -97,7 +95,7 @@ public class ComCommands {
                 StringBuilder sb = new StringBuilder();
                 sb.append("```\n");
                 for(Command command : handler.getAllCommands()){
-                    sb.append(" * ").append(command.name).append(" : ").append(command.help).append("\n");
+                    sb.append(".").append(command.name).append(" : ").append(command.help).append("\n");
                 }
                 sb.append("```");
                 ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(sb.toString())));

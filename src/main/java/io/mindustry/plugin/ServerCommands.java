@@ -26,7 +26,9 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -240,7 +242,8 @@ public class ServerCommands {
                         result.add("   All names:");
                         for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
                     }
-                    ctx.reply(Utils.constructMessage(result));
+                    //ctx.reply(Utils.constructMessage(result));
+                    ctx.channel.sendMessage(new File(LocalDateTime.now() + "-IO_BANS.txt", Utils.constructMessage(result)));
                 }
             });
         }

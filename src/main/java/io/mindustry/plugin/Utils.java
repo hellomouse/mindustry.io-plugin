@@ -16,11 +16,11 @@ public class Utils {
     }
 
     public static String constructMessage(List<String> array) {
-        StringBuilder result = new StringBuilder("```");
+        StringBuilder result = new StringBuilder();
         for(String string : array){
             result.append(string).append("\n");
         }
-        return result + "```";
+        return result.toString();
     }
 
     public static String stringArrayToString(List<String> array) {

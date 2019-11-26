@@ -198,7 +198,7 @@ public class ServerCommands {
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
-                                netServer.admins.banPlayerIP(p.con.address);
+                                netServer.admins.banPlayerIP(p.uuid);
                                 ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                             }

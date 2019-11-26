@@ -2,6 +2,8 @@ package io.mindustry.plugin.discordcommands;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -10,7 +12,7 @@ import org.javacord.api.listener.message.MessageCreateListener;
 public class DiscordCommands implements MessageCreateListener {
     public final String commandPrefix = ".";
     private HashMap<String, Command> registry = new HashMap<>();
-
+    private Set<MessageCreatedListener> messageCreatedListenerRegistry = new HashSet<>();
     public DiscordCommands() {
         // stuff
     }
@@ -31,10 +33,19 @@ public class DiscordCommands implements MessageCreateListener {
         registry.put(forcedName.toLowerCase(), c);
     }
     /**
+     * Register a method to be run when a message is created.
+     * @param listener MessageCreatedListener to be run when a message is created.
+     */
+    public void registerOnMessage(MessageCreatedListener listener) {
+        messageCreatedListenerRegistry.add(listener);
+    }
+    /**
      * Parse and run a command
      * @param event Source event associated with the message
      */
     public void onMessageCreate(MessageCreateEvent event) {
+        for(MessageCreatedListener listener: messageCreatedListenerRegistry) listener.run(event);
+
         String message = event.getMessageContent();
         if (!message.startsWith(commandPrefix)) return;
         String[] args = message.split(" ");

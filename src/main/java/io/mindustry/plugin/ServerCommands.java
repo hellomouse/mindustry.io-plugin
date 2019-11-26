@@ -1,5 +1,6 @@
 package io.mindustry.plugin;
 
+import io.anuke.arc.util.Log;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
@@ -24,12 +25,11 @@ import org.javacord.api.entity.message.MessageAttachment;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.InflaterInputStream;
@@ -200,7 +200,7 @@ public class ServerCommands {
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
-                                netServer.admins.banPlayerIP(p.uuid);
+                                netServer.admins.banPlayer(p.uuid);
                                 ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                             }
@@ -242,8 +242,18 @@ public class ServerCommands {
                         result.add("   All names:");
                         for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
                     }
-                    //ctx.reply(Utils.constructMessage(result));
-                    ctx.channel.sendMessage(new File(LocalDateTime.now() + "-IO_BANS.txt", Utils.constructMessage(result)));
+
+                    File f = new File(new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(Calendar.getInstance().getTime()) + "-IO_BANS.txt");
+                    try {
+                        FileWriter fw;
+                        fw = new FileWriter(f.getAbsoluteFile());
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(Utils.constructMessage(result));
+                        bw.close(); // Be sure to close BufferedWriter
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    ctx.channel.sendMessage(f);
                 }
             });
         }

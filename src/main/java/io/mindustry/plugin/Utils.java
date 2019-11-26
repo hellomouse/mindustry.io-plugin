@@ -1,6 +1,10 @@
 package io.mindustry.plugin;
 
+import io.anuke.mindustry.maps.Map;
+
 import java.util.List;
+
+import static io.anuke.mindustry.Vars.maps;
 
 public class Utils {
     static int nukeDistance = 25;
@@ -29,5 +33,22 @@ public class Utils {
             result.append(string);
         }
         return result.toString();
+    }
+
+    public static Map getMapBySelector(String query) {
+        Map found = null;
+        try {
+            // try by number
+            found = maps.customMaps().get(Integer.parseInt(query));
+        } catch (Exception e) {
+            // try by name
+            for (Map m : maps.customMaps()) {
+                if (m.name().equals(query)) {
+                    found = m;
+                    break;
+                }
+            }
+        }
+        return found;
     }
 }

@@ -21,7 +21,7 @@ public class ComCommands {
     public void registerCommands(DiscordCommands handler) {
         handler.registerCommand(new Command("chat") {
             {
-                help = "Send a message to ingame chat";
+                help = "Send a message to in-game chat";
             }
             public void run(Context ctx) {
                 if (ctx.message == null) {

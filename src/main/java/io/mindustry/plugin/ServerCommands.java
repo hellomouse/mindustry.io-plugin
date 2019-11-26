@@ -20,6 +20,7 @@ import io.anuke.mindustry.maps.Maps;
 import io.anuke.mindustry.io.SaveIO;
 import io.anuke.mindustry.net.Administration;
 
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageAttachment;
 
@@ -254,6 +255,7 @@ public class ServerCommands {
                         e.printStackTrace();
                     }
                     ctx.channel.sendMessage(f);
+                    f.delete();
                 }
             });
         }
@@ -313,6 +315,22 @@ public class ServerCommands {
                 }
             });
         }
+
+        if (data.has("manageMessages_role_id")) {
+            handler.registerCommand(new RoleRestrictedCommand("delete") {
+                {
+                    help = "Delete X amount of messages in the context channel";
+                    role = data.getString("manageMessages_role_id");
+                }
+                @Override
+                public void run(Context ctx) {
+                    int amt;
+                    if(ctx.args.length==2){ amt = Integer.parseInt(ctx.args[1]); } else {ctx.reply("Invalid arguments provided, use the following format: .delete <amount>"); return;}
+                    ctx.channel.deleteMessages(amt);
+                }
+            });
+        }
+
         if (data.has("spyPlayers_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("playersinfo") {
                 {

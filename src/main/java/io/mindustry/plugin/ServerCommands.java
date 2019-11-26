@@ -204,6 +204,7 @@ public class ServerCommands {
                                 netServer.admins.banPlayer(p.uuid);
                                 ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been banned.");
                             }
                         }
                     } else {
@@ -270,7 +271,6 @@ public class ServerCommands {
                     if(ctx.args.length==2){ target = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .kick <ip/id>"); return;}
 
                     int id = -1;
-                    boolean success = false;
                     try {
                         id = Integer.parseInt(target);
                     } catch (NumberFormatException ex) {}
@@ -279,10 +279,9 @@ public class ServerCommands {
                             if (p.con.address.equals(target) || p.id == id) {
                                 Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                                 ctx.reply("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
-                                success = true;
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been kicked.");
                             }
                         }
-                        if (!success){ ctx.reply("No such player ip/id is online."); }
                     } else {
                         ctx.reply("Not enough arguments / usage: `kick <id|ip>`");
                     }

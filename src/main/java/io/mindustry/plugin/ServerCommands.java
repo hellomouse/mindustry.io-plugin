@@ -102,17 +102,16 @@ public class ServerCommands {
                 @SuppressWarnings("unchecked")
                 public void run(Context ctx) {
                     if (ctx.args.length < 2) {
-                        ctx.reply("Not enough arguments, use `changemap <number|name>`");
+                        ctx.reply("Not enough arguments, use `.changemap <number|name>`");
                         return;
                     }
-                    Map found = getMapBySelector(ctx.message.trim());
+                    Map found = Utils.getMapBySelector(ctx.message.trim());
                     if (found == null) {
                         ctx.reply("Map not found!");
                         return;
                     }
 
                     // TODO: use new MapProvider api or something
-
                     // step 1: grab the current maps list
                     Array<Map> mapsList;
                     try {
@@ -143,6 +142,9 @@ public class ServerCommands {
                     }
 
                     ctx.reply("Changed map to " + targetMap.name());
+
+                    // step 6: reload maps
+                    maps.reload();
 
                     /*
                     FileHandle temp = Core.settings.getDataDirectory().child("maps/temp");
@@ -399,7 +401,7 @@ public class ServerCommands {
                         ctx.reply("Not enough arguments, use `removemap <number|name>`");
                         return;
                     }
-                    Map found = getMapBySelector(ctx.message.trim());
+                    Map found = Utils.getMapBySelector(ctx.message.trim());
                     if (found == null) {
                         ctx.reply("Map not found");
                         return;
@@ -411,22 +413,5 @@ public class ServerCommands {
                 }
             });
         }
-    }
-
-    private Map getMapBySelector(String query) {
-        Map found = null;
-        try {
-            // try by number
-            found = maps.customMaps().get(Integer.parseInt(query));
-        } catch (Exception e) {
-            // try by name
-            for (Map m : maps.customMaps()) {
-                if (m.name().equals(query)) {
-                    found = m;
-                    break;
-                }
-            }
-        }
-        return found;
     }
 }

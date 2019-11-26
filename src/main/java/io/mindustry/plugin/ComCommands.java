@@ -1,8 +1,12 @@
 package io.mindustry.plugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.anuke.arc.Core;
+import io.anuke.arc.files.FileHandle;
+import io.anuke.mindustry.maps.Map;
 import org.javacord.api.entity.message.MessageBuilder;
 
 import io.anuke.mindustry.entities.type.Player;
@@ -29,6 +33,25 @@ public class ComCommands {
                     return;
                 }
                 Call.sendMessage("[sky]" + ctx.author.getName()+ " @discord >[] " + ctx.message);
+            }
+        });
+        handler.registerCommand(new Command("downloadmap") {
+            {
+                help = "Download a server map in a .msav file format.";
+            }
+            public void run(Context ctx) {
+                if (ctx.args.length < 2) {
+                    ctx.reply("Not enough arguments, use `.downloadmap <number|name>`");
+                    return;
+                }
+
+                Map found = Utils.getMapBySelector(ctx.message.trim());
+                if (found == null) {
+                    ctx.reply("Map not found!");
+                    return;
+                }
+                FileHandle mapFile = found.file;
+                ctx.channel.sendMessage("Exported " + found.name(), mapFile.file());
             }
         });
         handler.registerCommand(new Command("players") {

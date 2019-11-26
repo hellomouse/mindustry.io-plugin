@@ -1,10 +1,9 @@
 package io.mindustry.plugin;
 
-import java.io.File;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.anuke.arc.Core;
 import io.anuke.arc.files.FileHandle;
 import io.anuke.mindustry.maps.Map;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -18,6 +17,7 @@ import io.anuke.mindustry.world.modules.ItemModule;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import static io.anuke.mindustry.Vars.*;
 
@@ -33,11 +33,12 @@ public class ComCommands {
                     return;
                 }
                 Call.sendMessage("[sky]" + ctx.author.getName()+ " @discord >[] " + ctx.message);
+                ctx.reply("``" + ctx.author.getName() + "@discord > " + ctx.message + "``\nSent successfully.");
             }
         });
-        handler.registerCommand(new Command("downloadmap") {
+        handler.registerCommand(new Command("map") {
             {
-                help = "Download a server map in a .msav file format.";
+                help = "Preview and download a server map in a .msav file format.";
             }
             public void run(Context ctx) {
                 if (ctx.args.length < 2) {
@@ -50,8 +51,17 @@ public class ComCommands {
                     ctx.reply("Map not found!");
                     return;
                 }
+
                 FileHandle mapFile = found.file;
-                ctx.channel.sendMessage("Exported " + found.name(), mapFile.file());
+
+                //ctx.channel.sendMessage("Exported " + found.name(), mapFile.file());
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setTitle(Utils.escapeBackticks(found.name()))
+                        .setDescription(Utils.escapeBackticks(found.description()))
+                        .setAuthor(Utils.escapeBackticks(found.author()))
+                        .setColor(Color.BLUE);
+                // TODO: .setImage(mapPreviewImage)
+                ctx.channel.sendMessage(embed, mapFile.file());
             }
         });
         handler.registerCommand(new Command("players") {

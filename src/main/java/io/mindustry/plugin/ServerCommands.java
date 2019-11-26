@@ -326,7 +326,7 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     int amt;
                     if(ctx.args.length==2){ amt = Integer.parseInt(ctx.args[1]); } else {ctx.reply("Invalid arguments provided, use the following format: .delete <amount>"); return;}
-                    ctx.channel.deleteMessages(amt);
+                    // TODO: make it delete 'amt' messages
                 }
             });
         }

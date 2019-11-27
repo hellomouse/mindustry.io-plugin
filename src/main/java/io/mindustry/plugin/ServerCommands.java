@@ -344,7 +344,7 @@ public class ServerCommands {
                     for (Player p : playerGroup.all()) {
                         String p_ip = p.con.address;
                         if (netServer.admins.isAdmin(p.uuid, p.usid)) p_ip = "*hidden*";
-                        result.add(" * " + p.name + " `" + p_ip + "`");
+                        result.add(" * " + Utils.escapeBackticks(p.name) + " : `" + p_ip + "`");
                     }
                     ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(String.join("\n", result))));
                 }

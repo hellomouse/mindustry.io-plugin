@@ -317,7 +317,7 @@ public class ServerCommands {
             });
         }
 
-        if (data.has("manageMessages_role_id")) {
+        /*if (data.has("manageMessages_role_id")) {  // TODO: Will probably use a different bot made in js thats gonna take care of the discord stuff
             handler.registerCommand(new RoleRestrictedCommand("delete") {
                 {
                     help = "Delete X amount of messages in the context channel";
@@ -330,7 +330,7 @@ public class ServerCommands {
                     // TODO: make it delete 'amt' messages
                 }
             });
-        }
+        }*/
 
         if (data.has("spyPlayers_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("playersinfo") {

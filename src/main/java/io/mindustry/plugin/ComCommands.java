@@ -29,12 +29,17 @@ public class ComCommands {
                 help = "Send a message to in-game chat";
             }
             public void run(Context ctx) {
+                ctx.message = Utils.escapeBackticks(ctx.message);
                 if (ctx.message == null) {
                     ctx.reply("No message given");
                     return;
                 }
-                Call.sendMessage("[sky]" + ctx.author.getName()+ " @discord >[] " + ctx.message);
-                ctx.reply("``" + ctx.author.getName() + "@discord > " + ctx.message + "``\nSent successfully.");
+                if (ctx.message.length() < Utils.chatMessageMaxSize) {
+                    Call.sendMessage("[sky]" + ctx.author.getName() + " @discord >[] " + ctx.message);
+                    ctx.reply("``" + ctx.author.getName() + "@discord > " + ctx.message + "``\nSent successfully.");
+                } else{
+                    ctx.reply("Message too big, please use a maximum of " + String.valueOf(Utils.chatMessageMaxSize) + " characters.");
+                }
             }
         });
         handler.registerCommand(new Command("map") {

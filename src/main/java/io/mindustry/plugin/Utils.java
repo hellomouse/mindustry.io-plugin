@@ -9,6 +9,7 @@ import static io.anuke.mindustry.Vars.maps;
 public class Utils {
     static int nukeDistance = 25;
     static int messageBufferSize = 5; // number of messages sent at once to discord
+    public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {

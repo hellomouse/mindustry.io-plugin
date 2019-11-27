@@ -94,7 +94,7 @@ public class IoPlugin extends Plugin {
             if (Utils.antiNukeEnabled) {
                 try {
                     Tile nukeTile = event.builder.buildRequest().tile();
-                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
+                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
                         Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
                         if (coreTile == null) {
                             return;

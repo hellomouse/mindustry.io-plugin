@@ -85,36 +85,33 @@ public class IoPlugin extends Plugin {
                         messageBuffer.clear();
                     }
                 });
-
-                // anti nuke
-
-                Events.on(EventType.BuildSelectEvent.class, event -> {
-                    if (Utils.antiNukeEnabled) {
-                        try {
-                            Tile nukeTile = event.builder.buildRequest().tile();
-                            if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
-                                Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
-                                if (coreTile == null) {
-                                    return;
-                                }
-                                double distance = Utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
-                                if (distance <= Utils.nukeDistance) {
-                                    Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
-                                    Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
-                                    ((Player) event.builder).kill();
-                                    ((Player) event.builder).sendMessage("[scarlet]Too close to the core, please find a better spot.");
-                                    tc.sendMessage(((Player) event.builder).name + " tried nuking the core, but failed horribly and suffered a painful death.");
-                                }
-                            }
-                        } catch (Exception ignored) {}
-                    } else{
-                        Log.info("Caught a nuker, but not preventing since anti nuke is off.");
-                    }
-                });
-
-
             }
         }
+
+        // anti nuke
+
+        Events.on(EventType.BuildSelectEvent.class, event -> {
+            if (Utils.antiNukeEnabled) {
+                try {
+                    Tile nukeTile = event.builder.buildRequest().tile();
+                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player) {
+                        Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
+                        if (coreTile == null) {
+                            return;
+                        }
+                        double distance = Utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
+                        if (distance <= Utils.nukeDistance) {
+                            Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
+                            Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
+                            ((Player) event.builder).kill();
+                            ((Player) event.builder).sendMessage("[scarlet]Too close to the core, please find a better spot.");
+                        }
+                    }
+                } catch (Exception ignored) {}
+            } else{
+                Log.info("Caught a nuker, but not preventing since anti nuke is off.");
+            }
+        });
 
     }
 

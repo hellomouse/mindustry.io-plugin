@@ -63,8 +63,7 @@ public class ComCommands {
                 EmbedBuilder embed = new EmbedBuilder()
                         .setTitle(Utils.escapeBackticks(found.name()))
                         .setDescription(Utils.escapeBackticks(found.description()))
-                        .setAuthor(Utils.escapeBackticks(found.author()))
-                        .setColor(Color.BLUE);
+                        .setAuthor(Utils.escapeBackticks(found.author()));
                 // TODO: .setImage(mapPreviewImage)
                 ctx.channel.sendMessage(embed, mapFile.file());
             }

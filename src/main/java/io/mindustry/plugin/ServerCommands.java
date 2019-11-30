@@ -207,6 +207,7 @@ public class ServerCommands {
                                 ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                                 Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been banned.");
+                                //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                     } else {
@@ -282,6 +283,7 @@ public class ServerCommands {
                                 Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                                 ctx.reply("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
                                 Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been kicked.");
+                                //Utils.LogAction("kick", "Remotely executed kick command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                     } else {
@@ -388,6 +390,7 @@ public class ServerCommands {
                     }
                     maps.reload();
                     ctx.reply(ml.get(0).getFileName() + " added succesfully!");
+                    //Utils.LogAction("uploadmap", "Uploaded a new map", ctx.author, null);
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("removemap") {

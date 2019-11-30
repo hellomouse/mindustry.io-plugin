@@ -17,6 +17,7 @@ public class Utils {
     static int messageBufferSize = 10; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
+    public static String welcomeMessage = "[sky]Welcome to mindustry.io! Consider joining our discord here: http://discord.mindustry.io";
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {
         return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));

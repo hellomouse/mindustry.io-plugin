@@ -73,9 +73,7 @@ public class IoPlugin extends Plugin {
         bt.setDaemon(false);
         bt.start();
 
-
-
-        //live chat
+        // live chat
         if (data.has("live_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
@@ -114,6 +112,13 @@ public class IoPlugin extends Plugin {
                 Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
+
+        // welcome message
+        if(Utils.welcomeMessage!=null) {
+            Events.on(EventType.PlayerJoin.class, event -> {
+                event.player.sendMessage(Utils.welcomeMessage);
+            });
+        }
 
     }
 

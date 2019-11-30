@@ -231,6 +231,19 @@ public class ServerCommands {
                     }
                 }
             });
+
+            handler.registerCommand(new RoleRestrictedCommand("motd") {
+                {
+                    help = "Change the default join message";
+                    role = data.getString("gameOver_role_id");
+                }
+                public void run(Context ctx) {
+                    String message;
+                    if(ctx.args.length==2){ message = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .motd <text>"); return;}
+                    Utils.welcomeMessage = message;
+                }
+            });
+
             handler.registerCommand(new RoleRestrictedCommand("bans") {
                 {
                     help = "Get info about all banned players.";

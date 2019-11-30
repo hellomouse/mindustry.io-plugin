@@ -73,6 +73,8 @@ public class IoPlugin extends Plugin {
         bt.setDaemon(false);
         bt.start();
 
+
+
         //live chat
         if (data.has("live_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
@@ -155,7 +157,7 @@ public class IoPlugin extends Plugin {
                 player.sendMessage(builder.toString());
             });
 
-            handler.<Player>register("gr", "<player> <reason", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
+            handler.<Player>register("gr", "<player> <reason>", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
                 //https://github.com/Anuken/Mindustry/blob/master/core/src/io/anuke/mindustry/core/NetServer.java#L300-L351
                 if (!(data.has("channel_id") && data.has("role_id"))) {
                     player.sendMessage("[scarlet]This command is disabled.");

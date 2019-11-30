@@ -241,6 +241,7 @@ public class ServerCommands {
                     String message;
                     if(ctx.args.length==2){ message = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .motd <text>"); return;}
                     Utils.welcomeMessage = message;
+                    ctx.reply("Changed motd to: `" + message + "`");
                 }
             });
 

@@ -1,14 +1,20 @@
 package io.mindustry.plugin;
 
 import io.anuke.mindustry.maps.Map;
+import org.javacord.api.entity.DiscordEntity;
+import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.message.embed.Embed;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.user.User;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.anuke.mindustry.Vars.maps;
 
 public class Utils {
     static int nukeDistance = 25;
-    static int messageBufferSize = 5; // number of messages sent at once to discord
+    static int messageBufferSize = 10; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
 
@@ -51,5 +57,20 @@ public class Utils {
             }
         }
         return found;
+    }
+
+    public static void LogAction(String title, String message, MessageAuthor user, String victim){
+        EmbedBuilder embed = new EmbedBuilder()
+                .setDescription(message)
+                .setTitle("An action was executed: " + title);
+        if(user!=null){
+            embed.setAuthor(user);
+        }
+        if(victim!=null){
+            embed.addInlineField("On user: ", victim);
+        }
+
+        //TODO: make it send to bot_log channel
+
     }
 }

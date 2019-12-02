@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -65,11 +66,13 @@ public class DiscordCommands implements MessageCreateListener {
     public void runCommand(String name, Context ctx) {
         Command command = registry.get(name.toLowerCase());
         if (command == null) {
-            ctx.reply("No such command");
             return;
         }
         if (!command.hasPermission(ctx)) {
-            ctx.reply("No permission");
+            EmbedBuilder eb = new EmbedBuilder()
+                    .setTitle("No permissions!")
+                    .setDescription("You need higher permissions to execute this command.");
+            ctx.channel.sendMessage(eb);
             return;
         }
         command.run(ctx);

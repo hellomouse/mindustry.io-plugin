@@ -24,6 +24,8 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageAttachment;
 
+import org.javacord.api.entity.message.embed.Embed;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -64,7 +66,7 @@ public class ServerCommands {
         if (data.has("gameOver_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("gameover") {
                 {
-                    help = "Force a game over";
+                    help = "Force a game over.";
                     role = data.getString("gameOver_role_id");
                 }
                 public void run(Context ctx) {
@@ -73,111 +75,88 @@ public class ServerCommands {
                         return;
                     }
                     Events.fire(new GameOverEvent(Team.crux));
-                    ctx.reply("Done. New game starting in 10 seconds.");
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTitle("Command executed.")
+                            .setDescription("Done. New game starting in 10 seconds.");
+                    ctx.channel.sendMessage(eb);
                 }
             });
         }
         handler.registerCommand(new Command("maps") {
             {
-                help = "Get a list of available maps";
+                help = "Check a list of available maps and their ids.";
             }
             public void run(Context ctx) {
-                List<String> result = new ArrayList<>();
-                result.add("List of available maps:");
+                EmbedBuilder eb = new EmbedBuilder()
+                        .setTitle("All available maps in the playlist:");
                 Array<Map> mapList = maps.customMaps();
                 for (int i = 0; i < mapList.size; i++) {
                     Map m = mapList.get(i);
-                    result.add("(" + i + ") " + m.name() + " / " + m.width + " x " + m.height);
+                    eb.addInlineField(String.valueOf(i), m.name() + " `" + m.width + " x " + m.height + "`");
                 }
-                ctx.reply(new MessageBuilder().appendCode("", String.join("\n", result)));
+                ctx.channel.sendMessage(eb);
             }
         });
         if (data.has("changeMap_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("changemap"){
                 {
-                    help = "Change the current map";
+                    help = "<mapname/mapid> Change the current map to the one provided.";
                     role = data.getString("changeMap_role_id");
                 }
-                // reflective access should be perfectly safe
+
                 @SuppressWarnings("unchecked")
                 public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
-                        ctx.reply("Not enough arguments, use `.changemap <number|name>`");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("Not enough arguments, use `.changemap <mapname|mapid>`");
+                        ctx.channel.sendMessage(eb);
                         return;
                     }
                     Map found = Utils.getMapBySelector(ctx.message.trim());
                     if (found == null) {
-                        ctx.reply("Map not found!");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("Map \"" + Utils.escapeBackticks(ctx.message.trim()) + "\" not found!");
+                        ctx.channel.sendMessage(eb);
                         return;
                     }
 
-                    // TODO: use new MapProvider api or something
-                    // step 1: grab the current maps list
                     Array<Map> mapsList;
                     try {
                         mapsList = (Array<Map>)mapsListField.get(maps);
                     } catch (IllegalAccessException ex) {
                         throw new RuntimeException("unreachable");
                     }
-                    
-                    // step 2: create new maps array with only the desired custom map
+
                     Map targetMap = found;
                     Array<Map> tempMapsList = mapsList.removeAll(map -> !map.custom || map != targetMap);
 
-                    // step 3: replace original array with our array
                     try {
                         mapsListField.set(maps, tempMapsList);
                     } catch (IllegalAccessException ex) {
                         throw new RuntimeException("unreachable");
                     }
 
-                    // step 4: fire game over event
                     Events.fire(new GameOverEvent(Team.crux));
 
-                    // step 5: put back original maps list
                     try {
                         mapsListField.set(maps, mapsList);
                     } catch (IllegalAccessException ex) {
                         throw new RuntimeException("unreachable");
                     }
 
-                    ctx.reply("Changed map to " + targetMap.name());
+                    eb.setTitle("Command executed.");
+                    eb.setDescription("Changed map to " + targetMap.name());
+                    ctx.channel.sendMessage(eb);
 
-                    // step 6: reload maps
                     maps.reload();
-
-                    /*
-                    FileHandle temp = Core.settings.getDataDirectory().child("maps/temp");
-                    temp.mkdirs();
-    
-                    for (Map m1 : maps.customMaps()) {
-                        if (m1.equals(world.getMap())) continue;
-                        if (m1.equals(found)) continue;
-                        m1.file.moveTo(temp);
-                    }
-                    //reload all maps from that folder
-                    maps.reload();
-                    //Call gameover
-                    Events.fire(new GameOverEvent(Team.crux));
-                    //move maps
-                    maps.reload();
-                    FileHandle mapsDir = Core.settings.getDataDirectory().child("maps");
-                    for (FileHandle fh : temp.list()) {
-                        fh.moveTo(mapsDir);
-                    }
-                    temp.deleteDirectory();
-                    maps.reload();
-    
-                    event.getChannel().sendMessage("Next map selected: " + found.name() + "\nThe current map will change in 10 seconds.");
-                    this.lastMapChange = System.currentTimeMillis() / 1000L;
-                    */
                 }
             });
         }
         if (data.has("closeServer_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("exit") {
                 {
-                    help = "Close the server";
+                    help = "Close the server.";
                     role = data.getString("closeServer_role_id");
                 }
                 public void run(Context ctx) {
@@ -190,11 +169,13 @@ public class ServerCommands {
             String banRole = data.getString("banPlayers_role_id");
             handler.registerCommand(new RoleRestrictedCommand("ban") {
                 {
-                    help = "Ban a player by id or ip";
+                    help = "<ip/id> <ip/id> Ban a player by the provided ip or id.";
                     role = banRole;
                 }
  
                 public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTimestampToNow();
                     String target = ctx.args[1];
                     int id = -1;
                     try {
@@ -204,20 +185,25 @@ public class ServerCommands {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
                                 netServer.admins.banPlayer(p.uuid);
-                                ctx.reply("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
+                                eb.setTitle("Command executed.");
+                                eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
+                                ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                                 Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been banned.");
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                     } else {
-                        ctx.reply("Not enough arguments / usage: `ban <id|ip>`");
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("Not enough arguments / usage: `ban <id|ip>`");
+                        ctx.channel.sendMessage(eb);
                     }
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("unban") {
+                EmbedBuilder eb = new EmbedBuilder();
                 {
-                    help = "Unban a player by ip";
+                    help = "Unban a player by the provided ip.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -225,9 +211,13 @@ public class ServerCommands {
                     if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .unban <ip>"); return;}
 
                     if (netServer.admins.unbanPlayerIP(ip)) {
-                        ctx.reply("Unbanned `" + ip + "` successfully");
+                        eb.setTitle("Command executed.");
+                        eb.setDescription("Unbanned `" + ip + "` successfully");
+                        ctx.channel.sendMessage(eb);
                     } else {
-                        ctx.reply("No such ban exists.");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("No such ban exists.");
+                        ctx.channel.sendMessage(eb);
                     }
                 }
             });
@@ -239,9 +229,13 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String message;
+                    String oldMotd = Utils.welcomeMessage;
                     if(ctx.args.length==2){ message = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .motd <text>"); return;}
                     Utils.welcomeMessage = message;
-                    ctx.reply("Changed motd to: `" + message + "`");
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTitle("Command executed.")
+                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + message);
+                    ctx.channel.sendMessage(eb);
                 }
             });
 
@@ -252,7 +246,6 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     List<String> result = new ArrayList<>();
-                    result.add("List of bans:");
                     Array<Administration.PlayerInfo> bans = netServer.admins.getBanned();
                     for (Administration.PlayerInfo playerInfo : bans) {
                         result.add("\n\n * Last seen IP: " + playerInfo.lastIP);
@@ -273,14 +266,16 @@ public class ServerCommands {
                         e.printStackTrace();
                     }
                     ctx.channel.sendMessage(f);
-                    f.delete();
+                    //f.delete();
                 }
             });
         }
         if (data.has("kickPlayers_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("kick") {
+                EmbedBuilder eb = new EmbedBuilder()
+                        .setTimestampToNow();
                 {
-                    help = "Kick a player by ip or id";
+                    help = "<ip/id> Kick a player by the provided ip or id.";
                     role = data.getString("kickPlayers_role_id");
                 }
                 public void run(Context ctx) {
@@ -294,20 +289,24 @@ public class ServerCommands {
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
-                                Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
-                                ctx.reply("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
+                                eb.setTitle("Command executed.");
+                                eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
                                 Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been kicked.");
+                                Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
+                                ctx.channel.sendMessage(eb);
                                 //Utils.LogAction("kick", "Remotely executed kick command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                     } else {
-                        ctx.reply("Not enough arguments / usage: `kick <id|ip>`");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("Not enough arguments / usage: `kick <id|ip>`");
+                        ctx.channel.sendMessage(eb);
                     }
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("antinuke") {
                 {
-                    help = "Toggle antinuke option";
+                    help = "<on/off/-]> Toggle the antinuke option, or check its status.";
                     role = data.getString("kickPlayers_role_id");
                 }
                 public void run(Context ctx) {
@@ -320,49 +319,43 @@ public class ServerCommands {
                             Utils.antiNukeEnabled = false;
                             ctx.reply("Anti nuke was disabled.");
                         } else {
-                            ctx.reply("Usage: antinuke <on|off>");
+                            ctx.reply("Usage: antinuke <on/off>");
                         }
                     } else {
+                        EmbedBuilder eb = new EmbedBuilder();
                         if (Utils.antiNukeEnabled) {
-                            ctx.reply("Anti nuke is currently enabled. Use `antinuke off` to disable it.");
+                            eb.setTitle("Enabled");
+                            eb.setDescription("Anti nuke is currently enabled. Use `.antinuke off` to disable it.");
+                            ctx.channel.sendMessage(eb);
                         } else {
-                            ctx.reply("Anti nuke is currently disabled. Use `antinuke on` to enable it.");
+                            eb.setTitle("Disabled");
+                            eb.setDescription("Anti nuke is currently disabled. Use `.antinuke on` to enable it.");
+                            ctx.channel.sendMessage(eb);
                         }
                     }
                 }
             });
         }
 
-        /*if (data.has("manageMessages_role_id")) {  // TODO: Will probably use a different bot made in js thats gonna take care of the discord stuff
-            handler.registerCommand(new RoleRestrictedCommand("delete") {
-                {
-                    help = "Delete X amount of messages in the context channel";
-                    role = data.getString("manageMessages_role_id");
-                }
-                @Override
-                public void run(Context ctx) {
-                    int amt;
-                    if(ctx.args.length==2){ amt = Integer.parseInt(ctx.args[1]); } else {ctx.reply("Invalid arguments provided, use the following format: .delete <amount>"); return;}
-                    // TODO: make it delete 'amt' messages
-                }
-            });
-        }*/
-
         if (data.has("spyPlayers_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("playersinfo") {
                 {
-                    help = "Get information on all players";
+                    help = "Check the information about all players on the server.";
                     role = data.getString("spyPlayers_role_id");
                 }
                 public void run(Context ctx) {
-                    List<String> result = new ArrayList<>();
-                    result.add("Players: " + playerGroup.size());
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTitle("Players online: " + playerGroup.size());
                     for (Player p : playerGroup.all()) {
                         String p_ip = p.con.address;
-                        if (netServer.admins.isAdmin(p.uuid, p.usid)) p_ip = "*hidden*";
-                        result.add(" * " + Utils.escapeBackticks(p.name) + " : `" + p_ip + "`");
+                        String p_name = p.name;
+                        if (netServer.admins.isAdmin(p.uuid, p.usid)) {  // make admins special :)
+                            p_ip = "*hidden*";
+                            p_name = "**" + p_name + "**";
+                        }
+                        eb.addInlineField(Utils.escapeBackticks(p_name),  p_ip + " : #" + p.id);
                     }
-                    ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(String.join("\n", result))));
+                    ctx.channel.sendMessage(eb);
                 }
             });
         }
@@ -370,10 +363,11 @@ public class ServerCommands {
             String mapConfigRole = data.getString("mapConfig_role_id");
             handler.registerCommand(new RoleRestrictedCommand("uploadmap") {
                 {
-                    help = "Upload a new map (include .msav file with command message)";
+                    help = "<.msav attachment> Upload a new map (Include a .msav file with command message)";
                     role = mapConfigRole;
                 }
                 public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
                     Array<MessageAttachment> ml = new Array<>();
                     for (MessageAttachment ma : ctx.event.getMessageAttachments()) {
                         if (ma.getFileName().split("\\.", 2)[1].trim().equals("msav")) {
@@ -381,10 +375,14 @@ public class ServerCommands {
                         }
                     }
                     if (ml.size != 1) {
-                        ctx.reply("You need to add one valid .msav file!");
+                        eb.setTitle("Map upload terminated.");
+                        eb.setDescription("You need to add one valid .msav file!");
+                        ctx.channel.sendMessage(eb);
                         return;
                     } else if (Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName()).exists()) {
-                        ctx.reply("There is already a map with this name on the server!");
+                        eb.setTitle("Map upload terminated.");
+                        eb.setDescription("There is already a map with this name on the server!");
+                        ctx.channel.sendMessage(eb);
                         return;
                     }
                     // more custom filename checks possible
@@ -395,7 +393,9 @@ public class ServerCommands {
                     try {
                         byte[] data = cf.get();
                         if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
-                            ctx.reply("Corrupted .msav file!");
+                            eb.setTitle("Map upload terminated.");
+                            eb.setDescription("Map file corrupted or invalid.");
+                            ctx.channel.sendMessage(eb);
                             return;
                         }
                         fh.writeBytes(cf.get(), false);
@@ -403,30 +403,40 @@ public class ServerCommands {
                         e.printStackTrace();
                     }
                     maps.reload();
-                    ctx.reply(ml.get(0).getFileName() + " added succesfully!");
+                    eb.setTitle("Map upload completed.");
+                    eb.setDescription(ml.get(0).getFileName() + " was added succesfully into the playlist!");
+                    ctx.channel.sendMessage(eb);
                     //Utils.LogAction("uploadmap", "Uploaded a new map", ctx.author, null);
                 }
             });
             handler.registerCommand(new RoleRestrictedCommand("removemap") {
                 {
-                    help = "Remove a map from the playlist (use number|name retrieved from .maps)";
+                    help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the .maps command)";
                     role = mapConfigRole;
                 }
                 @Override
                 public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
-                        ctx.reply("Not enough arguments, use `removemap <number|name>`");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("Not enough arguments, use `removemap <mapname/mapid>`");
+                        ctx.channel.sendMessage(eb);
                         return;
                     }
                     Map found = Utils.getMapBySelector(ctx.message.trim());
                     if (found == null) {
-                        ctx.reply("Map not found");
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("Map not found");
+                        ctx.channel.sendMessage(eb);
                         return;
                     }
 
                     maps.removeMap(found);
                     maps.reload();
-                    ctx.reply("Removed map " + found.name());
+                    
+                    eb.setTitle("Command executed.");
+                    eb.setDescription(found.name() + " was successfully removed from the playlist.");
+                    ctx.channel.sendMessage(eb);
                 }
             });
         }

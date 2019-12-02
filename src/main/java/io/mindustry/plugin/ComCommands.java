@@ -138,16 +138,8 @@ public class ComCommands {
             public void run(Context ctx) {
                 EmbedBuilder embed = new EmbedBuilder()
                         .setTitle("All available commands:");
-                for(Command command : handler.getAllCommands()){
-                    if(command.getClass() != RoleRestrictedCommand.class) {
-                        embed.addInlineField(command.name, command.help);
-                    }
-                }
-                embed.addField("**Restricted commands:**", "*Moderator only*");
-                for(Command command : handler.getAllCommands()){
-                    if(command.getClass() == RoleRestrictedCommand.class) {
-                        embed.addInlineField(command.name, command.help);
-                    }
+                for(Command command : handler.getAllCommands()) {
+                    embed.addInlineField(command.name, command.help);
                 }
                 ctx.channel.sendMessage(embed);
             }

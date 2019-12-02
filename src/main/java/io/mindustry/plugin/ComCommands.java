@@ -91,11 +91,10 @@ public class ComCommands {
                 try {
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTitle("mindustry.io")
+                            .addInlineField("Players", String.valueOf(playerGroup.size()))
                             .addInlineField("Map", world.getMap().name())
                             .addInlineField("Wave", String.valueOf(state.wave))
-                            .addInlineField("Next wave in", String.valueOf(state.wavetime + " seconds."))
-                            .addInlineField("Alive enemies", String.valueOf(state.enemies))
-                            .addInlineField("Players", String.valueOf(playerGroup.size()));
+                            .addInlineField("Next wave in", String.valueOf(Math.round(state.wavetime / 60) + " seconds."));
                     /*StringBuilder sb = new StringBuilder();
                     sb.append("Map: ").append(world.getMap().name()).append("\n").append("author: ").append(world.getMap().author()).append("\n");
                     sb.append("Wave: ").append(state.wave).append("\n");

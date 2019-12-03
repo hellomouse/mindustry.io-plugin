@@ -266,7 +266,7 @@ public class ServerCommands {
                         e.printStackTrace();
                     }
                     ctx.channel.sendMessage(f);
-                    //f.delete();
+                    f.delete();
                 }
             });
         }

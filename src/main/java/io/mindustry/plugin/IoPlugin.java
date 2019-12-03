@@ -30,11 +30,11 @@ import io.anuke.mindustry.plugin.Plugin;
 import io.anuke.mindustry.world.Tile;
 
 public class IoPlugin extends Plugin {
+    public static DiscordApi api = null;
     private final Long cooldownTime = 300L;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
-    private JSONObject data; //token, channel_id, role_id
-    private DiscordApi api = null;
+    public static JSONObject data; //token, channel_id, role_id
     private HashMap<Long, String> cooldowns = new HashMap<Long, String>(); //uuid
 
     //register event handlers and create variables in the constructor
@@ -253,8 +253,8 @@ public class IoPlugin extends Plugin {
     }
 
 
-    public TextChannel getTextChannel(String id){
-        Optional<Channel> dc =  ((Optional<Channel>)this.api.getChannelById(id));
+    public static TextChannel getTextChannel(String id){
+        Optional<Channel> dc =  ((Optional<Channel>) api.getChannelById(id));
         if (!dc.isPresent()) {
             Log.err("[ERR!] discordplugin: channel not found!");
             return null;
@@ -268,7 +268,7 @@ public class IoPlugin extends Plugin {
     }
 
     public Role getRole(String id){
-        Optional<Role> r1 = this.api.getRoleById(id);
+        Optional<Role> r1 = api.getRoleById(id);
         if (!r1.isPresent()) {
             Log.err("[ERR!] discordplugin: adminrole not found!");
             return null;

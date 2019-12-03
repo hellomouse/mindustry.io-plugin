@@ -1,6 +1,5 @@
 package io.mindustry.plugin;
 
-import io.anuke.arc.util.Log;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
@@ -20,11 +19,9 @@ import io.anuke.mindustry.maps.Maps;
 import io.anuke.mindustry.io.SaveIO;
 import io.anuke.mindustry.net.Administration;
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
-import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.json.JSONObject;
 
@@ -40,17 +37,14 @@ import java.util.zip.InflaterInputStream;
 import static io.anuke.mindustry.Vars.*;
 
 public class ServerCommands {
-    // private final long minMapChangeTime = 30L; // 30 seconds
 
     private JSONObject data;
-    // private long lastMapChange = 0L;
 
     private final Field mapsListField;
 
     public ServerCommands(JSONObject data){
         this.data = data;
 
-        // grab private maps array field
         Class<Maps> mapsClass = Maps.class;
         Field mapsField;
         try {
@@ -437,6 +431,58 @@ public class ServerCommands {
                     eb.setTitle("Command executed.");
                     eb.setDescription(found.name() + " was successfully removed from the playlist.");
                     ctx.channel.sendMessage(eb);
+                }
+            });
+        }
+        if(IoPlugin.data.has("mapSubmissions_channel_id")){
+            TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_channel_id"));
+            handler.registerCommand(new Command("submitmap") {
+                {
+                    help = "<.msav attachment> Submit a new map to be added into the server playlist in a .msav file format.";
+                }
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    Array<MessageAttachment> ml = new Array<>();
+                    for (MessageAttachment ma : ctx.event.getMessageAttachments()) {
+                        if (ma.getFileName().split("\\.", 2)[1].trim().equals("msav")) {
+                            ml.add(ma);
+                        }
+                    }
+                    if (ml.size != 1) {
+                        eb.setTitle("Map upload terminated.");
+                        eb.setDescription("You need to add one valid .msav file!");
+                        ctx.channel.sendMessage(eb);
+                        return;
+                    } else if (Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName()).exists()) {
+                        eb.setTitle("Map upload terminated.");
+                        eb.setDescription("There is already a map with this name on the server!");
+                        ctx.channel.sendMessage(eb);
+                        return;
+                    }
+                    CompletableFuture<byte[]> cf = ml.get(0).downloadAsByteArray();
+
+                    try {
+                        byte[] data = cf.get();
+                        if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
+                            eb.setTitle("Map upload terminated.");
+                            eb.setDescription("Map file corrupted or invalid.");
+                            ctx.channel.sendMessage(eb);
+                            return;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    eb.setTitle("Map upload completed.");
+                    eb.setDescription(ml.get(0).getFileName() + " was successfully queued for review by moderators!");
+                    ctx.channel.sendMessage(eb);
+                    EmbedBuilder eb2 = new EmbedBuilder()
+                            .setTitle("A map submission has been made.")
+                            .setAuthor(ctx.author)
+                            .setTimestampToNow()
+                            .setDescription(ml.get(0).getFileName());
+                    File mapFile = new File(ml.get(0).getFileName());
+                    CompletableFuture<byte[]> fileContent = ml.get(0).downloadAsByteArray();
+                    // TODO: make it post the map submission in tc
                 }
             });
         }

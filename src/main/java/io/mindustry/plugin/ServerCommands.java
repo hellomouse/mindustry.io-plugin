@@ -306,7 +306,7 @@ public class ServerCommands {
             });
             handler.registerCommand(new RoleRestrictedCommand("antinuke") {
                 {
-                    help = "<on/off/-]> Toggle the antinuke option, or check its status.";
+                    help = "<on/off/> Toggle the antinuke option, or check its status.";
                     role = data.getString("kickPlayers_role_id");
                 }
                 public void run(Context ctx) {

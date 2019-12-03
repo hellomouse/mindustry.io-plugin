@@ -299,7 +299,7 @@ public class ServerCommands {
                         }
                     } else {
                         eb.setTitle("Command terminated.");
-                        eb.setDescription("Not enough arguments / usage: `kick <id|ip>`");
+                        eb.setDescription("Not enough arguments / usage: `kick <ip/id>`");
                         ctx.channel.sendMessage(eb);
                     }
                 }

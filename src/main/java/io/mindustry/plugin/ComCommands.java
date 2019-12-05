@@ -71,7 +71,7 @@ public class ComCommands {
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTitle("Players online: " + playerGroup.size());
                 for (Player player : playerGroup.all()) {
-                    eb.addInlineField(Utils.escapeBackticks(player.name), " (#" + player.id + ")");
+                    eb.addField(Utils.escapeBackticks(player.name), " (#" + player.id + ")");
                 }
                 ctx.channel.sendMessage(eb);
             }
@@ -84,10 +84,10 @@ public class ComCommands {
                 try {
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTitle("mindustry.io")
-                            .addInlineField("Players", String.valueOf(playerGroup.size()))
-                            .addInlineField("Map", world.getMap().name())
-                            .addInlineField("Wave", String.valueOf(state.wave))
-                            .addInlineField("Next wave in", String.valueOf(Math.round(state.wavetime / 60) + " seconds."));
+                            .addField("Players", String.valueOf(playerGroup.size()))
+                            .addField("Map", world.getMap().name())
+                            .addField("Wave", String.valueOf(state.wave))
+                            .addField("Next wave in", Math.round(state.wavetime / 60) + " seconds.");
                     /*StringBuilder sb = new StringBuilder();
                     sb.append("Map: ").append(world.getMap().name()).append("\n").append("author: ").append(world.getMap().author()).append("\n");
                     sb.append("Wave: ").append(state.wave).append("\n");

@@ -86,7 +86,7 @@ public class ServerCommands {
                 Array<Map> mapList = maps.customMaps();
                 for (int i = 0; i < mapList.size; i++) {
                     Map m = mapList.get(i);
-                    eb.addInlineField(String.valueOf(i), m.name() + " `" + m.width + " x " + m.height + "`");
+                    eb.addField(String.valueOf(i), m.name() + " `" + m.width + " x " + m.height + "`");
                 }
                 ctx.channel.sendMessage(eb);
             }
@@ -347,7 +347,7 @@ public class ServerCommands {
                             p_ip = "*hidden*";
                             p_name = "**" + p_name + "**";
                         }
-                        eb.addInlineField(Utils.escapeBackticks(p_name),  p_ip + " : #" + p.id);
+                        eb.addField(Utils.escapeBackticks(p_name),  p_ip + " : #" + p.id);
                     }
                     ctx.channel.sendMessage(eb);
                 }

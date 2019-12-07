@@ -222,13 +222,15 @@ public class ServerCommands {
                     role = data.getString("gameOver_role_id");
                 }
                 public void run(Context ctx) {
-                    String message;
+                    //String[] split = ctx.message.split(" ", 2);
+                    //String newMotd = split[1];
+                    String newMotd = ctx.message;
                     String oldMotd = Utils.welcomeMessage;
-                    if(ctx.args.length==2){ message = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .motd <text>"); return;}
-                    Utils.welcomeMessage = message;
+                    if(newMotd==null){ctx.reply("Invalid arguments provided, use the following format: .motd <text...>"); return;}
+                    Utils.welcomeMessage = newMotd;
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTitle("Command executed.")
-                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + message);
+                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + newMotd);
                     ctx.channel.sendMessage(eb);
                 }
             });

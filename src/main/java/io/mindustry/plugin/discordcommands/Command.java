@@ -4,7 +4,7 @@ package io.mindustry.plugin.discordcommands;
 public abstract class Command {
     public String name;
     /** Help for this command, shown by the help command */
-    public String help = "No help is availble for this command";
+    public String help = "No information was provided for this command.";
 
     public Command(String name) {
         // always ALWAYS lowercase command names

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import io.anuke.mindustry.world.Block;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -28,6 +29,8 @@ import io.anuke.mindustry.game.EventType;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.plugin.Plugin;
 import io.anuke.mindustry.world.Tile;
+
+import static io.anuke.mindustry.Vars.*;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
@@ -112,6 +115,29 @@ public class IoPlugin extends Plugin {
                 Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
+
+        if (data.has("warnings_chat_channel_id")) {
+            TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
+            if (tc != null) {
+                Events.on(EventType.WaveEvent.class, event -> {
+                    EmbedBuilder eb = new EmbedBuilder().setTitle("Wave " + state.wave + " started.");
+                    tc.sendMessage(eb);
+                });
+                Events.on(EventType.BuildSelectEvent.class, event -> {
+                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
+                        Player builder = (Player) event.builder;
+                        Block buildBlock = event.builder.buildRequest().block;
+                        Tile buildTile = event.builder.buildRequest().tile();
+                        EmbedBuilder eb = new EmbedBuilder().setTitle("Suspicious block was placed.");
+                        eb.setDescription("Builder: " + Utils.escapeBackticks(builder.name) + " (#" + builder.id + ")");
+                        eb.addField(buildBlock.name, "Location: (" + buildTile.x + ", " + buildTile.y + ")");
+                        eb.setColor(Utils.Pals.scarlet);
+                        tc.sendMessage(eb);
+                    }
+                });
+                //TODO: make it register when power graphs get split apart by griefers
+            }
+        }
 
         // welcome message
         if(Utils.welcomeMessage!=null) {

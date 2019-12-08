@@ -1,14 +1,11 @@
 package io.mindustry.plugin;
 
 import io.anuke.mindustry.maps.Map;
-import org.javacord.api.entity.DiscordEntity;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.user.User;
 
+import java.awt.*;
 import java.util.List;
-import java.util.Optional;
 
 import static io.anuke.mindustry.Vars.maps;
 
@@ -18,6 +15,9 @@ public class Utils {
     public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
     public static String welcomeMessage = "[sky]Welcome to mindustry.io! Consider joining our discord here: http://discord.mindustry.io";
+    public static class Pals {
+        public static Color scarlet = (Color.getHSBColor(5, 85, 95));
+    }
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {
         return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));

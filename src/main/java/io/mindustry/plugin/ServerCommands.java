@@ -308,7 +308,7 @@ public class ServerCommands {
                     int id = -1;
                     try {
                         id = Integer.parseInt(target);
-                    } catch (NumberFormatException ex) {}
+                    } catch (NumberFormatException ignored) {}
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {

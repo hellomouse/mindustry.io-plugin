@@ -1,10 +1,8 @@
 package io.mindustry.plugin;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import io.anuke.mindustry.world.Block;
 import org.javacord.api.DiscordApi;
@@ -78,13 +76,19 @@ public class IoPlugin extends Plugin {
 
         // live chat
         if (data.has("live_chat_channel_id")) {
-            TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
+            TextChannel tc = getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
-                List<String> messageBuffer = new ArrayList<>();
+                HashMap<String, String> messageBuffer = new HashMap<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    messageBuffer.add(Utils.escapeBackticks(event.player.name) + ": `" + Utils.escapeBackticks(event.message) + "`\n");
+                    messageBuffer.put(Utils.escapeBackticks(event.player.name), Utils.escapeBackticks(event.message));
                     if(messageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
-                        tc.sendMessage(Utils.stringArrayToString(messageBuffer));
+                        EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
+                        for (Map.Entry<String, String> entry : messageBuffer.entrySet()) {
+                            String username = entry.getKey();
+                            String message = entry.getValue();
+                            eb.addField(Utils.escapeAt(username), Utils.escapeAt(message));
+                        }
+                        tc.sendMessage(eb);
                         messageBuffer.clear();
                     }
                 });

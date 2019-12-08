@@ -27,6 +27,8 @@ public class Utils {
         return string.replaceAll("`", "");
     }
 
+    public static String escapeAt(String string) { return string.replaceAll("@", ""); }
+
     public static String constructMessage(List<String> array) {
         StringBuilder result = new StringBuilder();
         for(String string : array){

@@ -163,7 +163,7 @@ public class ServerCommands {
             String banRole = data.getString("banPlayers_role_id");
             handler.registerCommand(new RoleRestrictedCommand("ban") {
                 {
-                    help = "<ip/id> <ip/id> Ban a player by the provided ip or id.";
+                    help = "<ip/id> Ban a player by the provided ip or id.";
                     role = banRole;
                 }
  
@@ -171,6 +171,7 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTimestampToNow();
                     String target = ctx.args[1];
+                    Boolean found = false;
                     int id = -1;
                     try {
                         id = Integer.parseInt(target);
@@ -178,6 +179,7 @@ public class ServerCommands {
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
+                                found = true;
                                 netServer.admins.banPlayer(p.uuid);
                                 eb.setTitle("Command executed.");
                                 eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
@@ -187,9 +189,33 @@ public class ServerCommands {
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
+                        if(!found){
+                            eb.setTitle("Command terminated");
+                            eb.setDescription("Player not online. Use .blacklist <ip> to ban an offline player.");
+                            ctx.channel.sendMessage(eb);
+                        }
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setDescription("Not enough arguments / usage: `ban <id|ip>`");
+                        eb.setDescription("Not enough arguments / usage: `.ban <id/ip>`");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+            });
+            handler.registerCommand(new RoleRestrictedCommand("blacklist") {
+                {
+                    help = "<ip> Ban a player by the provided ip.";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTimestampToNow();
+                    String target = ctx.args[1];
+                    if (target.length() > 0) {
+                        netServer.admins.banPlayerIP(target);
+                    } else {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("Not enough arguments / usage: `.blacklist <ip>`");
                         ctx.channel.sendMessage(eb);
                     }
                 }

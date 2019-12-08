@@ -251,18 +251,19 @@ public class ServerCommands {
                         for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
                     }
 
-                    File f = new File(new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(Calendar.getInstance().getTime()) + "-IO_BANS.txt");
+                    File f = new File(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()) + "_IO_BANS.txt");
                     try {
                         FileWriter fw;
                         fw = new FileWriter(f.getAbsoluteFile());
                         BufferedWriter bw = new BufferedWriter(fw);
                         bw.write(Utils.constructMessage(result));
-                        bw.close(); // Be sure to close BufferedWriter
+                        bw.close();
+                        ctx.channel.sendMessage(f);
+                        f.delete();
                     } catch (IOException e) {
+                        ctx.reply("An error occurred.");
                         e.printStackTrace();
                     }
-                    ctx.channel.sendMessage(f);
-                    f.delete();
                 }
             });
         }

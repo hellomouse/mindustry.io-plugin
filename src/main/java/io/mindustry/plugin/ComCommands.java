@@ -78,7 +78,7 @@ public class ComCommands {
         });
         handler.registerCommand(new Command("info") {
             {
-                help = "Check basic server information.";
+                help = "Get basic server information.";
             }
             public void run(Context ctx) {
                 try {
@@ -88,17 +88,12 @@ public class ComCommands {
                             .addField("Map", world.getMap().name())
                             .addField("Wave", String.valueOf(state.wave))
                             .addField("Next wave in", Math.round(state.wavetime / 60) + " seconds.");
-                    /*StringBuilder sb = new StringBuilder();
-                    sb.append("Map: ").append(world.getMap().name()).append("\n").append("author: ").append(world.getMap().author()).append("\n");
-                    sb.append("Wave: ").append(state.wave).append("\n");
-                    sb.append("Enemies: ").append(state.enemies).append("\n");
-                    sb.append("Players: ").append(playerGroup.size()).append('\n');
-                    ctx.reply(new MessageBuilder().appendCode("", Utils.escapeBackticks(sb.toString())));*/
+
                     ctx.channel.sendMessage(eb);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     e.printStackTrace();
-                    ctx.reply("An error has occured.");
+                    ctx.reply("An error has occurred.");
                 }
             }
         });

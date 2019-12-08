@@ -37,7 +37,7 @@ public class ComCommands {
                 }
             }
         });
-        handler.registerCommand(new Command("map") {
+        handler.registerCommand(new Command("downloadmap") {
             {
                 help = "<mapname/mapid> Preview and download a server map in a .msav file format.";
             }

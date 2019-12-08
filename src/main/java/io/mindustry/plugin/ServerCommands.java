@@ -1,5 +1,6 @@
 package io.mindustry.plugin;
 
+import io.anuke.mindustry.content.Mechs;
 import io.mindustry.plugin.discordcommands.Command;
 import io.mindustry.plugin.discordcommands.Context;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
@@ -462,8 +463,35 @@ public class ServerCommands {
                     ctx.channel.sendMessage(eb);
                 }
             });
+            handler.registerCommand(new RoleRestrictedCommand("fixserver") {
+                {
+                    help = "Attempt to fix the server without interrupting active connections.";
+                    role = data.getString("mapConfig_role_id");
+                }
+                public void run(Context ctx) {
+                    for(Player p : playerGroup.all()) {
+                        netServer.sendWorldData(p);
+                    }
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTitle("Command executed.")
+                            .setDescription("Synchronized every player's client with the server.");
+                    ctx.channel.sendMessage(eb);
+                }
+            });
         }
-        if(IoPlugin.data.has("mapSubmissions_channel_id")){
+        if(data.has("interactWithPlayers_role_id")){
+            handler.registerCommand(new RoleRestrictedCommand("mech") {
+                {
+                    help = "<mechname> <playerid> Change the provided player into a specific mech.";
+                    role = data.getString("interactWithPlayers_role_id");
+                }
+                public void run(Context ctx) {
+                    //TODO: finish this
+                }
+            });
+            //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
+        }
+        if(data.has("mapSubmissions_channel_id")){
             TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_channel_id"));
             handler.registerCommand(new Command("submitmap") {
                 {

@@ -4,6 +4,7 @@ import io.anuke.arc.files.FileHandle;
 import io.anuke.mindustry.maps.Map;
 
 
+
 import io.anuke.mindustry.entities.type.Player;
 import io.anuke.mindustry.game.Team;
 import io.anuke.mindustry.game.Teams.TeamData;
@@ -33,7 +34,7 @@ public class ComCommands {
                     Call.sendMessage("[sky]" + ctx.author.getName() + " @discord >[] " + ctx.message);
                     ctx.reply("``" + ctx.author.getName() + "@discord > " + ctx.message + "``\nSent successfully.");
                 } else{
-                    ctx.reply("Message too big, please use a maximum of " + String.valueOf(Utils.chatMessageMaxSize) + " characters.");
+                    ctx.reply("Message too big, please use a maximum of " + Utils.chatMessageMaxSize + " characters.");
                 }
             }
         });

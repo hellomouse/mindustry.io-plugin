@@ -6,6 +6,8 @@ import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 
+import io.mindustry.plugin.ComCommands;
+import io.mindustry.plugin.ServerCommands;
 import io.mindustry.plugin.discordcommands.DiscordCommands;
 
 public class BotThread extends Thread {
@@ -29,11 +31,13 @@ public class BotThread extends Thread {
     public void run(){
         while (this.mt.isAlive()){
             try {
+                TempBan.update();
                 Thread.sleep(1000);
             } catch (Exception e) {
 
             }
         }
+        
         if (data.has("serverdown_role_id")){
             Role r = new UtilMethods().getRole(api, data.getString("serverdown_role_id"));
             TextChannel tc = new UtilMethods().getTextChannel(api, data.getString("serverdown_channel_id"));

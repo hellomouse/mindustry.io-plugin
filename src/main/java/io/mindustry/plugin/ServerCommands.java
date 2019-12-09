@@ -10,6 +10,7 @@ import io.anuke.arc.Events;
 import io.anuke.arc.files.FileHandle;
 import io.anuke.arc.collection.Array;
 
+
 import io.anuke.mindustry.core.GameState;
 import io.anuke.mindustry.entities.type.Player;
 import io.anuke.mindustry.game.EventType.GameOverEvent;
@@ -40,12 +41,12 @@ import static io.anuke.mindustry.Vars.*;
 public class ServerCommands {
 
     private JSONObject data;
-
+    private TempBan tempban;
     private final Field mapsListField;
 
     public ServerCommands(JSONObject data){
         this.data = data;
-
+        this.tempban = new TempBan();
         Class<Maps> mapsClass = Maps.class;
         Field mapsField;
         try {
@@ -164,7 +165,7 @@ public class ServerCommands {
             String banRole = data.getString("banPlayers_role_id");
             handler.registerCommand(new RoleRestrictedCommand("ban") {
                 {
-                    help = "<ip/id> Ban a player by the provided ip or id.";
+                    help = "<ip/id> <ip/id> Ban a player by the provided ip or id.";
                     role = banRole;
                 }
  
@@ -172,7 +173,6 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTimestampToNow();
                     String target = ctx.args[1];
-                    Boolean found = false;
                     int id = -1;
                     try {
                         id = Integer.parseInt(target);
@@ -180,9 +180,7 @@ public class ServerCommands {
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
-                                found = true;
                                 netServer.admins.banPlayer(p.uuid);
-                                eb.setTitle("Command executed.");
                                 eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
@@ -190,33 +188,9 @@ public class ServerCommands {
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
-                        if(!found){
-                            eb.setTitle("Command terminated");
-                            eb.setDescription("Player not online. Use .blacklist <ip> to ban an offline player.");
-                            ctx.channel.sendMessage(eb);
-                        }
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setDescription("Not enough arguments / usage: `.ban <id/ip>`");
-                        ctx.channel.sendMessage(eb);
-                    }
-                }
-            });
-            handler.registerCommand(new RoleRestrictedCommand("blacklist") {
-                {
-                    help = "<ip> Ban a player by the provided ip.";
-                    role = banRole;
-                }
-
-                public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setTimestampToNow();
-                    String target = ctx.args[1];
-                    if (target.length() > 0) {
-                        netServer.admins.banPlayerIP(target);
-                    } else {
-                        eb.setTitle("Command terminated");
-                        eb.setDescription("Not enough arguments / usage: `.blacklist <ip>`");
+                        eb.setDescription("Not enough arguments / usage: `ban <id|ip>`");
                         ctx.channel.sendMessage(eb);
                     }
                 }
@@ -242,6 +216,69 @@ public class ServerCommands {
                     }
                 }
             });
+            handler.registerCommand(new RoleRestrictedCommand("tempban") {
+                {
+                    help = "<ip/id> <ip/id> Tempban a player by the provided ip or id for x amount of minutes.";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTimestampToNow();
+                    String target = ctx.args[1];
+                    String time = ctx.args[2];
+                    int id = -1;
+                    int banminutes = -1;
+                    try {
+                        id = Integer.parseInt(target);
+                    } catch (NumberFormatException ex) {
+                    }
+                    try {
+                        banminutes = Integer.parseInt(time);
+                    } catch (NumberFormatException ex) {
+                    }
+
+                    if (target.length() > 0 && banminutes > 0) {
+                        for (Player p : playerGroup.all()) {
+                            if (p.con.address.equals(target) || p.id == id) {
+                                netServer.admins.banPlayer(p.uuid);
+                                tempban.addBan(p, banminutes);
+                                eb.setTitle("Command executed.");
+                                eb.setDescription("Tempbanned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
+                                ctx.channel.sendMessage(eb);
+                                Call.onKick(p.con, "You've been temporarily banned by: " + ctx.author.getName() + " for " + banminutes + " Minutes. Appeal at http://discord.mindustry.io");
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been temporarily banned.");
+
+                            } else {
+                                eb.setTitle("Command terminated");
+                                eb.setDescription("Not enough arguments / usage: `tempban <id|ip>, time to be banned(in minutes)`");
+                                ctx.channel.sendMessage(eb);
+                            }
+                        }
+                    }
+                }
+            });
+            handler.registerCommand(new RoleRestrictedCommand("untempban") {
+                EmbedBuilder eb = new EmbedBuilder();
+                {
+                    help = "Untempban a player by the provided ip.";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String ip;
+                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .unban <ip>"); return;}
+
+                    if (tempban.removeBan(ip)) {
+                        eb.setTitle("Command executed.");
+                        eb.setDescription("Untempbanned `" + ip + "` successfully");
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("No such tempban exists.");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+            });
 
             handler.registerCommand(new RoleRestrictedCommand("motd") {
                 {
@@ -249,15 +286,13 @@ public class ServerCommands {
                     role = data.getString("gameOver_role_id");
                 }
                 public void run(Context ctx) {
-                    //String[] split = ctx.message.split(" ", 2);
-                    //String newMotd = split[1];
-                    String newMotd = ctx.message;
+                    String message;
                     String oldMotd = Utils.welcomeMessage;
-                    if(newMotd==null){ctx.reply("Invalid arguments provided, use the following format: .motd <text...>"); return;}
-                    Utils.welcomeMessage = newMotd;
+                    if(ctx.args.length==2){ message = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .motd <text>"); return;}
+                    Utils.welcomeMessage = message;
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTitle("Command executed.")
-                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + newMotd);
+                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + message);
                     ctx.channel.sendMessage(eb);
                 }
             });
@@ -278,19 +313,18 @@ public class ServerCommands {
                         for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
                     }
 
-                    File f = new File(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()) + "_IO_BANS.txt");
+                    File f = new File(new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(Calendar.getInstance().getTime()) + "-IO_BANS.txt");
                     try {
                         FileWriter fw;
                         fw = new FileWriter(f.getAbsoluteFile());
                         BufferedWriter bw = new BufferedWriter(fw);
                         bw.write(Utils.constructMessage(result));
-                        bw.close();
-                        ctx.channel.sendMessage(f);
-                        f.delete();
+                        bw.close(); // Be sure to close BufferedWriter
                     } catch (IOException e) {
-                        ctx.reply("An error occurred.");
                         e.printStackTrace();
                     }
+                    ctx.channel.sendMessage(f);
+                    f.delete();
                 }
             });
         }
@@ -309,7 +343,7 @@ public class ServerCommands {
                     int id = -1;
                     try {
                         id = Integer.parseInt(target);
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ex) {}
                     if (target.length() > 0) {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
@@ -463,33 +497,6 @@ public class ServerCommands {
                     ctx.channel.sendMessage(eb);
                 }
             });
-            handler.registerCommand(new RoleRestrictedCommand("fixserver") {
-                {
-                    help = "Attempt to fix the server without interrupting active connections.";
-                    role = data.getString("mapConfig_role_id");
-                }
-                public void run(Context ctx) {
-                    for(Player p : playerGroup.all()) {
-                        netServer.sendWorldData(p);
-                    }
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("Command executed.")
-                            .setDescription("Synchronized every player's client with the server.");
-                    ctx.channel.sendMessage(eb);
-                }
-            });
-        }
-        if(data.has("interactWithPlayers_role_id")){
-            handler.registerCommand(new RoleRestrictedCommand("mech") {
-                {
-                    help = "<mechname> <playerid> Change the provided player into a specific mech.";
-                    role = data.getString("interactWithPlayers_role_id");
-                }
-                public void run(Context ctx) {
-                    //TODO: finish this
-                }
-            });
-            //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }
         if(data.has("mapSubmissions_channel_id")){
             TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_channel_id"));

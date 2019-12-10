@@ -40,12 +40,10 @@ import static io.anuke.mindustry.Vars.*;
 public class ServerCommands {
 
     private JSONObject data;
-    private TempBan tempban;
     private final Field mapsListField;
 
     public ServerCommands(JSONObject data) throws IOException{
         this.data = data;
-        tempban = new TempBan();
         Class<Maps> mapsClass = Maps.class;
         Field mapsField;
         try {
@@ -228,7 +226,7 @@ public class ServerCommands {
                                 found = true;
                                 netServer.admins.banPlayer(p.uuid);
                                 eb.setTitle("Command executed.");
-                                tempban.addBan(p, time);
+                                TempBan.addBan(p, time);
                                 eb.setDescription("Tempbanned " + p.name + "(#" + p.id + ") `" + p.con.address +  "` for "+time+" minutes successfully!");
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() +" for " +time+" minutes. Appeal at http://discord.mindustry.io");
@@ -289,17 +287,17 @@ public class ServerCommands {
                 }
             });
             
-            handler.registerCommand(new RoleRestrictedCommand("unban") {
+            handler.registerCommand(new RoleRestrictedCommand("untempban") {
                 EmbedBuilder eb = new EmbedBuilder();
                 {
-                    help = "Unban a player by the provided ip.";
+                    help = "Untempban a player by the provided ip.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
                     String ip;
                     if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .untempban <ip>"); return;}
 
-                    if (tempban.removeBan(ip)) {
+                    if (TempBan.removeBan(ip)) {
                         eb.setTitle("Command executed.");
                         eb.setDescription("Untempbanned `" + ip + "` successfully");
                         ctx.channel.sendMessage(eb);

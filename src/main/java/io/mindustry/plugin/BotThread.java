@@ -37,7 +37,6 @@ public class BotThread extends Thread {
 
             }
         }
-        
         if (data.has("serverdown_role_id")){
             Role r = new UtilMethods().getRole(api, data.getString("serverdown_role_id"));
             TextChannel tc = new UtilMethods().getTextChannel(api, data.getString("serverdown_channel_id"));

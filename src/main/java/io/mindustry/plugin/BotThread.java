@@ -6,7 +6,6 @@ import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 
-
 import io.mindustry.plugin.discordcommands.DiscordCommands;
 
 public class BotThread extends Thread {

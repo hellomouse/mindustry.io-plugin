@@ -42,7 +42,7 @@ public class ServerCommands {
     private JSONObject data;
     private final Field mapsListField;
 
-    public ServerCommands(JSONObject data) throws IOException{
+    public ServerCommands(JSONObject data){
         this.data = data;
         Class<Maps> mapsClass = Maps.class;
         Field mapsField;

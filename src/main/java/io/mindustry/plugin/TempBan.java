@@ -1,7 +1,6 @@
 package io.mindustry.plugin;
 
 import io.anuke.mindustry.entities.type.Player;
-import static io.anuke.mindustry.Vars.*;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +18,6 @@ public class TempBan {
 
     public static JSONObject getBans() {
         JSONObject get = new JSONObject(); // create a default get jsonobject incase json file was just created
-
         try {
             File banfile = new File("bans.json");
             if (!banfile.exists()) {
@@ -29,9 +27,32 @@ public class TempBan {
             JSONParser parser = new JSONParser();
             get = (JSONObject) (parser.parse(filereader)); //parses file for a jsonobject and set get to it
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
         return get;
+    }
+
+    public static ArrayList<String> getBanArrayList() {
+        bans = getBans();
+        ArrayList<String> get = new ArrayList<>();
+        try {
+            for (Object i : bans.keySet()) {
+                get.add(((String) i));
+            }
+        } catch (Exception e) {
+        }
+        return get;
+    }
+
+    public static String getBanTime(String ip) {
+        bans = getBans();
+        String out = "how did you get this message you have no ban time what";
+        for (Object i : bans.keySet()) {
+            if (ip.equals(((String) i))) {
+                out = "" + (((float) (((long) bans.get(i)) - System.currentTimeMillis())) / 1000);
+            }
+        }
+        return out;
     }
 
     public static void addBan(Player p, double minutes) {// using float allows for somewhat more precise bans
@@ -42,7 +63,6 @@ public class TempBan {
             bans.put(p.con.address, ((milliseconds + System.currentTimeMillis())));// gets current unix time, adds time to be tempbanned to it, and adds it it to jsonobject with the ip of the player
             writeBans();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -53,7 +73,6 @@ public class TempBan {
             bans.remove(ip);//removes ip from object, probably works
             output = true;
         } catch (Exception e) {
-            e.printStackTrace();
         }
         writeBans();
         return output;
@@ -67,7 +86,6 @@ public class TempBan {
             filewriter.write(bans.toJSONString());//turns json object into a jsonstring, and writes it to json file
             filewriter.flush();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -76,10 +94,8 @@ public class TempBan {
         bans = getBans();
         for (Object i : bans.keySet()) {
             if (((long) bans.get(i)) <= System.currentTimeMillis()) {// checks if current time is greater than or equal to to be unbanned time, and if it is unbans them and removes them from the json
-                netServer.admins.unbanPlayerIP((String)i);//unban code
                 toremove.add((String) i);// due to enhanced for loop being unable to be edited while it is being looped to, i made a list to add bans to be removed
             }
-
         }
         for (String i : toremove) { // goes through list of bans to be removed and removes them
             bans.remove(i);
@@ -91,7 +107,6 @@ public class TempBan {
             updatebans();// goes through update bans to check if bans are to be removed, then writes the new bans to json file
             writeBans();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

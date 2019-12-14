@@ -29,7 +29,6 @@ public class BotThread extends Thread {
     public void run(){
         while (this.mt.isAlive()){
             try {
-                TempBan.update();
                 Thread.sleep(1000);
             } catch (Exception e) {
 

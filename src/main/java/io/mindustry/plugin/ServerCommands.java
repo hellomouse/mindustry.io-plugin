@@ -224,12 +224,11 @@ public class ServerCommands {
                         for (Player p : playerGroup.all()) {
                             if (p.con.address.equals(target) || p.id == id) {
                                 found = true;
-                                netServer.admins.banPlayer(p.uuid);
                                 eb.setTitle("Command executed.");
                                 TempBan.addBan(p, time);
                                 eb.setDescription("Tempbanned " + p.name + "(#" + p.id + ") `" + p.con.address +  "` for "+time+" minutes successfully!");
                                 ctx.channel.sendMessage(eb);
-                                Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() +" for " +time+" minutes. Appeal at http://discord.mindustry.io");
+                                Call.onKick(p.con, "You've been tempbanned by: " + ctx.author.getName() +" for " +time+" minutes. Appeal at http://discord.mindustry.io");
                                 Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been temporarily banned.");
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }

@@ -1,11 +1,10 @@
 package io.mindustry.plugin;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
+import io.anuke.mindustry.world.Block;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -28,6 +27,8 @@ import io.anuke.mindustry.game.EventType;
 import io.anuke.mindustry.gen.Call;
 import io.anuke.mindustry.plugin.Plugin;
 import io.anuke.mindustry.world.Tile;
+
+import static io.anuke.mindustry.Vars.*;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
@@ -75,13 +76,19 @@ public class IoPlugin extends Plugin {
 
         // live chat
         if (data.has("live_chat_channel_id")) {
-            TextChannel tc = this.getTextChannel(data.getString("live_chat_channel_id"));
+            TextChannel tc = getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
-                List<String> messageBuffer = new ArrayList<>();
+                HashMap<String, String> messageBuffer = new HashMap<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    messageBuffer.add(Utils.escapeBackticks(event.player.name) + ": `" + Utils.escapeBackticks(event.message) + "`\n");
+                    messageBuffer.put(Utils.escapeBackticks(event.player.name), Utils.escapeBackticks(event.message));
                     if(messageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
-                        tc.sendMessage(Utils.stringArrayToString(messageBuffer));
+                        EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
+                        for (Map.Entry<String, String> entry : messageBuffer.entrySet()) {
+                            String username = entry.getKey();
+                            String message = entry.getValue();
+                            eb.addField(Utils.escapeAt(username), Utils.escapeAt(message));
+                        }
+                        tc.sendMessage(eb);
                         messageBuffer.clear();
                     }
                 });
@@ -112,13 +119,37 @@ public class IoPlugin extends Plugin {
                 Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
+        
         Events.on(EventType.PlayerConnect.class, player ->{
             TempBan.update();//updates tempban list
             for(String i : TempBan.getBanArrayList()){//checks if connecting player is in tempban list
                 if(i.equals(player.player.con.address)) Call.onKick(player.player.con, "Tempban time remaining: "+TempBan.getBanTime(player.player.con.address));//kicks player and says how long tempbanned
             }
             });
-        
+
+        if (data.has("warnings_chat_channel_id")) {
+            TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
+            if (tc != null) {
+                Events.on(EventType.WaveEvent.class, event -> {
+                    EmbedBuilder eb = new EmbedBuilder().setTitle("Wave " + state.wave + " started.");
+                    tc.sendMessage(eb);
+                });
+                Events.on(EventType.BuildSelectEvent.class, event -> {
+                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
+                        Player builder = (Player) event.builder;
+                        Block buildBlock = event.builder.buildRequest().block;
+                        Tile buildTile = event.builder.buildRequest().tile();
+                        EmbedBuilder eb = new EmbedBuilder().setTitle("Suspicious block was placed.");
+                        eb.setDescription("Builder: " + Utils.escapeBackticks(builder.name) + " (#" + builder.id + ")");
+                        eb.addField(buildBlock.name, "Location: (" + buildTile.x + ", " + buildTile.y + ")");
+                        eb.setColor(Utils.Pals.scarlet);
+                        tc.sendMessage(eb);
+                    }
+                });
+                //TODO: make it register when power graphs get split apart by griefers
+            }
+        }
+
         // welcome message
         if(Utils.welcomeMessage!=null) {
             Events.on(EventType.PlayerJoin.class, event -> {
@@ -138,7 +169,7 @@ public class IoPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler){
         if (api != null) {
-            handler.<Player>register("d", "<text>", "Sends a message to moderators. (Use when a griefer is online)", (args, player) -> {
+            handler.<Player>register("d", "<text...>", "Sends a message to moderators. (Use when a griefer is online)", (args, player) -> {
 
                 if (!data.has("dchannel_id")) {
                     player.sendMessage("[scarlet]This command is disabled.");
@@ -168,7 +199,7 @@ public class IoPlugin extends Plugin {
                 player.sendMessage(builder.toString());
             });
 
-            handler.<Player>register("gr", "<player> <reason>", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
+            handler.<Player>register("gr", "<player> <reason...>", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
                 //https://github.com/Anuken/Mindustry/blob/master/core/src/io/anuke/mindustry/core/NetServer.java#L300-L351
                 if (!(data.has("channel_id") && data.has("role_id"))) {
                     player.sendMessage("[scarlet]This command is disabled.");
@@ -180,7 +211,7 @@ public class IoPlugin extends Plugin {
                     if (key + cooldownTime < System.currentTimeMillis() / 1000L) {
                         cooldowns.remove(key);
                         continue;
-                    } else if (player.uuid == cooldowns.get(key)) {
+                    } else if (player.uuid.equals(cooldowns.get(key))) {
                         player.sendMessage("[scarlet]This command is on a 5 minute cooldown!");
                         return;
                     }

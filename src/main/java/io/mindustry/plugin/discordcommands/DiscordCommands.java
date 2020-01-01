@@ -1,4 +1,4 @@
-package io.mindustry.plugin.discordcommands;
+package mindustry.plugin.discordcommands;
 
 import java.util.Collection;
 import java.util.HashMap;

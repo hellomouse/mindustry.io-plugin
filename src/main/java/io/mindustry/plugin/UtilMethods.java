@@ -1,4 +1,4 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.Role;
 
-import io.anuke.arc.util.Log;
+import arc.util.Log;
 
 public class UtilMethods {
     public TextChannel getTextChannel(DiscordApi api, String id){

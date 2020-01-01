@@ -1,4 +1,4 @@
-package io.mindustry.plugin.discordcommands;
+package mindustry.plugin.discordcommands;
 
 /** Represents a command */
 public abstract class Command {

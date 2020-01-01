@@ -1,13 +1,13 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
-import io.anuke.mindustry.maps.Map;
+import mindustry.maps.Map;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import java.awt.*;
 import java.util.List;
 
-import static io.anuke.mindustry.Vars.maps;
+import static mindustry.Vars.maps;
 
 public class Utils {
     static int nukeDistance = 25;

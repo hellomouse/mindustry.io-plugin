@@ -1,10 +1,10 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import io.anuke.mindustry.world.Block;
+import mindustry.world.Block;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -15,20 +15,19 @@ import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import io.anuke.arc.Core;
-import io.anuke.arc.Events;
-import io.anuke.arc.util.CommandHandler;
-import io.anuke.arc.util.Log;
-import io.anuke.arc.util.Strings;
-import io.anuke.mindustry.Vars;
-import io.anuke.mindustry.content.Blocks;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.EventType;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.plugin.Plugin;
-import io.anuke.mindustry.world.Tile;
+import arc.Core;
+import arc.Events;
+import arc.util.CommandHandler;
+import arc.util.Log;
+import arc.util.Strings;
+import mindustry.Vars;
+import mindustry.content.Blocks;
+import mindustry.entities.type.Player;
+import mindustry.game.EventType;
+import mindustry.gen.Call;
+import mindustry.world.Tile;
 
-import static io.anuke.mindustry.Vars.*;
+import static mindustry.Vars.*;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;

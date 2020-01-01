@@ -1,24 +1,24 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
-import io.anuke.mindustry.content.Mechs;
-import io.mindustry.plugin.discordcommands.Command;
-import io.mindustry.plugin.discordcommands.Context;
-import io.mindustry.plugin.discordcommands.DiscordCommands;
-import io.mindustry.plugin.discordcommands.RoleRestrictedCommand;
-import io.anuke.arc.Core;
-import io.anuke.arc.Events;
-import io.anuke.arc.files.FileHandle;
-import io.anuke.arc.collection.Array;
+import mindustry.content.Mechs;
+import mindustry.plugin.discordcommands.Command;
+import mindustry.plugin.discordcommands.Context;
+import mindustry.plugin.discordcommands.DiscordCommands;
+import mindustry.plugin.discordcommands.RoleRestrictedCommand;
+import arc.Core;
+import arc.Events;
+import arc.files.Fi;
+import arc.struct.Array;
 
-import io.anuke.mindustry.core.GameState;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.EventType.GameOverEvent;
-import io.anuke.mindustry.game.Team;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.maps.Map;
-import io.anuke.mindustry.maps.Maps;
-import io.anuke.mindustry.io.SaveIO;
-import io.anuke.mindustry.net.Administration;
+import mindustry.core.GameState;
+import mindustry.entities.type.Player;
+import mindustry.game.EventType.GameOverEvent;
+import mindustry.game.Team;
+import mindustry.gen.Call;
+import mindustry.maps.Map;
+import mindustry.maps.Maps;
+import mindustry.io.SaveIO;
+import mindustry.net.Administration;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.InflaterInputStream;
 
-import static io.anuke.mindustry.Vars.*;
+import static mindustry.Vars.*;
 
 public class ServerCommands {
 
@@ -477,7 +477,7 @@ public class ServerCommands {
                     // more custom filename checks possible
 
                     CompletableFuture<byte[]> cf = ml.get(0).downloadAsByteArray();
-                    FileHandle fh = Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName());
+                    Fi fh = Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName());
 
                     try {
                         byte[] data = cf.get();

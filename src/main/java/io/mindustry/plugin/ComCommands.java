@@ -1,22 +1,22 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
-import io.anuke.arc.files.FileHandle;
-import io.anuke.mindustry.maps.Map;
+import arc.files.Fi;
+import mindustry.maps.Map;
 
 
 
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.Team;
-import io.anuke.mindustry.game.Teams.TeamData;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.world.Tile;
-import io.anuke.mindustry.world.modules.ItemModule;
-import io.mindustry.plugin.discordcommands.Command;
-import io.mindustry.plugin.discordcommands.Context;
-import io.mindustry.plugin.discordcommands.DiscordCommands;
+import mindustry.entities.type.Player;
+import mindustry.game.Team;
+import mindustry.game.Teams.TeamData;
+import mindustry.gen.Call;
+import mindustry.world.blocks.storage.CoreBlock.CoreEntity;
+import mindustry.world.modules.ItemModule;
+import mindustry.plugin.discordcommands.Command;
+import mindustry.plugin.discordcommands.Context;
+import mindustry.plugin.discordcommands.DiscordCommands;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
-import static io.anuke.mindustry.Vars.*;
+import static mindustry.Vars.*;
 
 public class ComCommands {
     public void registerCommands(DiscordCommands handler) {
@@ -54,7 +54,7 @@ public class ComCommands {
                     return;
                 }
 
-                FileHandle mapFile = found.file;
+                Fi mapFile = found.file;
 
                 EmbedBuilder embed = new EmbedBuilder()
                         .setTitle(Utils.escapeBackticks(found.name()))
@@ -110,8 +110,8 @@ public class ComCommands {
                 // the normal player team is "sharded"
                 TeamData data = state.teams.get(Team.sharded);
                 //-- Items are shared between cores
-                Tile core = data.cores.first();
-                ItemModule items = core.entity.items;
+                CoreEntity core = data.cores.first();
+                ItemModule items = core.items;
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTitle("Resources in the core:");
                 items.forEach((item, amount) -> eb.addInlineField(item.name, String.valueOf(amount)));

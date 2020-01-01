@@ -1,6 +1,6 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
-import io.anuke.mindustry.entities.type.Player;
+import mindustry.entities.type.Player;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileWriter;

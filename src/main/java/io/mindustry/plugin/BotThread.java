@@ -1,4 +1,4 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
@@ -6,7 +6,7 @@ import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 
-import io.mindustry.plugin.discordcommands.DiscordCommands;
+import mindustry.plugin.discordcommands.DiscordCommands;
 
 public class BotThread extends Thread {
     public DiscordApi api;

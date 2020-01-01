@@ -1,24 +1,24 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
-import io.anuke.mindustry.content.Mechs;
-import io.mindustry.plugin.discordcommands.Command;
-import io.mindustry.plugin.discordcommands.Context;
-import io.mindustry.plugin.discordcommands.DiscordCommands;
-import io.mindustry.plugin.discordcommands.RoleRestrictedCommand;
-import io.anuke.arc.Core;
-import io.anuke.arc.Events;
-import io.anuke.arc.files.FileHandle;
-import io.anuke.arc.collection.Array;
+import mindustry.content.Mechs;
+import mindustry.plugin.discordcommands.Command;
+import mindustry.plugin.discordcommands.Context;
+import mindustry.plugin.discordcommands.DiscordCommands;
+import mindustry.plugin.discordcommands.RoleRestrictedCommand;
+import arc.Core;
+import arc.Events;
+import arc.files.Fi;
+import arc.struct.Array;
 
-import io.anuke.mindustry.core.GameState;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.EventType.GameOverEvent;
-import io.anuke.mindustry.game.Team;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.maps.Map;
-import io.anuke.mindustry.maps.Maps;
-import io.anuke.mindustry.io.SaveIO;
-import io.anuke.mindustry.net.Administration;
+import mindustry.core.GameState;
+import mindustry.entities.type.Player;
+import mindustry.game.EventType.GameOverEvent;
+import mindustry.game.Team;
+import mindustry.gen.Call;
+import mindustry.maps.Map;
+import mindustry.maps.Maps;
+import mindustry.io.SaveIO;
+import mindustry.net.Administration;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
@@ -35,17 +35,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.InflaterInputStream;
 
-import static io.anuke.mindustry.Vars.*;
+import static mindustry.Vars.*;
 
 public class ServerCommands {
 
     private JSONObject data;
-
     private final Field mapsListField;
 
     public ServerCommands(JSONObject data){
         this.data = data;
-
         Class<Maps> mapsClass = Maps.class;
         Field mapsField;
         try {
@@ -202,6 +200,51 @@ public class ServerCommands {
                     }
                 }
             });
+            handler.registerCommand(new RoleRestrictedCommand("tempban") {
+                {
+                    help = "<ip/id> Temporarily ban a player by the provided ip or id for x amount of minutes.";
+                    role = banRole;
+                }
+ 
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTimestampToNow();
+                    String target = ctx.args[1];
+                    String timearg = ctx.args[2];
+                    Boolean found = false;
+                    int id = -1;
+                    int time =-1;
+                    try {
+                        id = Integer.parseInt(target);
+                    } catch (NumberFormatException ex) {}
+                    try {
+                        time = Integer.parseInt(timearg);
+                    } catch (NumberFormatException ex) {}
+                    if (target.length() > 0 && time>0) {
+                        for (Player p : playerGroup.all()) {
+                            if (p.con.address.equals(target) || p.id == id) {
+                                found = true;
+                                eb.setTitle("Command executed.");
+                                TempBan.addBan(p, time);
+                                eb.setDescription("Tempbanned " + p.name + "(#" + p.id + ") `" + p.con.address +  "` for "+time+" minutes successfully!");
+                                ctx.channel.sendMessage(eb);
+                                Call.onKick(p.con, "You've been tempbanned by: " + ctx.author.getName() +" for " +time+" minutes. Appeal at http://discord.mindustry.io");
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been temporarily banned.");
+                                //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
+                            }
+                        }
+                        if(!found){
+                            eb.setTitle("Command terminated");
+                            eb.setDescription("Player not online. Use .blacklist <ip> to ban an offline player.");
+                            ctx.channel.sendMessage(eb);
+                        }
+                    } else {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("Not enough arguments / usage: `.tempban <id/ip> <Minutes>`");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+            });
             handler.registerCommand(new RoleRestrictedCommand("blacklist") {
                 {
                     help = "<ip> Ban a player by the provided ip.";
@@ -242,7 +285,29 @@ public class ServerCommands {
                     }
                 }
             });
+            
+            handler.registerCommand(new RoleRestrictedCommand("untempban") {
+                EmbedBuilder eb = new EmbedBuilder();
+                {
+                    help = "Untempban a player by the provided ip.";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String ip;
+                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .untempban <ip>"); return;}
 
+                    if (TempBan.removeBan(ip)) {
+                        eb.setTitle("Command executed.");
+                        eb.setDescription("Untempbanned `" + ip + "` successfully");
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setTitle("Command terminated.");
+                        eb.setDescription("No such tempban exists.");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+            });
+            
             handler.registerCommand(new RoleRestrictedCommand("motd") {
                 {
                     help = "Change the default join message";
@@ -412,7 +477,7 @@ public class ServerCommands {
                     // more custom filename checks possible
 
                     CompletableFuture<byte[]> cf = ml.get(0).downloadAsByteArray();
-                    FileHandle fh = Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName());
+                    Fi fh = Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName());
 
                     try {
                         byte[] data = cf.get();

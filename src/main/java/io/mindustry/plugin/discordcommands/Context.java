@@ -1,4 +1,4 @@
-package io.mindustry.plugin.discordcommands;
+package mindustry.plugin.discordcommands;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAuthor;

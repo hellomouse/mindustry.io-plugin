@@ -1,10 +1,10 @@
-package io.mindustry.plugin;
+package mindustry.plugin;
 
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import io.anuke.mindustry.world.Block;
+import mindustry.world.Block;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -15,20 +15,19 @@ import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import io.anuke.arc.Core;
-import io.anuke.arc.Events;
-import io.anuke.arc.util.CommandHandler;
-import io.anuke.arc.util.Log;
-import io.anuke.arc.util.Strings;
-import io.anuke.mindustry.Vars;
-import io.anuke.mindustry.content.Blocks;
-import io.anuke.mindustry.entities.type.Player;
-import io.anuke.mindustry.game.EventType;
-import io.anuke.mindustry.gen.Call;
-import io.anuke.mindustry.plugin.Plugin;
-import io.anuke.mindustry.world.Tile;
+import arc.Core;
+import arc.Events;
+import arc.util.CommandHandler;
+import arc.util.Log;
+import arc.util.Strings;
+import mindustry.Vars;
+import mindustry.content.Blocks;
+import mindustry.entities.type.Player;
+import mindustry.game.EventType;
+import mindustry.gen.Call;
+import mindustry.world.Tile;
 
-import static io.anuke.mindustry.Vars.*;
+import static mindustry.Vars.*;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
@@ -119,6 +118,13 @@ public class IoPlugin extends Plugin {
                 Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
+        
+        Events.on(EventType.PlayerConnect.class, player ->{
+            TempBan.update();//updates tempban list
+            for(String i : TempBan.getBanArrayList()){//checks if connecting player is in tempban list
+                if(i.equals(player.player.con.address)) Call.onKick(player.player.con, "Tempban time remaining: "+TempBan.getBanTime(player.player.con.address));//kicks player and says how long tempbanned
+            }
+            });
 
         if (data.has("warnings_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));

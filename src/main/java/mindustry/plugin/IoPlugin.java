@@ -118,13 +118,6 @@ public class IoPlugin extends Plugin {
                 Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
-        
-        Events.on(EventType.PlayerConnect.class, player ->{
-            TempBan.update();//updates tempban list
-            for(String i : TempBan.getBanArrayList()){//checks if connecting player is in tempban list
-                if(i.equals(player.player.con.address)) Call.onKick(player.player.con, "Tempban time remaining: "+TempBan.getBanTime(player.player.con.address));//kicks player and says how long tempbanned
-            }
-            });
 
         if (data.has("warnings_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));

@@ -334,38 +334,6 @@ public class ServerCommands {
                 }
             });
 
-            handler.registerCommand(new RoleRestrictedCommand("antinuke") {
-                {
-                    help = "<on/off/> Toggle the antinuke option, or check its status.";
-                    role = banRole;
-                }
-                public void run(Context ctx) {
-                    if (ctx.args.length > 1) {
-                        String toggle = ctx.args[1].toLowerCase();
-                        if (toggle.equals("on")) {
-                            Utils.antiNukeEnabled = true;
-                            ctx.reply("Anti nuke was enabled.");
-                        } else if (toggle.equals("off")) {
-                            Utils.antiNukeEnabled = false;
-                            ctx.reply("Anti nuke was disabled.");
-                        } else {
-                            ctx.reply("Usage: antinuke <on/off>");
-                        }
-                    } else {
-                        EmbedBuilder eb = new EmbedBuilder();
-                        if (Utils.antiNukeEnabled) {
-                            eb.setTitle("Enabled");
-                            eb.setDescription("Anti nuke is currently enabled. Use `%antinuke off` to disable it.".replace("%", IoPlugin.prefix));
-                            ctx.channel.sendMessage(eb);
-                        } else {
-                            eb.setTitle("Disabled");
-                            eb.setDescription("Anti nuke is currently disabled. Use `%antinuke on` to enable it.".replace("%", IoPlugin.prefix));
-                            ctx.channel.sendMessage(eb);
-                        }
-                    }
-                }
-            });
-
             handler.registerCommand(new RoleRestrictedCommand("playersinfo") {
                 {
                     help = "Check the information about all players on the server.";

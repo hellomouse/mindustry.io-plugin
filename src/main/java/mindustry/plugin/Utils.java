@@ -12,10 +12,9 @@ import static mindustry.Vars.maps;
 import static mindustry.Vars.playerGroup;
 
 public class Utils {
-    static int nukeDistance = 25;
     static int messageBufferSize = 5; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 200;
-    public static Boolean antiNukeEnabled = true;;
+
     public static class Pals {
         public static Color warning = (Color.getHSBColor(5, 85, 95));
         public static Color info = (Color.getHSBColor(45, 85, 95));

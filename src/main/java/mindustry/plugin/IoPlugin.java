@@ -129,29 +129,6 @@ public class IoPlugin extends Plugin {
             }
         }
 
-        // anti nuke
-
-        Events.on(EventType.BuildSelectEvent.class, event -> {
-            if (Utils.antiNukeEnabled) {
-                try {
-                    Tile nukeTile = event.builder.buildRequest().tile();
-                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
-                        Tile coreTile = ((Player) event.builder).getClosestCore().getTile();
-                        if (coreTile == null) {
-                            return;
-                        }
-                        double distance = Utils.DistanceBetween(coreTile.x, coreTile.y, nukeTile.x, nukeTile.y);
-                        if (distance <= Utils.nukeDistance) {
-                            Call.beginBreak(event.builder.getTeam(), event.tile.x, event.tile.y);
-                            Call.onDeconstructFinish(event.tile, Blocks.thoriumReactor, ((Player) event.builder).id);
-                            ((Player) event.builder).kill();
-                            ((Player) event.builder).sendMessage("[scarlet]Too close to the core, please find a better spot.");
-                        }
-                    }
-                } catch (Exception ignored) {}
-            }
-        });
-
 
         // warning logs
 
@@ -224,7 +201,7 @@ public class IoPlugin extends Plugin {
                         player.name = "[orange]<[][scarlet]mod[][orange]>[] " + player.name;
                         break;
                     case 4:
-                        Call.sendMessage("[orange]<[][white]io admin[][orange]>[]" + player.name + " joined the server!");
+                        Call.sendMessage("[orange]<[][white]io admin[][orange]>[] " + player.name + " joined the server!");
                         player.name = "[orange]<[][white]io[][orange]>[] " + player.name;
                         break;
                 }

@@ -12,7 +12,7 @@ import static mindustry.Vars.maps;
 import static mindustry.Vars.playerGroup;
 
 public class Utils {
-    static int messageBufferSize = 7; // number of messages sent at once to discord
+    static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
 
     public static class Pals {

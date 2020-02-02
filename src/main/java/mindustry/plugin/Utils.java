@@ -18,6 +18,7 @@ public class Utils {
     public static class Pals {
         public static Color warning = (Color.getHSBColor(5, 85, 95));
         public static Color info = (Color.getHSBColor(45, 85, 95));
+        public static Color error = (Color.getHSBColor(3, 78, 91));
     }
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {

@@ -182,7 +182,8 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
                     ctx.message = Utils.escapeCharacters(ctx.message);
-                    if (ctx.message == null) {
+
+                    if (ctx.message.length() <= 0) {
                         eb.setTitle("Command terminated");
                         eb.setColor(Utils.Pals.error);
                         eb.setDescription("No message given");
@@ -190,9 +191,8 @@ public class ServerCommands {
                         return;
                     }
 
-                    for(Player player : playerGroup.all()) {
-                        Call.onInfoToast(player.con, ctx.message,60 * 10);
-                    }
+                    Call.onInfoToast(ctx.message, 120f);
+
                     eb.setTitle("Command executed");
                     eb.setDescription("Your message was announced.");
                     ctx.channel.sendMessage(eb);

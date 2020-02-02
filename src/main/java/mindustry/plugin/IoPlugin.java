@@ -249,10 +249,10 @@ public class IoPlugin extends Plugin {
         if (api != null) {
             handler.<Player>register("d", "<text...>", "Sends a message to moderators. (Please provide the griefer's name and the current server's ip.)", (args, player) -> {
 
-                if (!data.has("reportschannel_id")) {
+                if (!data.has("warnings_chat_channel_id")) {
                     player.sendMessage("[scarlet]This command is disabled.");
                 } else {
-                    TextChannel tc = this.getTextChannel(data.getString("dchannel_id"));
+                    TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
                     if (tc == null) {
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;

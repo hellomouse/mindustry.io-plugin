@@ -192,7 +192,7 @@ public class ServerCommands {
                     }
 
                     for (Player p : playerGroup.all()) {
-                        Call.onInfoToast(p.con, ctx.message, 60 * 10);
+                        Call.onInfoToast(p.con, ctx.message, 10);
                     }
 
                     eb.setTitle("Command executed");

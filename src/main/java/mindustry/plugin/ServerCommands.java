@@ -65,14 +65,13 @@ public class ServerCommands {
                 help = "Check a list of available maps and their ids.";
             }
             public void run(Context ctx) {
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setTitle("All available maps in the playlist:");
+                StringBuilder msg = new StringBuilder().append("**All available maps in the playlist:**\n```");
                 Array<Map> mapList = maps.customMaps();
                 for (int i = 0; i < mapList.size; i++) {
                     Map m = mapList.get(i);
-                    eb.addField(String.valueOf(i), m.name() + " `" + m.width + " x " + m.height + "`");
+                    msg.append(String.valueOf(i)).append(" : ").append(m.name()).append(" `").append(m.width).append(" x ").append(m.height).append("`");
                 }
-                ctx.channel.sendMessage(eb);
+                ctx.channel.sendMessage(msg.toString());
             }
         });
         if (data.has("administrator_roleid")) {

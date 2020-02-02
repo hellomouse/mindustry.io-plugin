@@ -69,7 +69,7 @@ public class ServerCommands {
                 Array<Map> mapList = maps.customMaps();
                 for (int i = 0; i < mapList.size; i++) {
                     Map m = mapList.get(i);
-                    msg.append(String.valueOf(i)).append(" : ").append(m.name()).append(" : ").append(m.width).append(" x ").append(m.height);
+                    msg.append(String.valueOf(i)).append(" : ").append(m.name()).append(" : ").append(m.width).append(" x ").append(m.height).append("\n");
                 }
                 msg.append("```");
                 ctx.channel.sendMessage(msg.toString());
@@ -175,6 +175,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("announce") {
                 {
                     help = "<message> Announces a message to in-game chat.";
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();

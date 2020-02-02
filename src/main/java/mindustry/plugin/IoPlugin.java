@@ -162,17 +162,20 @@ public class IoPlugin extends Plugin {
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
-            player.name = player.name.replaceAll("<", "").replaceAll(">", "");
+
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid);
-                if(rank<=0) return;
-                if(player.name.contains(" ")) {
-                    player.name = player.name.split(" ", 1)[1];
+                if(rank==0) {
+                    player.name.replaceAll("<", "");
+                    player.name.replaceAll(">", "");
                 }
-                switch(rank) {
+                if(player.name.contains("<") && player.name.contains(">")) { // contains the tag
+                    player.name = player.name.replaceFirst("\\[(.*)\\[\\] ", ""); // replace only the tag, no other colors
+                }
+                switch(rank) { // apply new tag
                     case 1:
                         Call.sendMessage("[sky]active player " + player.name + " joined the server!");
-                        player.name = "[sky]<active>[]" + player.name;
+                        player.name = "[sky]<active>[] " + player.name;
                         break;
                     case 2:
                         Call.sendMessage("[#fcba03]vip " + player.name + " joined the server!");
@@ -184,9 +187,12 @@ public class IoPlugin extends Plugin {
                         break;
                     case 4:
                         Call.sendMessage("[orange]<[][white]io admin[][orange]>[] " + player.name + " joined the server!");
-                        player.name = "[white]<io>[] " + player.name;
+                        player.name = "[orange]<[white]io[orange]>[] " + player.name;
                         break;
                 }
+            } else { // not in database
+                player.name.replaceAll("<", "");
+                player.name.replaceAll(">", "");
             }
         });
     }
@@ -229,6 +235,18 @@ public class IoPlugin extends Plugin {
                     builder.append(p.name).append("[accent] (#").append(p.id).append(")\n");
                 }
                 player.sendMessage(builder.toString());
+            });
+
+            handler.<Player>register("rainbow", "Give your username a rainbow animation [vip+ only]", (args, player) -> {
+                if(database.containsKey(player.uuid)) {
+                    if(database.get(player.uuid) >= 2) {
+
+                    } else {
+                        player.sendMessage("You don't have permissions to execute this command!");
+                    }
+                } else {
+                    player.sendMessage("You don't have permissions to execute this command!");
+                }
             });
 
         }

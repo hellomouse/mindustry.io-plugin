@@ -137,15 +137,17 @@ public class IoPlugin extends Plugin {
             if (tc != null) {
                 HashMap<String, String> warnMessageBuffer = new HashMap<>();
                 Events.on(EventType.TapConfigEvent.class, event -> {
-                    if(event.player!= null) {
-                        warnMessageBuffer.put(Utils.escapeCharacters(event.player.name), "Block: " + event.tile.block().name +  " Location: (" + event.tile.x + ", " + event.tile.y + ")");
+                    if(event.player != null) {
+
+                        warnMessageBuffer.put("Block: " + event.tile.block().name +  " Location: (" + event.tile.x + ", " + event.tile.y + ") Configuration: " + event.value, event.player.name);
 
                         if(warnMessageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
-                            EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
+                            EmbedBuilder eb = new EmbedBuilder().setTitle("Logs from " + new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
                             eb.setColor(Utils.Pals.warning);
+                            eb.setTimestampToNow();
                             for (Map.Entry<String, String> entry : warnMessageBuffer.entrySet()) {
-                                String username = entry.getKey();
-                                String message = entry.getValue();
+                                String message = entry.getKey();
+                                String username = entry.getValue();
                                 eb.addField(Utils.escapeCharacters(username), message);
                             }
                             tc.sendMessage(eb);
@@ -160,6 +162,7 @@ public class IoPlugin extends Plugin {
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
+            player.name = player.name.replaceAll("<", "").replaceAll(">", "");
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid);
                 if(rank<=0) return;

@@ -26,16 +26,21 @@ public class ComCommands {
                 help = "<message> Sends a message to in-game chat.";
             }
             public void run(Context ctx) {
+                EmbedBuilder eb = new EmbedBuilder();
                 ctx.message = Utils.escapeCharacters(ctx.message);
                 if (ctx.message == null) {
-                    ctx.reply("No message given");
+                    eb.setTitle("Command terminated");
+                    eb.setDescription("No message given");
+                    ctx.channel.sendMessage(eb);
                     return;
                 }
                 if (ctx.message.length() < Utils.chatMessageMaxSize) {
                     Call.sendMessage("[sky]" + ctx.author.getName() + " @discord >[] " + ctx.message);
-                    ctx.reply("``" + ctx.author.getName() + "@discord > " + ctx.message + "``\nSent successfully.");
+                    eb.setTitle("Command executed");
+                    eb.setDescription("Your message was sent successfully..");
+                    ctx.channel.sendMessage(eb);
                 } else{
-                    ctx.reply("Message too big, please use a maximum of " + Utils.chatMessageMaxSize + " characters.");
+                    ctx.reply("Message too big.");
                 }
             }
         });

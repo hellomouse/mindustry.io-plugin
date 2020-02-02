@@ -172,6 +172,30 @@ public class ServerCommands {
         if (data.has("moderator_roleid")) {
             String banRole = data.getString("moderator_roleid");
 
+            handler.registerCommand(new RoleRestrictedCommand("announce") {
+                {
+                    help = "<message> Announces a message to in-game chat.";
+                }
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    ctx.message = Utils.escapeCharacters(ctx.message);
+                    if (ctx.message == null) {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("No message given");
+                        ctx.channel.sendMessage(eb);
+                        return;
+                    }
+                    if (ctx.message.length() < Utils.chatMessageMaxSize) {
+                        Call.sendMessage("[scarlet]Admin announcement:[] " + ctx.message);
+                        eb.setTitle("Command executed");
+                        eb.setDescription("Your message was announced.");
+                        ctx.channel.sendMessage(eb);
+                    } else{
+                        ctx.reply("Message too big.");
+                    }
+                }
+            });
+
             handler.registerCommand(new RoleRestrictedCommand("gameover") {
                 {
                     help = "Force a game over.";

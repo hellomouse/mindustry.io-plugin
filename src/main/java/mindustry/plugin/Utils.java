@@ -12,8 +12,8 @@ import static mindustry.Vars.maps;
 import static mindustry.Vars.playerGroup;
 
 public class Utils {
-    static int messageBufferSize = 5; // number of messages sent at once to discord
-    public static int chatMessageMaxSize = 200;
+    static int messageBufferSize = 7; // number of messages sent at once to discord
+    public static int chatMessageMaxSize = 256;
 
     public static class Pals {
         public static Color warning = (Color.getHSBColor(5, 85, 95));

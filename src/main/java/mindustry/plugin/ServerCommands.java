@@ -191,7 +191,9 @@ public class ServerCommands {
                         return;
                     }
 
-                    Call.onInfoToast(ctx.message, 120f);
+                    for (Player p : playerGroup.all()) {
+                        Call.onInfoToast(p.con, ctx.message, 60 * 10);
+                    }
 
                     eb.setTitle("Command executed");
                     eb.setDescription("Your message was announced.");

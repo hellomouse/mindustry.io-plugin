@@ -61,7 +61,6 @@ public class IoPlugin extends Plugin {
         }
         try {
             api = new DiscordApiBuilder().setToken(alldata.getString("token")).login().join();
-            api.updateActivity("prefix: " + prefix);
         }catch (Exception e){
             if (e.getMessage().contains("READY packet")){
                 Log.err("\n[ERR!] discordplugin: invalid token.\n");
@@ -95,6 +94,7 @@ public class IoPlugin extends Plugin {
         // setup prefix
         if (data.has("prefix")) {
             prefix = String.valueOf(data.getString("prefix").charAt(0));
+            api.updateActivity("prefix: " + prefix);
         } else {
             Log.warn("[WARN!] discordplugin: no prefix setting detected, using default \".\" prefix.");
         }

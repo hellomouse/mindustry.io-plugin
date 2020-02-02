@@ -69,8 +69,9 @@ public class ServerCommands {
                 Array<Map> mapList = maps.customMaps();
                 for (int i = 0; i < mapList.size; i++) {
                     Map m = mapList.get(i);
-                    msg.append(String.valueOf(i)).append(" : ").append(m.name()).append(" `").append(m.width).append(" x ").append(m.height).append("`");
+                    msg.append(String.valueOf(i)).append(" : ").append(m.name()).append(" : ").append(m.width).append(" x ").append(m.height);
                 }
+                msg.append("```");
                 ctx.channel.sendMessage(msg.toString());
             }
         });

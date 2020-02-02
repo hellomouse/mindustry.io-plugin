@@ -1,6 +1,9 @@
 package mindustry.plugin;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -33,6 +36,7 @@ public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";
+    public static HashMap<String, Integer> database  = new HashMap<String, Integer>();
     private final Long cooldownTime = 300L;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
@@ -75,6 +79,23 @@ public class IoPlugin extends Plugin {
         bt.setDaemon(false);
         bt.start();
 
+
+        // setup database
+        try {
+            File toRead = new File("database.io");
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            database = (HashMap<String, Integer>) ois.readObject();
+
+            ois.close();
+            fis.close();
+
+            Log.info("discordplugin: database loaded successfully");
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
         // setup prefix
         if (data.has("prefix")) {
             prefix = String.valueOf(data.getString("prefix").charAt(0));
@@ -84,10 +105,12 @@ public class IoPlugin extends Plugin {
 
         // setup name
         if (data.has("server_name")) {
-            prefix = String.valueOf(data.getString("server_name").charAt(0));
+            serverName = String.valueOf(data.getString("server_name").charAt(0));
         } else {
             Log.warn("[WARN!] discordplugin: no server_name setting detected.");
         }
+
+        // setup database
 
         // live chat
         if (data.has("live_chat_channel_id")) {
@@ -133,47 +156,84 @@ public class IoPlugin extends Plugin {
             }
         });
 
+
+        // warning logs
+
         if (data.has("warnings_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
             if (tc != null) {
-                Events.on(EventType.WaveEvent.class, event -> {
-                    EmbedBuilder eb = new EmbedBuilder().setTitle("Wave " + state.wave + " started.");
-                    tc.sendMessage(eb);
-                });
+                HashMap<String, String> infoMessageBuffer = new HashMap<>();
                 Events.on(EventType.BuildSelectEvent.class, event -> {
                     // we dont want to log all blocks, thats too much.. only suspicious ones
                     if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
                         Player builder = (Player) event.builder;
                         Block buildBlock = event.builder.buildRequest().block;
                         Tile buildTile = event.builder.buildRequest().tile();
-                        EmbedBuilder eb = new EmbedBuilder().setTitle("Suspicious block was placed.");
-                        eb.setDescription("Builder: " + Utils.escapeCharacters(builder.name) + " (#" + builder.id + ")");
-                        eb.addField(buildBlock.name, "Location: (" + buildTile.x + ", " + buildTile.y + ")");
-                        eb.setColor(Utils.Pals.warning);
-                        tc.sendMessage(eb);
+                        infoMessageBuffer.put(builder.name, "Block: " + buildBlock.name + " Location: (" + buildTile.x + ", " + buildTile.y + ")");
+
+                        if(infoMessageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
+                            EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
+                            eb.setColor(Utils.Pals.info);
+                            for (Map.Entry<String, String> entry : infoMessageBuffer.entrySet()) {
+                                String username = entry.getKey();
+                                String message = entry.getValue();
+                                eb.addField(Utils.escapeCharacters(username), message);
+                            }
+                            tc.sendMessage(eb);
+                            infoMessageBuffer.clear();
+                        }
+
                     }
                 });
 
+                HashMap<String, String> warnMessageBuffer = new HashMap<>();
                 Events.on(EventType.TapConfigEvent.class, event -> {
                     if(event.player!= null) {
-                        EmbedBuilder eb = new EmbedBuilder().setTitle("Tile was configured.");
-                        eb.setDescription("**Configurator:** " + Utils.escapeCharacters(event.player.name) + " (#" + event.player.id + ")\n");
-                        eb.addField(event.tile.block().name, "Location: (" + event.tile.x + ", " + event.tile.y + ")");
-                        eb.setColor(Utils.Pals.info);
-                        tc.sendMessage(eb);
+                        warnMessageBuffer.put(Utils.escapeCharacters(event.player.name), "Block: " + event.tile.block().name +  " Location: (" + event.tile.x + ", " + event.tile.y + ")");
+
+                        if(warnMessageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
+                            EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
+                            eb.setColor(Utils.Pals.warning);
+                            for (Map.Entry<String, String> entry : warnMessageBuffer.entrySet()) {
+                                String username = entry.getKey();
+                                String message = entry.getValue();
+                                eb.addField(Utils.escapeCharacters(username), message);
+                            }
+                            tc.sendMessage(eb);
+                            warnMessageBuffer.clear();
+                        }
                     }
                 });
 
             }
         }
 
-        // welcome message
-        if(Utils.welcomeMessage!=null) {
-            Events.on(EventType.PlayerJoin.class, event -> {
-                event.player.sendMessage(Utils.welcomeMessage);
-            });
-        }
-
+        // player joined
+        Events.on(EventType.PlayerJoin.class, event -> {
+            Player player = event.player;
+            player.name = player.name.replaceAll("<", "").replaceAll(">", "");
+            if(database.containsKey(player.uuid)) {
+                int rank = database.get(player.uuid);
+                switch(rank) {
+                    case 1:
+                        Call.sendMessage("[sky]vip " + player.name + " joined the server!");
+                        player.name = "[orange]<[][sky]vip[][orange]>[] " + player.name;
+                        break;
+                    case 2:
+                        Call.sendMessage("[#fcba03]moderator " + player.name + " joined the server!");
+                        player.name = "[orange]<[][#fcba03]mod[][orange]>[] " + player.name;
+                        break;
+                    case 3:
+                        Call.sendMessage("[scarlet]administrator " + player.name + " joined the server!");
+                        player.name = "[orange]<[][scarlet]admin[][orange]>[] " + player.name;
+                        break;
+                    case 4:
+                        Call.sendMessage("[orange]<[][white]io[][orange]>[]" + player.name + " joined the server!");
+                        player.name = "[orange]<[][white]io[][orange]>[] " + player.name;
+                        break;
+                }
+            }
+        });
     }
 
     //register commands that run on the server
@@ -186,9 +246,9 @@ public class IoPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler){
         if (api != null) {
-            handler.<Player>register("d", "<text...>", "Sends a message to moderators. (Use when a griefer is online)", (args, player) -> {
+            handler.<Player>register("d", "<text...>", "Sends a message to moderators. (Please provide the griefer's name and the current server's ip.)", (args, player) -> {
 
-                if (!data.has("dchannel_id")) {
+                if (!data.has("reportschannel_id")) {
                     player.sendMessage("[scarlet]This command is disabled.");
                 } else {
                     TextChannel tc = this.getTextChannel(data.getString("dchannel_id"));
@@ -196,7 +256,7 @@ public class IoPlugin extends Plugin {
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(Utils.escapeCharacters(player.name + " *@mindustry* : `" + args[0] + "`"));
+                    tc.sendMessage(Utils.escapeCharacters(player.name) + " *@mindustry* : `" + args[0] + "`");
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
@@ -216,95 +276,10 @@ public class IoPlugin extends Plugin {
                 player.sendMessage(builder.toString());
             });
 
-            handler.<Player>register("gr", "<player> <reason...>", "Report a griefer by id (use '/gr' to get a list of ids)", (args, player) -> {
-                //https://github.com/Anuken/Mindustry/blob/master/core/src/io/anuke/mindustry/core/NetServer.java#L300-L351
-                if (!(data.has("channel_id") && data.has("role_id"))) {
-                    player.sendMessage("[scarlet]This command is disabled.");
-                    return;
-                }
-
-
-                for (Long key : cooldowns.keySet()) {
-                    if (key + cooldownTime < System.currentTimeMillis() / 1000L) {
-                        cooldowns.remove(key);
-                        continue;
-                    } else if (player.uuid.equals(cooldowns.get(key))) {
-                        player.sendMessage("[scarlet]This command is on a 5 minute cooldown!");
-                        return;
-                    }
-                }
-
-                if (args.length == 0) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("[orange]List of players: \n");
-                    for (Player p : Vars.playerGroup.all()) {
-                        if(p.isAdmin) {
-                            builder.append("[scarlet]<ADMIN> ");
-                        } else{
-                            builder.append("[lightgray] ");
-                        }
-                        builder.append(p.name).append("[accent] (#").append(p.id).append(")\n");
-                    }
-                    player.sendMessage(builder.toString());
-                } else {
-                    Player found = null;
-                    if (args[0].length() > 1 && args[0].startsWith("#") && Strings.canParseInt(args[0].substring(1))) {
-                        int id = Strings.parseInt(args[0].substring(1));
-                        for (Player p: Vars.playerGroup.all()){
-                            if (p.id == id){
-                                found = p;
-                                break;
-                            }
-                        }
-                    } else {
-                        for (Player p: Vars.playerGroup.all()){
-                            if (p.name.equalsIgnoreCase(args[0])){
-                                found = p;
-                                break;
-                            }
-                        }
-                    }
-                    if (found != null) {
-                        if (found.isAdmin) {
-                            player.sendMessage("[scarlet]Did you really expect to be able to report an admin?");
-                        } else if (found.getTeam() != player.getTeam()) {
-                            player.sendMessage("[scarlet]Only players on your team can be reported.");
-                        } else {
-                            TextChannel tc = this.getTextChannel(data.getString("channel_id"));
-                            Role r = this.getRole(data.getString("role_id"));
-                            if (tc == null || r == null) {
-                                player.sendMessage("[scarlet]This command is disabled.");
-                                return;
-                            }
-                            //send message
-                            if (args.length > 1) {
-                                new MessageBuilder()
-                                        .setEmbed(new EmbedBuilder()
-                                                .setTitle("A griefer was reported on " + serverName)
-                                                .setDescription(r.getMentionTag())
-                                                .addField("Name", found.name)
-                                                .addField("Reason", args[1])
-                                                .setColor(Color.ORANGE)
-                                                .setFooter("Reported by " + player.name))
-                                        .send(tc);
-                            } else {
-                                new MessageBuilder()
-                                        .setEmbed(new EmbedBuilder()
-                                                .setTitle("A griefer was reported on " + serverName)
-                                                .setDescription(r.getMentionTag())
-                                                .addField("Name", found.name)
-                                                .setColor(Color.ORANGE)
-                                                .setFooter("Reported by " + player.name))
-                                        .send(tc);
-                            }
-                            player.sendMessage(found.name + "[sky] was reported successfully.");
-                            cooldowns.put(System.currentTimeMillis() / 1000L, player.uuid);
-                        }
-                    }
-                }
-            });
         }
+
     }
+
 
 
     public static TextChannel getTextChannel(String id){

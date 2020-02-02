@@ -138,7 +138,6 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     String target = ctx.args[1];
                     Integer targetRank = Integer.parseInt(ctx.args[2]);
-                    Mech desiredMech = Mechs.alpha;
                     if(target.length() > 0 && targetRank > -1 && targetRank < 5) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){

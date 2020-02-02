@@ -148,6 +148,9 @@ public class ServerCommands {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
                             IoPlugin.database.put(player.uuid, targetRank);
+                            if(targetRank==4) { // give admin to administrators
+                                netServer.admins.adminPlayer(player.uuid, player.usid);
+                            }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to " + targetRank);
                             ctx.channel.sendMessage(eb);
@@ -520,12 +523,12 @@ public class ServerCommands {
             });
             handler.registerCommand(new RoleRestrictedCommand("syncserver") {
                 {
-                    help = "Attempt to fix the server without interrupting active connections.";
+                    help = "Tell everyone to resync.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
                     for(Player p : playerGroup.all()) {
-                        netServer.sendWorldData(p);
+                        Call.onInfoMessage(p.con, "Desync detected, please use the /sync command.");
                     }
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTitle("Command executed.")

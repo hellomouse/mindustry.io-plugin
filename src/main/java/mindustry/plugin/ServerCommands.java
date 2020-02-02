@@ -187,7 +187,9 @@ public class ServerCommands {
                         return;
                     }
                     if (ctx.message.length() < Utils.chatMessageMaxSize) {
-                        Call.sendMessage("[scarlet]Admin announcement:[] " + ctx.message);
+                        for(Player player : playerGroup.all()) {
+                            Call.onInfoToast(player.con, "[scarlet]Administrator announcement: \n" + ctx.message,60 * 10);
+                        }
                         eb.setTitle("Command executed");
                         eb.setDescription("Your message was announced.");
                         ctx.channel.sendMessage(eb);
@@ -239,7 +241,7 @@ public class ServerCommands {
                                 eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
-                                Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned.");
+                                Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned.");
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
@@ -270,6 +272,7 @@ public class ServerCommands {
                         netServer.admins.banPlayerIP(target);
                         eb.setTitle("Blacklisted successfully.");
                         eb.setDescription("`" + target + "` was banned.");
+                        ctx.channel.sendMessage(eb);
                     } else {
                         eb.setTitle("Command terminated");
                         eb.setDescription("Not enough arguments / usage: `%blacklist <ip>`".replace("%", IoPlugin.prefix));

@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import arc.util.Log;
 import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
@@ -24,6 +25,7 @@ import mindustry.type.Mech;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
+import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.json.JSONObject;
 
@@ -137,12 +139,16 @@ public class ServerCommands {
                 }
 
                 public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
                     String target = ctx.args[1];
                     Integer targetRank = Integer.parseInt(ctx.args[2]);
                     if(target.length() > 0 && targetRank > -1 && targetRank < 5) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
                             IoPlugin.database.put(player.uuid, targetRank);
+                            eb.setTitle("Command executed successfully");
+                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to " + targetRank);
+                            ctx.channel.sendMessage(eb);
                             Call.onKick(player.con, "Your rank was modified, please rejoin.");
                         }
                     }
@@ -453,14 +459,12 @@ public class ServerCommands {
                     role = banRole;
                 }
                 public void run(Context ctx) {
-                    //TODO: finish this
                     String target = ctx.args[1];
                     String targetMech = ctx.args[2].toLowerCase();
                     Mech desiredMech = Mechs.alpha;
                     if(target.length() > 0 && targetMech.length() > 0) {
                         switch(targetMech){
                             case "alpha":
-                                desiredMech = Mechs.alpha;
                                 break;
                             case "delta":
                                 desiredMech = Mechs.delta;
@@ -488,15 +492,23 @@ public class ServerCommands {
                                 break;
                         }
 
+                        EmbedBuilder eb = new EmbedBuilder();
+
                         if(target.equals("all")) {
                             for (Player p : playerGroup.all()) {
                                 p.mech = desiredMech;
                             }
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Changed everyone's mech into " + desiredMech.name);
+                            ctx.channel.sendMessage(eb);
                             return;
                         }
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
                             player.mech = desiredMech;
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Changed " + Utils.escapeCharacters(player.name) + "s mech into " + desiredMech.name);
+                            ctx.channel.sendMessage(eb);
                         }
                     }
                 }

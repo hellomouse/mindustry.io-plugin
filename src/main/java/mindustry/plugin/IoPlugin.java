@@ -135,30 +135,6 @@ public class IoPlugin extends Plugin {
         if (data.has("warnings_chat_channel_id")) {
             TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
             if (tc != null) {
-                HashMap<String, String> infoMessageBuffer = new HashMap<>();
-                Events.on(EventType.BuildSelectEvent.class, event -> {
-                    // we dont want to log all blocks, thats too much.. only suspicious ones
-                    if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
-                        Player builder = (Player) event.builder;
-                        Block buildBlock = event.builder.buildRequest().block;
-                        Tile buildTile = event.builder.buildRequest().tile();
-                        infoMessageBuffer.put(builder.name, "Block: " + buildBlock.name + " Location: (" + buildTile.x + ", " + buildTile.y + ")");
-
-                        if(infoMessageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
-                            EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
-                            eb.setColor(Utils.Pals.info);
-                            for (Map.Entry<String, String> entry : infoMessageBuffer.entrySet()) {
-                                String username = entry.getKey();
-                                String message = entry.getValue();
-                                eb.addField(Utils.escapeCharacters(username), message);
-                            }
-                            tc.sendMessage(eb);
-                            infoMessageBuffer.clear();
-                        }
-
-                    }
-                });
-
                 HashMap<String, String> warnMessageBuffer = new HashMap<>();
                 Events.on(EventType.TapConfigEvent.class, event -> {
                     if(event.player!= null) {
@@ -190,19 +166,19 @@ public class IoPlugin extends Plugin {
                 switch(rank) {
                     case 1:
                         Call.sendMessage("[sky]active player " + player.name + " joined the server!");
-                        player.name = "[orange]<[][sky]active[][orange]>[] " + player.name;
+                        player.name = "[sky]<active>[]" + player.name;
                         break;
                     case 2:
                         Call.sendMessage("[#fcba03]vip " + player.name + " joined the server!");
-                        player.name = "[orange]<[][#fcba03]vip[][orange]>[] " + player.name;
+                        player.name = "[#fcba03]<vip>[] " + player.name;
                         break;
                     case 3:
                         Call.sendMessage("[scarlet]moderator " + player.name + " joined the server!");
-                        player.name = "[orange]<[][scarlet]mod[][orange]>[] " + player.name;
+                        player.name = "[scarlet]<mod>[] " + player.name;
                         break;
                     case 4:
                         Call.sendMessage("[orange]<[][white]io admin[][orange]>[] " + player.name + " joined the server!");
-                        player.name = "[orange]<[][white]io[][orange]>[] " + player.name;
+                        player.name = "[white]<io>[] " + player.name;
                         break;
                 }
             }

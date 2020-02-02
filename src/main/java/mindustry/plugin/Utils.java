@@ -26,7 +26,7 @@ public class Utils {
     }
 
     public static String escapeCharacters(String string){
-        return string.replaceAll("`", "").replaceAll("@", "");
+        return string.replaceAll("`", "").replaceAll("@", "").replaceAll("\\[(.*?)\\]", "");
     }
 
     public static String escapeAt(String string) { return string.replaceAll("@", ""); }

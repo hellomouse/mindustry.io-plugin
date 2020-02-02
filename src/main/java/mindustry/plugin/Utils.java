@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import mindustry.entities.type.Player;
 import mindustry.maps.Map;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -8,13 +9,13 @@ import java.awt.*;
 import java.util.List;
 
 import static mindustry.Vars.maps;
+import static mindustry.Vars.playerGroup;
 
 public class Utils {
     static int nukeDistance = 25;
     static int messageBufferSize = 10; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
-    public static String welcomeMessage = "[sky]Welcome to mindustry.io! Consider joining our discord here: http://discord.mindustry.io";
     public static class Pals {
         public static Color warning = (Color.getHSBColor(5, 85, 95));
         public static Color info = (Color.getHSBColor(45, 85, 95));
@@ -58,6 +59,16 @@ public class Utils {
                     found = m;
                     break;
                 }
+            }
+        }
+        return found;
+    }
+
+    public static Player findPlayer(String identifier){
+        Player found = null;
+        for (Player player : playerGroup.all()) {
+            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier)) {
+                found = player;
             }
         }
         return found;

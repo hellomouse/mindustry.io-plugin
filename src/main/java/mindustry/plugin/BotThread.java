@@ -8,6 +8,10 @@ import org.json.JSONObject;
 
 import mindustry.plugin.discordcommands.DiscordCommands;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+
 public class BotThread extends Thread {
     public DiscordApi api;
     private Thread mt;
@@ -29,10 +33,25 @@ public class BotThread extends Thread {
     public void run(){
         while (this.mt.isAlive()){
             try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
+                Thread.sleep(30 * 1000);
 
-            }
+                // save database
+
+                try {
+                    File fileOne=new File("fileone");
+                    FileOutputStream fos=new FileOutputStream(fileOne);
+                    ObjectOutputStream oos=new ObjectOutputStream(fos);
+
+                    oos.writeObject(IoPlugin.database);
+                    oos.flush();
+                    oos.close();
+                    fos.close();
+
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e) {}
         }
         if (data.has("serverdown_role_id")){
             Role r = new UtilMethods().getRole(api, data.getString("serverdown_role_id"));
@@ -42,10 +61,10 @@ public class BotThread extends Thread {
                     Thread.sleep(1000);
                 } catch (Exception e) {}
             } else {
-                if (data.has("serverdown_name")){
-                    String serverNaam = data.getString("serverdown_name");
+                if (data.has("server_name")){
+                    String serverName = data.getString("server_name");
                     new MessageBuilder()
-                            .append(String.format("%s\nServer %s is down",r.getMentionTag(),((serverNaam != "") ? ("**"+serverNaam+"**") : "")))
+                            .append(String.format("%s\nServer %s is down",r.getMentionTag(),((serverName != "") ? ("**"+serverName+"**") : "")))
                             .send(tc);
                 } else {
                     new MessageBuilder()

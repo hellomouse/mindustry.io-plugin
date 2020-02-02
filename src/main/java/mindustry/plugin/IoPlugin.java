@@ -68,6 +68,7 @@ public class IoPlugin extends Plugin {
         }
         try {
             api = new DiscordApiBuilder().setToken(alldata.getString("token")).login().join();
+            api.updateActivity("prefix: " + prefix);
         }catch (Exception e){
             if (e.getMessage().contains("READY packet")){
                 Log.err("\n[ERR!] discordplugin: invalid token.\n");

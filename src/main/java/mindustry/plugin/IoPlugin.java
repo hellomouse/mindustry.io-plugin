@@ -101,7 +101,7 @@ public class IoPlugin extends Plugin {
 
         // setup name
         if (data.has("server_name")) {
-            serverName = String.valueOf(data.getString("server_name").charAt(0));
+            serverName = String.valueOf(data.getString("server_name"));
         } else {
             Log.warn("[WARN!] discordplugin: no server_name setting detected.");
         }

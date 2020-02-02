@@ -220,7 +220,7 @@ public class ServerCommands {
                     }
                     if(target.equals("all")) {
                         for (Player p : playerGroup.all()) {
-                            Call.onInfoMessage(p.con, ctx.message);
+                            Call.onInfoMessage(p.con, ctx.message.split(" ", 2)[1]);
                         }
                         eb.setTitle("Command executed");
                         eb.setDescription("Alert was sent to all players.");
@@ -228,7 +228,7 @@ public class ServerCommands {
                     } else{
                         Player p = Utils.findPlayer(target);
                         if (p != null) {
-                            Call.onInfoMessage(p.con, ctx.message);
+                            Call.onInfoMessage(p.con, ctx.message.split(" ", 2)[1]);
                             eb.setTitle("Command executed");
                             eb.setDescription("Alert was sent to " + Utils.escapeCharacters(p.name));
                             ctx.channel.sendMessage(eb);
@@ -649,7 +649,7 @@ public class ServerCommands {
                 }
             });
 
-            handler.registerCommand(new RoleRestrictedCommand("teleport") {
+            /*handler.registerCommand(new RoleRestrictedCommand("teleport") {
                 {
                     help = "<playerid|ip|all> <playerid|ip|all> Teleport player1 to player2.";
                     role = banRole;
@@ -664,10 +664,11 @@ public class ServerCommands {
                     Player to = Utils.findPlayer(target2);
 
                     if(target1.equals("all") && to != null) {
-
+                        Administration.Config.strict.set(false);
                         for (Player p : playerGroup.all()) {
-                            Call.onPositionSet(p.con, to.x, to.y);
+                            Call.onPositionSet(p.con, to.getX(), to.getY());
                         }
+                        Administration.Config.strict.set(true);
                         eb.setTitle("Command executed successfully.");
                         eb.setDescription("Teleported everyone to (" + to.x + ", " + to.y + ")");
                         ctx.channel.sendMessage(eb);
@@ -675,7 +676,9 @@ public class ServerCommands {
                     }
 
                     if(from != null && to != null){
-                        Call.onPositionSet(from.con, to.x, to.y);
+                        Administration.Config.strict.set(false);
+                        Call.onPositionSet(from.con, to.getX(), to.getY());
+                        Administration.Config.strict.set(true);
                         eb.setTitle("Command executed successfully.");
                         eb.setDescription("Teleported " + Utils.escapeCharacters(from.name) +" to (" + to.x + ", " + to.y + ")");
                         ctx.channel.sendMessage(eb);
@@ -700,10 +703,11 @@ public class ServerCommands {
                     Integer y = Integer.parseInt(toy);
 
                     if(target.equals("all") && x != null && y != null) {
-
+                        Administration.Config.strict.set(false);
                         for (Player p : playerGroup.all()) {
                             Call.onPositionSet(p.con, x, y);
                         }
+                        Administration.Config.strict.set(true);
                         eb.setTitle("Command executed successfully.");
                         eb.setDescription("Teleported everyone to (" + x + ", " + y + ")");
                         ctx.channel.sendMessage(eb);
@@ -711,13 +715,15 @@ public class ServerCommands {
                     }
 
                     if(from != null && x != null && y != null){
+                        Administration.Config.strict.set(false);
                         Call.onPositionSet(from.con, x, y);
+                        Administration.Config.strict.set(true);
                         eb.setTitle("Command executed successfully.");
                         eb.setDescription("Teleported " + Utils.escapeCharacters(from.name) +" to (" + x + ", " + y + ")");
                         ctx.channel.sendMessage(eb);
                     }
                 }
-            });
+            });*/
 
             //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }

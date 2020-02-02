@@ -41,4 +41,8 @@ public class Context {
         mb.append(message);
         mb.send(channel);
     }
+
+    public void delete() {
+        channel.deleteMessages(message);
+    }
 }

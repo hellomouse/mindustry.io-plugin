@@ -1,6 +1,5 @@
 package mindustry.plugin;
 
-import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
 import mindustry.plugin.discordcommands.DiscordCommands;
@@ -49,7 +48,7 @@ public class ServerCommands {
         try {
             mapsField = mapsClass.getDeclaredField("maps");
         } catch (NoSuchFieldException ex) {
-            throw new RuntimeException("Could not find field 'maps' of class 'io.anuke.mindustry.maps.Maps'");
+            throw new RuntimeException("Could not find field 'maps' of class 'mindustry.maps.Maps'");
         }
         mapsField.setAccessible(true);
         this.mapsListField = mapsField;
@@ -102,14 +101,14 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
                         eb.setTitle("Command terminated.");
-                        eb.setDescription("Not enough arguments, use `.changemap <mapname|mapid>`");
+                        eb.setDescription("Not enough arguments, use `%changemap <mapname|mapid>`".replace("%", IoPlugin.prefix));
                         ctx.channel.sendMessage(eb);
                         return;
                     }
                     Map found = Utils.getMapBySelector(ctx.message.trim());
                     if (found == null) {
                         eb.setTitle("Command terminated.");
-                        eb.setDescription("Map \"" + Utils.escapeBackticks(ctx.message.trim()) + "\" not found!");
+                        eb.setDescription("Map \"" + Utils.escapeCharacters(ctx.message.trim()) + "\" not found!");
                         ctx.channel.sendMessage(eb);
                         return;
                     }
@@ -184,18 +183,18 @@ public class ServerCommands {
                                 eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
-                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been banned.");
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned.");
                                 //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                         if(!found){
                             eb.setTitle("Command terminated");
-                            eb.setDescription("Player not online. Use .blacklist <ip> to ban an offline player.");
+                            eb.setDescription("Player not online. Use %blacklist <ip> to ban an offline player.".replace("%", IoPlugin.prefix));
                             ctx.channel.sendMessage(eb);
                         }
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setDescription("Not enough arguments / usage: `.ban <id/ip>`");
+                        eb.setDescription("Not enough arguments / usage: `%ban <id/ip>`".replace("%", IoPlugin.prefix));
                         ctx.channel.sendMessage(eb);
                     }
                 }
@@ -215,7 +214,7 @@ public class ServerCommands {
                         netServer.admins.banPlayerIP(target);
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setDescription("Not enough arguments / usage: `.blacklist <ip>`");
+                        eb.setDescription("Not enough arguments / usage: `%blacklist <ip>`".replace("%", IoPlugin.prefix));
                         ctx.channel.sendMessage(eb);
                     }
                 }
@@ -228,7 +227,7 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String ip;
-                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .unban <ip>"); return;}
+                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: %unban <ip>".replace("%", IoPlugin.prefix)); return;}
 
                     if (netServer.admins.unbanPlayerIP(ip)) {
                         eb.setTitle("Command executed.");
@@ -239,25 +238,6 @@ public class ServerCommands {
                         eb.setDescription("No such ban exists.");
                         ctx.channel.sendMessage(eb);
                     }
-                }
-            });
-            
-            handler.registerCommand(new RoleRestrictedCommand("motd") {
-                {
-                    help = "Change the default join message";
-                    role = data.getString("gameOver_role_id");
-                }
-                public void run(Context ctx) {
-                    //String[] split = ctx.message.split(" ", 2);
-                    //String newMotd = split[1];
-                    String newMotd = ctx.message;
-                    String oldMotd = Utils.welcomeMessage;
-                    if(newMotd==null){ctx.reply("Invalid arguments provided, use the following format: .motd <text...>"); return;}
-                    Utils.welcomeMessage = newMotd;
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("Command executed.")
-                            .setDescription("Changed **MOTD** from \"" + oldMotd + "\" -> " + newMotd);
-                    ctx.channel.sendMessage(eb);
                 }
             });
 
@@ -274,7 +254,7 @@ public class ServerCommands {
                         result.add("   All IPs:");
                         for (String ip : playerInfo.ips) result.add("    * " + ip);
                         result.add("   All names:");
-                        for (String name : playerInfo.names) result.add("    * " + Utils.escapeBackticks(name));
+                        for (String name : playerInfo.names) result.add("    * " + Utils.escapeCharacters(name));
                     }
 
                     File f = new File(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()) + "_IO_BANS.txt");
@@ -303,7 +283,7 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String target;
-                    if(ctx.args.length==2){ target = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: .kick <ip/id>"); return;}
+                    if(ctx.args.length==2){ target = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: %kick <ip/id>".replace("%", IoPlugin.prefix)); return;}
 
                     int id = -1;
                     try {
@@ -314,7 +294,7 @@ public class ServerCommands {
                             if (p.con.address.equals(target) || p.id == id) {
                                 eb.setTitle("Command executed.");
                                 eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
-                                Call.sendChatMessage("[scarlet]" + Utils.escapeBackticks(p.name) + " has been kicked.");
+                                Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been kicked.");
                                 Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                                 ctx.channel.sendMessage(eb);
                                 //Utils.LogAction("kick", "Remotely executed kick command", ctx.author, p.name + " : " + p.con.address);
@@ -348,11 +328,11 @@ public class ServerCommands {
                         EmbedBuilder eb = new EmbedBuilder();
                         if (Utils.antiNukeEnabled) {
                             eb.setTitle("Enabled");
-                            eb.setDescription("Anti nuke is currently enabled. Use `.antinuke off` to disable it.");
+                            eb.setDescription("Anti nuke is currently enabled. Use `%antinuke off` to disable it.".replace("%", IoPlugin.prefix));
                             ctx.channel.sendMessage(eb);
                         } else {
                             eb.setTitle("Disabled");
-                            eb.setDescription("Anti nuke is currently disabled. Use `.antinuke on` to enable it.");
+                            eb.setDescription("Anti nuke is currently disabled. Use `%antinuke on` to enable it.".replace("%", IoPlugin.prefix));
                             ctx.channel.sendMessage(eb);
                         }
                     }
@@ -376,7 +356,7 @@ public class ServerCommands {
                             p_ip = "*hidden*";
                             p_name = "**" + p_name + "**";
                         }
-                        eb.addField(Utils.escapeBackticks(p_name),  p_ip + " : #" + p.id);
+                        eb.addField(Utils.escapeCharacters(p_name),  p_ip + " : #" + p.id);
                     }
                     ctx.channel.sendMessage(eb);
                 }
@@ -434,7 +414,7 @@ public class ServerCommands {
             });
             handler.registerCommand(new RoleRestrictedCommand("removemap") {
                 {
-                    help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the .maps command)";
+                    help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the %maps command)".replace("%", IoPlugin.prefix);
                     role = mapConfigRole;
                 }
                 @Override
@@ -442,7 +422,7 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
                         eb.setTitle("Command terminated.");
-                        eb.setDescription("Not enough arguments, use `removemap <mapname/mapid>`");
+                        eb.setDescription("Not enough arguments, use `%removemap <mapname/mapid>`".replace("%", IoPlugin.prefix));
                         ctx.channel.sendMessage(eb);
                         return;
                     }
@@ -462,7 +442,7 @@ public class ServerCommands {
                     ctx.channel.sendMessage(eb);
                 }
             });
-            handler.registerCommand(new RoleRestrictedCommand("fixserver") {
+            handler.registerCommand(new RoleRestrictedCommand("syncserver") {
                 {
                     help = "Attempt to fix the server without interrupting active connections.";
                     role = data.getString("mapConfig_role_id");

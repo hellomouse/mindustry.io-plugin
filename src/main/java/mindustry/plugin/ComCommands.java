@@ -25,7 +25,7 @@ public class ComCommands {
                 help = "<message> Sends a message to in-game chat.";
             }
             public void run(Context ctx) {
-                ctx.message = Utils.escapeBackticks(ctx.message);
+                ctx.message = Utils.escapeCharacters(ctx.message);
                 if (ctx.message == null) {
                     ctx.reply("No message given");
                     return;
@@ -44,7 +44,7 @@ public class ComCommands {
             }
             public void run(Context ctx) {
                 if (ctx.args.length < 2) {
-                    ctx.reply("Not enough arguments, use `.map <mapname/mapid>`");
+                    ctx.reply("Not enough arguments, use `%map <mapname/mapid>`".replace("%", IoPlugin.prefix));
                     return;
                 }
 
@@ -57,9 +57,9 @@ public class ComCommands {
                 Fi mapFile = found.file;
 
                 EmbedBuilder embed = new EmbedBuilder()
-                        .setTitle(Utils.escapeBackticks(found.name()))
-                        .setDescription(Utils.escapeBackticks(found.description()))
-                        .setAuthor(Utils.escapeBackticks(found.author()));
+                        .setTitle(Utils.escapeCharacters(found.name()))
+                        .setDescription(Utils.escapeCharacters(found.description()))
+                        .setAuthor(Utils.escapeCharacters(found.author()));
                 // TODO: .setImage(mapPreviewImage)
                 ctx.channel.sendMessage(embed, mapFile.file());
             }
@@ -69,12 +69,12 @@ public class ComCommands {
                 help = "Check who is online and their ids.";
             }
             public void run(Context ctx) {
-                EmbedBuilder eb = new EmbedBuilder()
-                        .setTitle("Players online: " + playerGroup.size());
+                StringBuilder msg = new StringBuilder("**Players online: " + playerGroup.size() + "**\n```\n");
                 for (Player player : playerGroup.all()) {
-                    eb.addField(Utils.escapeBackticks(player.name), " (#" + player.id + ")");
+                    msg.append("· ").append(Utils.escapeCharacters(player.name)).append(" : ").append(player.id).append("\n");
                 }
-                ctx.channel.sendMessage(eb);
+                msg.append("```");
+                ctx.channel.sendMessage(msg.toString());
             }
         });
         handler.registerCommand(new Command("info") {
@@ -84,7 +84,7 @@ public class ComCommands {
             public void run(Context ctx) {
                 try {
                     EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("mindustry.io")
+                            .setTitle("mindustry.io") // serverName
                             .addField("Players", String.valueOf(playerGroup.size()))
                             .addField("Map", world.getMap().name())
                             .addField("Wave", String.valueOf(state.wave))

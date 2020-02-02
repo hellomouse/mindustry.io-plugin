@@ -16,15 +16,16 @@ public class Utils {
     public static Boolean antiNukeEnabled = true;;
     public static String welcomeMessage = "[sky]Welcome to mindustry.io! Consider joining our discord here: http://discord.mindustry.io";
     public static class Pals {
-        public static Color scarlet = (Color.getHSBColor(5, 85, 95));
+        public static Color warning = (Color.getHSBColor(5, 85, 95));
+        public static Color info = (Color.getHSBColor(45, 85, 95));
     }
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {
         return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
-    public static String escapeBackticks(String string){
-        return string.replaceAll("`", "");
+    public static String escapeCharacters(String string){
+        return string.replaceAll("`", "").replaceAll("@", "");
     }
 
     public static String escapeAt(String string) { return string.replaceAll("@", ""); }

@@ -31,6 +31,8 @@ import static mindustry.Vars.*;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
+    public static String prefix = ".";
+    public static String serverName = "<untitled>";
     private final Long cooldownTime = 300L;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
@@ -73,19 +75,33 @@ public class IoPlugin extends Plugin {
         bt.setDaemon(false);
         bt.start();
 
+        // setup prefix
+        if (data.has("prefix")) {
+            prefix = String.valueOf(data.getString("prefix").charAt(0));
+        } else {
+            Log.warn("[WARN!] discordplugin: no prefix setting detected, using default \".\" prefix.");
+        }
+
+        // setup name
+        if (data.has("server_name")) {
+            prefix = String.valueOf(data.getString("server_name").charAt(0));
+        } else {
+            Log.warn("[WARN!] discordplugin: no server_name setting detected.");
+        }
+
         // live chat
         if (data.has("live_chat_channel_id")) {
             TextChannel tc = getTextChannel(data.getString("live_chat_channel_id"));
             if (tc != null) {
                 HashMap<String, String> messageBuffer = new HashMap<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    messageBuffer.put(Utils.escapeBackticks(event.player.name), Utils.escapeBackticks(event.message));
+                    messageBuffer.put(Utils.escapeCharacters(event.player.name), Utils.escapeCharacters(event.message));
                     if(messageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
                         EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
                         for (Map.Entry<String, String> entry : messageBuffer.entrySet()) {
                             String username = entry.getKey();
                             String message = entry.getValue();
-                            eb.addField(Utils.escapeAt(username), Utils.escapeAt(message));
+                            eb.addField(Utils.escapeCharacters(username), Utils.escapeCharacters(message));
                         }
                         tc.sendMessage(eb);
                         messageBuffer.clear();
@@ -114,8 +130,6 @@ public class IoPlugin extends Plugin {
                         }
                     }
                 } catch (Exception ignored) {}
-            } else{
-                Log.info("Caught a nuker, but not preventing since anti nuke is off.");
             }
         });
 
@@ -127,18 +141,29 @@ public class IoPlugin extends Plugin {
                     tc.sendMessage(eb);
                 });
                 Events.on(EventType.BuildSelectEvent.class, event -> {
+                    // we dont want to log all blocks, thats too much.. only suspicious ones
                     if (!event.breaking && event.builder.buildRequest().block == Blocks.thoriumReactor || event.builder.buildRequest().block == Blocks.combustionGenerator || event.builder.buildRequest().block == Blocks.turbineGenerator || event.builder.buildRequest().block == Blocks.impactReactor && event.builder instanceof Player) {
                         Player builder = (Player) event.builder;
                         Block buildBlock = event.builder.buildRequest().block;
                         Tile buildTile = event.builder.buildRequest().tile();
                         EmbedBuilder eb = new EmbedBuilder().setTitle("Suspicious block was placed.");
-                        eb.setDescription("Builder: " + Utils.escapeBackticks(builder.name) + " (#" + builder.id + ")");
+                        eb.setDescription("Builder: " + Utils.escapeCharacters(builder.name) + " (#" + builder.id + ")");
                         eb.addField(buildBlock.name, "Location: (" + buildTile.x + ", " + buildTile.y + ")");
-                        eb.setColor(Utils.Pals.scarlet);
+                        eb.setColor(Utils.Pals.warning);
                         tc.sendMessage(eb);
                     }
                 });
-                //TODO: make it register when power graphs get split apart by griefers
+
+                Events.on(EventType.TapConfigEvent.class, event -> {
+                    if(event.player!= null) {
+                        EmbedBuilder eb = new EmbedBuilder().setTitle("Tile was configured.");
+                        eb.setDescription("**Configurator:** " + Utils.escapeCharacters(event.player.name) + " (#" + event.player.id + ")\n");
+                        eb.addField(event.tile.block().name, "Location: (" + event.tile.x + ", " + event.tile.y + ")");
+                        eb.setColor(Utils.Pals.info);
+                        tc.sendMessage(eb);
+                    }
+                });
+
             }
         }
 
@@ -171,7 +196,7 @@ public class IoPlugin extends Plugin {
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(Utils.escapeBackticks(player.name + " *@mindustry* : `" + args[0] + "`"));
+                    tc.sendMessage(Utils.escapeCharacters(player.name + " *@mindustry* : `" + args[0] + "`"));
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
@@ -255,7 +280,7 @@ public class IoPlugin extends Plugin {
                             if (args.length > 1) {
                                 new MessageBuilder()
                                         .setEmbed(new EmbedBuilder()
-                                                .setTitle("A griefer was reported on the survival server.")
+                                                .setTitle("A griefer was reported on " + serverName)
                                                 .setDescription(r.getMentionTag())
                                                 .addField("Name", found.name)
                                                 .addField("Reason", args[1])
@@ -265,14 +290,14 @@ public class IoPlugin extends Plugin {
                             } else {
                                 new MessageBuilder()
                                         .setEmbed(new EmbedBuilder()
-                                                .setTitle("A griefer was reported on the survival server.")
+                                                .setTitle("A griefer was reported on " + serverName)
                                                 .setDescription(r.getMentionTag())
                                                 .addField("Name", found.name)
                                                 .setColor(Color.ORANGE)
                                                 .setFooter("Reported by " + player.name))
                                         .send(tc);
                             }
-                            player.sendMessage(found.name + "[sky] was reported to discord.");
+                            player.sendMessage(found.name + "[sky] was reported successfully.");
                             cooldowns.put(System.currentTimeMillis() / 1000L, player.uuid);
                         }
                     }

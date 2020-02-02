@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import mindustry.plugin.IoPlugin;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
 /** Represents a registry of commands */
 public class DiscordCommands implements MessageCreateListener {
-    public final String commandPrefix = ".";
     private HashMap<String, Command> registry = new HashMap<>();
     private Set<MessageCreatedListener> messageCreatedListenerRegistry = new HashSet<>();
     public DiscordCommands() {
@@ -48,10 +48,10 @@ public class DiscordCommands implements MessageCreateListener {
         for(MessageCreatedListener listener: messageCreatedListenerRegistry) listener.run(event);
 
         String message = event.getMessageContent();
-        if (!message.startsWith(commandPrefix)) return;
+        if (!message.startsWith(IoPlugin.prefix)) return;
         String[] args = message.split(" ");
         int commandLength = args[0].length();
-        args[0] = args[0].substring(commandPrefix.length());
+        args[0] = args[0].substring(IoPlugin.prefix.length());
         String name = args[0];
 
         String newMessage = null;

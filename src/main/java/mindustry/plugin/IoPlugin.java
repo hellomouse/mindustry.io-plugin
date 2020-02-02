@@ -160,9 +160,12 @@ public class IoPlugin extends Plugin {
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
-            player.name = player.name.replaceAll("<", "").replaceAll(">", "");
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid);
+                if(rank<=0) return;
+                if(player.name.contains(" ")) {
+                    player.name = player.name.split(" ", 1)[1];
+                }
                 switch(rank) {
                     case 1:
                         Call.sendMessage("[sky]active player " + player.name + " joined the server!");

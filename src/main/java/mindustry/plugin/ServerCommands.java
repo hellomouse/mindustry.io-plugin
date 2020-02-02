@@ -74,10 +74,11 @@ public class ServerCommands {
             }
         });
         if (data.has("administrator_roleid")) {
+            String adminRole = data.getString("changeMap_role_id");
             handler.registerCommand(new RoleRestrictedCommand("changemap"){
                 {
                     help = "<mapname/mapid> Change the current map to the one provided.";
-                    role = data.getString("changeMap_role_id");
+                    role = adminRole;
                 }
 
                 @SuppressWarnings("unchecked")
@@ -132,7 +133,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("setrank"){
                 {
                     help = "<playerid|ip> <rank> Change the player's rank to the provided one.";
-                    role = data.getString("changeMap_role_id");
+                    role = adminRole;
                 }
 
                 public void run(Context ctx) {
@@ -154,7 +155,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("exit") {
                 {
                     help = "Close the server.";
-                    role = data.getString("closeServer_role_id");
+                    role = data.getString("exit_roleid");
                 }
                 public void run(Context ctx) {
                     net.dispose();
@@ -465,7 +466,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("syncserver") {
                 {
                     help = "Attempt to fix the server without interrupting active connections.";
-                    role = data.getString("mapConfig_role_id");
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     for(Player p : playerGroup.all()) {
@@ -481,7 +482,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("mech") {
                 {
                     help = "<mechname> <playerid|ip|all> Change the provided player into a specific mech.";
-                    role = data.getString("interactWithPlayers_role_id");
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     //TODO: finish this

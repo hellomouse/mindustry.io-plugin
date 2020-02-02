@@ -74,7 +74,7 @@ public class ServerCommands {
             }
         });
         if (data.has("administrator_roleid")) {
-            String adminRole = data.getString("changeMap_role_id");
+            String adminRole = data.getString("administrator_roleid");
             handler.registerCommand(new RoleRestrictedCommand("changemap"){
                 {
                     help = "<mapname/mapid> Change the current map to the one provided.";
@@ -164,7 +164,7 @@ public class ServerCommands {
             });
         }
         if (data.has("moderator_roleid")) {
-            String banRole = data.getString("banPlayers_role_id");
+            String banRole = data.getString("moderator_roleid");
 
             handler.registerCommand(new RoleRestrictedCommand("gameover") {
                 {
@@ -537,8 +537,8 @@ public class ServerCommands {
         }
 
 
-        if(data.has("mapSubmissions_channel_id")){
-            TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_channel_id"));
+        if(data.has("mapSubmissions_id")){
+            TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_id"));
             handler.registerCommand(new Command("submitmap") {
                 {
                     help = "<.msav attachment> Submit a new map to be added into the server playlist in a .msav file format.";

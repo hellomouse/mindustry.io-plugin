@@ -47,14 +47,7 @@ public class IoPlugin extends Plugin {
     public IoPlugin() throws InterruptedException {
         try {
             String pureJson = Core.settings.getDataDirectory().child("mods/settings.json").readString();
-            alldata = new JSONObject(new JSONTokener(pureJson));
-            if (!alldata.has("in-game")){
-                Log.err("[ERR!] discordplugin: settings.json has an invalid format!\n");
-                //this.makeSettingsFile("settings.json");
-                return;
-            } else {
-                data = alldata.getJSONObject("in-game");
-            }
+            data = alldata = new JSONObject(new JSONTokener(pureJson));
         } catch (Exception e) {
             if (e.getMessage().contains(fileNotFoundErrorMessage)){
                 Log.err("[ERR!] discordplugin: settings.json file is missing.\nBot can't start.");
@@ -76,7 +69,7 @@ public class IoPlugin extends Plugin {
                 e.printStackTrace();
             }
         }
-        BotThread bt = new BotThread(api, Thread.currentThread(), alldata.getJSONObject("discord"));
+        BotThread bt = new BotThread(api, Thread.currentThread(), alldata);
         bt.setDaemon(false);
         bt.start();
 
@@ -84,15 +77,17 @@ public class IoPlugin extends Plugin {
         // setup database
         try {
             File toRead = new File("database.io");
-            FileInputStream fis = new FileInputStream(toRead);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+            if(toRead.length() > 0) {
+                FileInputStream fis = new FileInputStream(toRead);
+                ObjectInputStream ois = new ObjectInputStream(fis);
 
-            database = (HashMap<String, Integer>) ois.readObject();
+                database = (HashMap<String, Integer>) ois.readObject();
 
-            ois.close();
-            fis.close();
+                ois.close();
+                fis.close();
 
-            Log.info("discordplugin: database loaded successfully");
+                Log.info("discordplugin: database loaded successfully");
+            }
         } catch(Exception e){
             e.printStackTrace();
         }

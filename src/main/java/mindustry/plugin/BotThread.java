@@ -38,7 +38,7 @@ public class BotThread extends Thread {
                 // save database
 
                 try {
-                    File fileOne=new File("fileone");
+                    File fileOne =new File("database.io");
                     FileOutputStream fos=new FileOutputStream(fileOne);
                     ObjectOutputStream oos=new ObjectOutputStream(fos);
 

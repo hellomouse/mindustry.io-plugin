@@ -1,6 +1,7 @@
 package mindustry.plugin;
 
 import arc.files.Fi;
+import mindustry.Vars;
 import mindustry.maps.Map;
 
 
@@ -84,7 +85,7 @@ public class ComCommands {
             public void run(Context ctx) {
                 try {
                     EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("mindustry.io") // serverName
+                            .setTitle(IoPlugin.serverName)
                             .addField("Players", String.valueOf(playerGroup.size()))
                             .addField("Map", world.getMap().name())
                             .addField("Wave", String.valueOf(state.wave))

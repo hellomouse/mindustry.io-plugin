@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
 import mindustry.plugin.discordcommands.DiscordCommands;
@@ -19,6 +20,7 @@ import mindustry.maps.Maps;
 import mindustry.io.SaveIO;
 import mindustry.net.Administration;
 
+import mindustry.type.Mech;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
@@ -55,25 +57,7 @@ public class ServerCommands {
     }
 
     public void registerCommands(DiscordCommands handler) {
-        if (data.has("gameOver_role_id")) {
-            handler.registerCommand(new RoleRestrictedCommand("gameover") {
-                {
-                    help = "Force a game over.";
-                    role = data.getString("gameOver_role_id");
-                }
-                public void run(Context ctx) {
-                    if (state.is(GameState.State.menu)) {
-                        ctx.reply("Invalid state");
-                        return;
-                    }
-                    Events.fire(new GameOverEvent(Team.crux));
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("Command executed.")
-                            .setDescription("Done. New game starting in 10 seconds.");
-                    ctx.channel.sendMessage(eb);
-                }
-            });
-        }
+
         handler.registerCommand(new Command("maps") {
             {
                 help = "Check a list of available maps and their ids.";
@@ -89,7 +73,7 @@ public class ServerCommands {
                 ctx.channel.sendMessage(eb);
             }
         });
-        if (data.has("changeMap_role_id")) {
+        if (data.has("administrator_roleid")) {
             handler.registerCommand(new RoleRestrictedCommand("changemap"){
                 {
                     help = "<mapname/mapid> Change the current map to the one provided.";
@@ -144,8 +128,30 @@ public class ServerCommands {
                     maps.reload();
                 }
             });
+
+            handler.registerCommand(new RoleRestrictedCommand("setrank"){
+                {
+                    help = "<playerid|ip> <rank> Change the player's rank to the provided one.";
+                    role = data.getString("changeMap_role_id");
+                }
+
+                public void run(Context ctx) {
+                    String target = ctx.args[1];
+                    Integer targetRank = Integer.parseInt(ctx.args[2]);
+                    Mech desiredMech = Mechs.alpha;
+                    if(target.length() > 0 && targetRank > -1 && targetRank < 5) {
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            IoPlugin.database.put(player.uuid, targetRank);
+                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        }
+                    }
+                }
+
+            });
         }
-        if (data.has("closeServer_role_id")) {
+
+        if (data.has("exit_roleid")) {
             handler.registerCommand(new RoleRestrictedCommand("exit") {
                 {
                     help = "Close the server.";
@@ -157,8 +163,27 @@ public class ServerCommands {
                 }
             });
         }
-        if (data.has("banPlayers_role_id")) {
+        if (data.has("moderator_roleid")) {
             String banRole = data.getString("banPlayers_role_id");
+
+            handler.registerCommand(new RoleRestrictedCommand("gameover") {
+                {
+                    help = "Force a game over.";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    if (state.is(GameState.State.menu)) {
+                        ctx.reply("Invalid state");
+                        return;
+                    }
+                    Events.fire(new GameOverEvent(Team.crux));
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setTitle("Command executed.")
+                            .setDescription("Done. New game starting in 10 seconds.");
+                    ctx.channel.sendMessage(eb);
+                }
+            });
+
             handler.registerCommand(new RoleRestrictedCommand("ban") {
                 {
                     help = "<ip/id> Ban a player by the provided ip or id.";
@@ -212,6 +237,8 @@ public class ServerCommands {
                     String target = ctx.args[1];
                     if (target.length() > 0) {
                         netServer.admins.banPlayerIP(target);
+                        eb.setTitle("Blacklisted successfully.");
+                        eb.setDescription("`" + target + "` was banned.");
                     } else {
                         eb.setTitle("Command terminated");
                         eb.setDescription("Not enough arguments / usage: `%blacklist <ip>`".replace("%", IoPlugin.prefix));
@@ -272,14 +299,13 @@ public class ServerCommands {
                     }
                 }
             });
-        }
-        if (data.has("kickPlayers_role_id")) {
+
             handler.registerCommand(new RoleRestrictedCommand("kick") {
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTimestampToNow();
                 {
                     help = "<ip/id> Kick a player by the provided ip or id.";
-                    role = data.getString("kickPlayers_role_id");
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     String target;
@@ -307,10 +333,11 @@ public class ServerCommands {
                     }
                 }
             });
+
             handler.registerCommand(new RoleRestrictedCommand("antinuke") {
                 {
                     help = "<on/off/> Toggle the antinuke option, or check its status.";
-                    role = data.getString("kickPlayers_role_id");
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     if (ctx.args.length > 1) {
@@ -338,36 +365,30 @@ public class ServerCommands {
                     }
                 }
             });
-        }
 
-        if (data.has("spyPlayers_role_id")) {
             handler.registerCommand(new RoleRestrictedCommand("playersinfo") {
                 {
                     help = "Check the information about all players on the server.";
-                    role = data.getString("spyPlayers_role_id");
+                    role = banRole;
                 }
                 public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder()
-                            .setTitle("Players online: " + playerGroup.size());
-                    for (Player p : playerGroup.all()) {
-                        String p_ip = p.con.address;
-                        String p_name = p.name;
-                        if (netServer.admins.isAdmin(p.uuid, p.usid)) {  // make admins special :)
-                            p_ip = "*hidden*";
-                            p_name = "**" + p_name + "**";
+                    StringBuilder msg = new StringBuilder("**Players online: " + playerGroup.size() + "**\n```\n");
+                    for (Player player : playerGroup.all()) {
+                        msg.append("· ").append(Utils.escapeCharacters(player.name));
+                        if(!player.isAdmin) {
+                            msg.append(" : ").append(player.con.address).append("\n");
                         }
-                        eb.addField(Utils.escapeCharacters(p_name),  p_ip + " : #" + p.id);
                     }
-                    ctx.channel.sendMessage(eb);
+                    msg.append("```");
+
+                    ctx.channel.sendMessage(msg.toString());
                 }
             });
-        }
-        if (data.has("mapConfig_role_id")) {
-            String mapConfigRole = data.getString("mapConfig_role_id");
+
             handler.registerCommand(new RoleRestrictedCommand("uploadmap") {
                 {
                     help = "<.msav attachment> Upload a new map (Include a .msav file with command message)";
-                    role = mapConfigRole;
+                    role = banRole;
                 }
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
@@ -415,7 +436,7 @@ public class ServerCommands {
             handler.registerCommand(new RoleRestrictedCommand("removemap") {
                 {
                     help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the %maps command)".replace("%", IoPlugin.prefix);
-                    role = mapConfigRole;
+                    role = banRole;
                 }
                 @Override
                 public void run(Context ctx) {
@@ -436,7 +457,7 @@ public class ServerCommands {
 
                     maps.removeMap(found);
                     maps.reload();
-                    
+
                     eb.setTitle("Command executed.");
                     eb.setDescription(found.name() + " was successfully removed from the playlist.");
                     ctx.channel.sendMessage(eb);
@@ -457,19 +478,65 @@ public class ServerCommands {
                     ctx.channel.sendMessage(eb);
                 }
             });
-        }
-        if(data.has("interactWithPlayers_role_id")){
+
             handler.registerCommand(new RoleRestrictedCommand("mech") {
                 {
-                    help = "<mechname> <playerid> Change the provided player into a specific mech.";
+                    help = "<mechname> <playerid|ip|all> Change the provided player into a specific mech.";
                     role = data.getString("interactWithPlayers_role_id");
                 }
                 public void run(Context ctx) {
                     //TODO: finish this
+                    String target = ctx.args[1];
+                    String targetMech = ctx.args[2].toLowerCase();
+                    Mech desiredMech = Mechs.alpha;
+                    if(target.length() > 0 && targetMech.length() > 0) {
+                        switch(targetMech){
+                            case "alpha":
+                                desiredMech = Mechs.alpha;
+                                break;
+                            case "delta":
+                                desiredMech = Mechs.delta;
+                                break;
+                            case "tau":
+                                desiredMech = Mechs.tau;
+                                break;
+                            case "dart":
+                                desiredMech = Mechs.dart;
+                                break;
+                            case "glaive":
+                                desiredMech = Mechs.glaive;
+                                break;
+                            case "javelin":
+                                desiredMech = Mechs.javelin;
+                                break;
+                            case "omega":
+                                desiredMech = Mechs.omega;
+                                break;
+                            case "trident":
+                                desiredMech = Mechs.trident;
+                                break;
+                            default:
+                                desiredMech = Mechs.starter;
+                                break;
+                        }
+
+                        if(target.equals("all")) {
+                            for (Player p : playerGroup.all()) {
+                                p.mech = desiredMech;
+                            }
+                            return;
+                        }
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            player.mech = desiredMech;
+                        }
+                    }
                 }
             });
             //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }
+
+
         if(data.has("mapSubmissions_channel_id")){
             TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_channel_id"));
             handler.registerCommand(new Command("submitmap") {
@@ -512,13 +579,12 @@ public class ServerCommands {
                     eb.setDescription(ml.get(0).getFileName() + " was successfully queued for review by moderators!");
                     ctx.channel.sendMessage(eb);
                     EmbedBuilder eb2 = new EmbedBuilder()
-                            .setTitle("A map submission has been made.")
+                            .setTitle("A map submission has been made for " + IoPlugin.serverName)
                             .setAuthor(ctx.author)
                             .setTimestampToNow()
-                            .setDescription(ml.get(0).getFileName());
-                    File mapFile = new File(ml.get(0).getFileName());
-                    CompletableFuture<byte[]> fileContent = ml.get(0).downloadAsByteArray();
-                    // TODO: make it post the map submission in tc
+                            .addField("Name", ml.get(0).getFileName())
+                            .addField("URL", String.valueOf(ml.get(0).getUrl()));
+                    tc.sendMessage(eb2);
                 }
             });
         }

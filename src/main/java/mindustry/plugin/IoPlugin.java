@@ -217,19 +217,19 @@ public class IoPlugin extends Plugin {
                 int rank = database.get(player.uuid);
                 switch(rank) {
                     case 1:
-                        Call.sendMessage("[sky]vip " + player.name + " joined the server!");
-                        player.name = "[orange]<[][sky]vip[][orange]>[] " + player.name;
+                        Call.sendMessage("[sky]active player " + player.name + " joined the server!");
+                        player.name = "[orange]<[][sky]active[][orange]>[] " + player.name;
                         break;
                     case 2:
-                        Call.sendMessage("[#fcba03]moderator " + player.name + " joined the server!");
-                        player.name = "[orange]<[][#fcba03]mod[][orange]>[] " + player.name;
+                        Call.sendMessage("[#fcba03]vip " + player.name + " joined the server!");
+                        player.name = "[orange]<[][#fcba03]vip[][orange]>[] " + player.name;
                         break;
                     case 3:
-                        Call.sendMessage("[scarlet]administrator " + player.name + " joined the server!");
-                        player.name = "[orange]<[][scarlet]admin[][orange]>[] " + player.name;
+                        Call.sendMessage("[scarlet]moderator " + player.name + " joined the server!");
+                        player.name = "[orange]<[][scarlet]mod[][orange]>[] " + player.name;
                         break;
                     case 4:
-                        Call.sendMessage("[orange]<[][white]io[][orange]>[]" + player.name + " joined the server!");
+                        Call.sendMessage("[orange]<[][white]io admin[][orange]>[]" + player.name + " joined the server!");
                         player.name = "[orange]<[][white]io[][orange]>[] " + player.name;
                         break;
                 }

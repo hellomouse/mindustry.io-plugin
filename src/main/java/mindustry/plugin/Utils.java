@@ -13,7 +13,7 @@ import static mindustry.Vars.playerGroup;
 
 public class Utils {
     static int nukeDistance = 25;
-    static int messageBufferSize = 10; // number of messages sent at once to discord
+    static int messageBufferSize = 5; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 200;
     public static Boolean antiNukeEnabled = true;;
     public static class Pals {

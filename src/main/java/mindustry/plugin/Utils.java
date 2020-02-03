@@ -107,18 +107,4 @@ public class Utils {
         return message;
     }
 
-    public static void LogAction(String title, String message, MessageAuthor user, String victim){
-        EmbedBuilder embed = new EmbedBuilder()
-                .setDescription(message)
-                .setTitle("An action was executed: " + title);
-        if(user!=null){
-            embed.setAuthor(user);
-        }
-        if(victim!=null){
-            embed.addInlineField("On user: ", victim);
-        }
-
-        //TODO: make it send to bot_log channel
-
-    }
 }

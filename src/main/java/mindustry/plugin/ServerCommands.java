@@ -142,7 +142,7 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     String target = ctx.args[1];
                     int targetRank = Integer.parseInt(ctx.args[2]);
-                    if(target.length() > 0 && targetRank > -1 && targetRank < 5) {
+                    if(target.length() > 0 && targetRank > -1 && targetRank < 6) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
                             if(IoPlugin.database.containsKey(player.uuid)) {
@@ -150,7 +150,7 @@ public class ServerCommands {
                             } else {
                                 IoPlugin.database.put(player.uuid, new PlayerData(targetRank));
                             }
-                            if(targetRank==4) { // give admin to administrators
+                            if(targetRank==5) { // give admin to administrators
                                 netServer.admins.adminPlayer(player.uuid, player.usid);
                             }
                             eb.setTitle("Command executed successfully");
@@ -290,7 +290,6 @@ public class ServerCommands {
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
                                 Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned.");
-                                //Utils.LogAction("ban", "Remotely executed ban command", ctx.author, p.name + " : " + p.con.address);
                             }
                         }
                         if(!found){
@@ -350,38 +349,6 @@ public class ServerCommands {
                         eb.setColor(Utils.Pals.error);
                         eb.setDescription("No such ban exists.");
                         ctx.channel.sendMessage(eb);
-                    }
-                }
-            });
-
-            handler.registerCommand(new RoleRestrictedCommand("bans") {
-                {
-                    help = "Get info about all banned players.";
-                    role = banRole;
-                }
-                public void run(Context ctx) {
-                    List<String> result = new ArrayList<>();
-                    Array<Administration.PlayerInfo> bans = netServer.admins.getBanned();
-                    for (Administration.PlayerInfo playerInfo : bans) {
-                        result.add("\n\n * Last seen IP: " + playerInfo.lastIP);
-                        result.add("   All IPs:");
-                        for (String ip : playerInfo.ips) result.add("    * " + ip);
-                        result.add("   All names:");
-                        for (String name : playerInfo.names) result.add("    * " + Utils.escapeCharacters(name));
-                    }
-
-                    File f = new File(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()) + "_IO_BANS.txt");
-                    try {
-                        FileWriter fw;
-                        fw = new FileWriter(f.getAbsoluteFile());
-                        BufferedWriter bw = new BufferedWriter(fw);
-                        bw.write(Utils.constructMessage(result));
-                        bw.close();
-                        ctx.channel.sendMessage(f);
-                        f.delete();
-                    } catch (IOException e) {
-                        ctx.reply("An error occurred.");
-                        e.printStackTrace();
                     }
                 }
             });

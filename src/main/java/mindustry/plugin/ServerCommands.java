@@ -289,7 +289,7 @@ public class ServerCommands {
                                 eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                                 ctx.channel.sendMessage(eb);
                                 Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
-                                Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned.");
+                                Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned permanently.");
                             }
                         }
                         if(!found){

@@ -1,6 +1,6 @@
 package mindustry.plugin;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
@@ -36,7 +36,8 @@ public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";
-    public static HashMap<String, Integer> database  = new HashMap<String, Integer>();
+    public static HashMap<String, Integer> database  = new HashMap<String, Integer>(); // uuid, rank
+    public static HashMap<Player, PlayerData> rainbowedPlayers = new HashMap<Player, PlayerData>(); // player, PlayerData
     private final Long cooldownTime = 300L;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
@@ -159,6 +160,12 @@ public class IoPlugin extends Plugin {
             }
         }
 
+        Events.on(EventType.PlayerLeave.class, event -> {
+            if(rainbowedPlayers.containsKey(player)) {
+                rainbowedPlayers.remove(player);
+            }
+        });
+
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
@@ -195,6 +202,46 @@ public class IoPlugin extends Plugin {
                 player.name.replaceAll(">", "");
             }
         });
+
+        Thread rainbowLoop = new Thread() {
+            public void run() {
+                do {
+                    for (Map.Entry<Player, PlayerData> entry : rainbowedPlayers.entrySet()) {
+                        Player p = entry.getKey();
+                        if(!playerGroup.all().contains(p)){
+                            rainbowedPlayers.remove(player);
+                            return;
+                        }
+                        if(p==null) return;
+                        if(p.name==null) return;
+                        PlayerData pdata = entry.getValue();
+                        String playerNameUnmodified = pdata.realName;
+                        Integer hue = pdata.hue;
+                        if(hue < 360) {
+                            hue = hue + 1;
+                        } else{
+                            hue = 0;
+                        }
+
+
+                        Color hsb = Color.getHSBColor(hue / 360f, 1f, 1f);
+                        pdata.setHue(hue);
+                        String hex = "#" + Integer.toHexString(hsb.getRGB()).substring(2);
+                        String[] c = playerNameUnmodified.split(" ", 2);
+
+                        p.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
+                        rainbowedPlayers.replace(player, pdata);
+                    }
+                    try {
+                        Thread.sleep(75);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (true);
+            }
+        };
+
+        rainbowLoop.start();
     }
 
     //register commands that run on the server
@@ -240,7 +287,15 @@ public class IoPlugin extends Plugin {
             handler.<Player>register("rainbow", "Give your username a rainbow animation [vip+ only]", (args, player) -> {
                 if(database.containsKey(player.uuid)) {
                     if(database.get(player.uuid) >= 2) {
-
+                        if(rainbowedPlayers.containsKey(player)) {
+                            player.sendMessage("[sky]Rainbow effect toggled off.");
+                            String nameToSet = rainbowedPlayers.get(player).realName;
+                            rainbowedPlayers.remove(player);
+                            player.name = nameToSet;
+                        } else {
+                            player.sendMessage("[sky]Rainbow effect toggled on.");
+                            rainbowedPlayers.put(player, new PlayerData(player, 0, player.name));
+                        }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
                     }

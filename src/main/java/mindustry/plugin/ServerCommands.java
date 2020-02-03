@@ -731,6 +731,58 @@ public class ServerCommands {
             //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }
 
+        if (data.has("donator_roleid")) {
+            String donatorRole = data.getString("donator_roleid");
+            handler.registerCommand(new RoleRestrictedCommand("redeemvip"){
+                {
+                    help = "<playerid|ip> Promote your in-game rank to donator [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    role = donatorRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1];
+                    if(target.length() > 0) {
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            IoPlugin.database.put(player.uuid, 2);
+                            eb.setTitle("Command executed successfully");
+                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <vip>.");
+                            ctx.channel.sendMessage(eb);
+                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        }
+                    }
+                }
+
+            });
+        }
+
+        if (data.has("activeplayer_roleid")) {
+            String activeRole = data.getString("activeplayer_roleid");
+            handler.registerCommand(new RoleRestrictedCommand("redeemactive"){
+                {
+                    help = "<playerid|ip> Promote your in-game rank to active player [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    role = activeRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1];
+                    if(target.length() > 0) {
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            IoPlugin.database.put(player.uuid, 1);
+                            eb.setTitle("Command executed successfully");
+                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
+                            ctx.channel.sendMessage(eb);
+                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        }
+                    }
+                }
+
+            });
+        }
+
 
         if(data.has("mapSubmissions_id")){
             TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_id"));

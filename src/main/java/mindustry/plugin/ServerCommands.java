@@ -1,6 +1,5 @@
 package mindustry.plugin;
 
-import arc.util.Log;
 import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
@@ -25,7 +24,6 @@ import mindustry.type.Mech;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
-import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.json.JSONObject;
 
@@ -143,11 +141,15 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
                     String target = ctx.args[1];
-                    Integer targetRank = Integer.parseInt(ctx.args[2]);
+                    int targetRank = Integer.parseInt(ctx.args[2]);
                     if(target.length() > 0 && targetRank > -1 && targetRank < 5) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
-                            IoPlugin.database.put(player.uuid, targetRank);
+                            if(IoPlugin.database.containsKey(player.uuid)) {
+                                IoPlugin.database.get(player.uuid).setRank(targetRank);
+                            } else {
+                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank));
+                            }
                             if(targetRank==4) { // give admin to administrators
                                 netServer.admins.adminPlayer(player.uuid, player.usid);
                             }
@@ -652,6 +654,86 @@ public class ServerCommands {
                 }
             });
 
+            handler.registerCommand(new RoleRestrictedCommand("changeteamid") {
+                {
+                    help = "<team> <playerid|ip|all> Change the provided player's team into a generated int.";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String target = ctx.args[1];
+                    int targetTeam = Integer.parseInt(ctx.args[2]);
+                    if(target.length() > 0 && targetTeam > 0) {
+                        EmbedBuilder eb = new EmbedBuilder();
+
+                        if(target.equals("all")) {
+                            for (Player p : playerGroup.all()) {
+                                p.setTeam(Team.get(targetTeam));
+                            }
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Changed everyone's team to " + targetTeam);
+                            ctx.channel.sendMessage(eb);
+                            return;
+                        }
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            player.setTeam(Team.get(targetTeam));
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Changed " + Utils.escapeCharacters(player.name) + "s team to " + targetTeam);
+                            ctx.channel.sendMessage(eb);
+                        }
+                    }
+                }
+            });
+
+            handler.registerCommand(new RoleRestrictedCommand("rename"){
+                {
+                    help = "<playerid|ip> <name> Rename the provided player";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1];
+                    String name = ctx.message.substring(target.length() + 1);
+                    if(target.length() > 0 && name.length() > 0) {
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            if(IoPlugin.rainbowedPlayers.containsKey(player)) { // turn rainbow off if its enabled
+                                IoPlugin.rainbowedPlayers.remove(player);
+                            }
+                            player.name = name;
+                            eb.setTitle("Command executed successfully");
+                            eb.setDescription("Changed name to " + Utils.escapeCharacters(player.name));
+                            ctx.channel.sendMessage(eb);
+                            Call.onInfoToast(player.con, "[scarlet]Your name was changed by a moderator.", 10);
+                        }
+                    }
+                }
+
+            });
+
+            handler.registerCommand(new RoleRestrictedCommand("motd"){
+                {
+                    help = "<newmessage> Change / set a welcome message";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    eb.setTitle("Command executed successfully");
+                    String message = ctx.message;
+                    if(message.length() > 0 && !message.equals("disable")) {
+                        Utils.welcomeMessage = message;
+                        eb.setDescription("Changed welcome message.");
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setDescription("Disabled welcome message.");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+
+            });
+
             /*handler.registerCommand(new RoleRestrictedCommand("teleport") {
                 {
                     help = "<playerid|ip|all> <playerid|ip|all> Teleport player1 to player2.";
@@ -745,7 +827,11 @@ public class ServerCommands {
                     if(target.length() > 0) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
-                            IoPlugin.database.put(player.uuid, 2);
+                            if(IoPlugin.database.containsKey(player.uuid)) {
+                                IoPlugin.database.get(player.uuid).setRank(2);
+                            } else {
+                                IoPlugin.database.put(player.uuid, new PlayerData(2));
+                            }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <vip>.");
                             ctx.channel.sendMessage(eb);
@@ -771,7 +857,11 @@ public class ServerCommands {
                     if(target.length() > 0) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
-                            IoPlugin.database.put(player.uuid, 1);
+                            if(IoPlugin.database.containsKey(player.uuid)) {
+                                IoPlugin.database.get(player.uuid).setRank(1);
+                            } else {
+                                IoPlugin.database.put(player.uuid, new PlayerData(1));
+                            }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
                             ctx.channel.sendMessage(eb);

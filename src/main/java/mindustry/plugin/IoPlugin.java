@@ -7,12 +7,13 @@ import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import mindustry.world.Block;
+import mindustry.content.UnitTypes;
+import mindustry.entities.type.BaseUnit;
+import mindustry.game.Team;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.json.JSONObject;
@@ -22,13 +23,10 @@ import arc.Core;
 import arc.Events;
 import arc.util.CommandHandler;
 import arc.util.Log;
-import arc.util.Strings;
 import mindustry.Vars;
-import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.game.EventType;
 import mindustry.gen.Call;
-import mindustry.world.Tile;
 
 import static mindustry.Vars.*;
 
@@ -36,16 +34,17 @@ public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";
-    public static HashMap<String, Integer> database  = new HashMap<String, Integer>(); // uuid, rank
+    public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
     public static HashMap<Player, PlayerData> rainbowedPlayers = new HashMap<Player, PlayerData>(); // player, PlayerData
-    private final Long cooldownTime = 300L;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     public static JSONObject data; //token, channel_id, role_id
-    private HashMap<Long, String> cooldowns = new HashMap<Long, String>(); //uuid
+
 
     //register event handlers and create variables in the constructor
     public IoPlugin() throws InterruptedException {
+        Utils.init();
+
         try {
             String pureJson = Core.settings.getDataDirectory().child("mods/settings.json").readString();
             data = alldata = new JSONObject(new JSONTokener(pureJson));
@@ -81,7 +80,7 @@ public class IoPlugin extends Plugin {
                 FileInputStream fis = new FileInputStream(toRead);
                 ObjectInputStream ois = new ObjectInputStream(fis);
 
-                database = (HashMap<String, Integer>) ois.readObject();
+                database = (HashMap<String, PlayerData>) ois.readObject();
 
                 ois.close();
                 fis.close();
@@ -171,10 +170,10 @@ public class IoPlugin extends Plugin {
             Player player = event.player;
 
             if(database.containsKey(player.uuid)) {
-                int rank = database.get(player.uuid);
+                int rank = database.get(player.uuid).getRank();
                 if(rank==0) {
-                    player.name.replaceAll("<", "");
-                    player.name.replaceAll(">", "");
+                    player.name = player.name.replaceAll("<", "");
+                    player.name = player.name.replaceAll(">", "");
                 }
                 if(player.name.contains("<") && player.name.contains(">")) { // contains the tag
                     player.name = player.name.replaceFirst("\\[(.*)\\[\\] ", ""); // replace only the tag, no other colors
@@ -189,55 +188,96 @@ public class IoPlugin extends Plugin {
                         player.name = "[#fcba03]<vip>[] " + player.name;
                         break;
                     case 3:
-                        Call.sendMessage("[scarlet]moderator " + player.name + " joined the server!");
-                        player.name = "[scarlet]<mod>[] " + player.name;
+                        Call.sendMessage("[scarlet]mvp " + player.name + " joined the server!");
+                        player.name = "[scarlet]<mvp>[] " + player.name;
                         break;
                     case 4:
+                        Call.sendMessage("[orange]<[][white]io moderator[][orange]>[] " + player.name + " joined the server!");
+                        player.name = "[orange]<[white]mod[orange]>[] " + player.name;
+                        break;
+                    case 5:
                         Call.sendMessage("[orange]<[][white]io admin[][orange]>[] " + player.name + " joined the server!");
-                        player.name = "[orange]<[white]io[orange]>[] " + player.name;
+                        player.name = "[orange]<[white]admin[orange]>[] " + player.name;
                         break;
                 }
             } else { // not in database
-                player.name.replaceAll("<", "");
-                player.name.replaceAll(">", "");
+                database.put(player.uuid, new PlayerData(0));
+
+                player.name = player.name.replaceAll("<", "");
+                player.name = player.name.replaceAll(">", "");
+            }
+
+            if(Utils.welcomeMessage.length() > 0){
+                Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.welcomeMessage));
             }
         });
 
+        // player built building
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if(event.player!= null){
+                if (!event.breaking) {
+                    if(database.containsKey(event.player.uuid)) {
+                        database.get(event.player.uuid).incrementBuilding(1);
+                    }
+                }
+            }
+        });
+
+        Events.on(EventType.GameOverEvent.class, event -> {
+            for (Player p : playerGroup.all()) {
+                if (database.containsKey(p.uuid)) {
+                    PlayerData pd = database.get(p.uuid);
+                    pd.incrementGames();
+                    pd.resetDraug();
+                }
+                Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
+            }
+        });
+
+
+
         Thread rainbowLoop = new Thread() {
             public void run() {
-                do {
-                    for (Map.Entry<Player, PlayerData> entry : rainbowedPlayers.entrySet()) {
-                        Player p = entry.getKey();
-                        if(!playerGroup.all().contains(p)){
-                            rainbowedPlayers.remove(player);
-                            return;
+                TimerTask task = new TimerTask() {
+
+                    @Override
+                    public void run() {
+                        for (Map.Entry<Player, PlayerData> entry : rainbowedPlayers.entrySet()) {
+                            Player p = entry.getKey();
+                            if(!playerGroup.all().contains(p)){
+                                rainbowedPlayers.remove(player);
+                                return;
+                            }
+                            if(p==null) return;
+                            if(p.name==null) return;
+                            PlayerData pdata = entry.getValue();
+                            String playerNameUnmodified = pdata.realName;
+                            Integer hue = pdata.hue;
+                            if(hue < 360) {
+                                hue = hue + 1;
+                            } else{
+                                hue = 0;
+                            }
+
+
+                            Color hsb = Color.getHSBColor(hue / 360f, 1f, 1f);
+                            pdata.setHue(hue);
+                            String hex = "#" + Integer.toHexString(hsb.getRGB()).substring(2);
+                            String[] c = playerNameUnmodified.split(" ", 2);
+
+                            p.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
+                            rainbowedPlayers.replace(player, pdata);
                         }
-                        if(p==null) return;
-                        if(p.name==null) return;
-                        PlayerData pdata = entry.getValue();
-                        String playerNameUnmodified = pdata.realName;
-                        Integer hue = pdata.hue;
-                        if(hue < 360) {
-                            hue = hue + 1;
-                        } else{
-                            hue = 0;
+                        try {
+                            Thread.sleep(75);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-
-
-                        Color hsb = Color.getHSBColor(hue / 360f, 1f, 1f);
-                        pdata.setHue(hue);
-                        String hex = "#" + Integer.toHexString(hsb.getRGB()).substring(2);
-                        String[] c = playerNameUnmodified.split(" ", 2);
-
-                        p.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
-                        rainbowedPlayers.replace(player, pdata);
                     }
-                    try {
-                        Thread.sleep(75);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } while (true);
+                };
+
+                Timer timer = new Timer();
+                timer.schedule(task, new Date(), 75);
             }
         };
 
@@ -277,16 +317,16 @@ public class IoPlugin extends Plugin {
                     if(p.isAdmin) {
                         builder.append("[scarlet]<ADMIN> ");
                     } else{
-                        builder.append("[lightgray] ");
+                        builder.append("[lightgray]");
                     }
-                    builder.append(p.name).append("[accent] (#").append(p.id).append(")\n");
+                    builder.append(p.name).append("[accent] : ").append(p.id).append("\n");
                 }
                 player.sendMessage(builder.toString());
             });
 
-            handler.<Player>register("rainbow", "Give your username a rainbow animation [vip+ only]", (args, player) -> {
+            handler.<Player>register("rainbow", "[vip+] Give your username a rainbow animation", (args, player) -> {
                 if(database.containsKey(player.uuid)) {
-                    if(database.get(player.uuid) >= 2) {
+                    if(database.get(player.uuid).getRank() >= 2) {
                         if(rainbowedPlayers.containsKey(player)) {
                             player.sendMessage("[sky]Rainbow effect toggled off.");
                             String nameToSet = rainbowedPlayers.get(player).realName;
@@ -294,13 +334,57 @@ public class IoPlugin extends Plugin {
                             player.name = nameToSet;
                         } else {
                             player.sendMessage("[sky]Rainbow effect toggled on.");
-                            rainbowedPlayers.put(player, new PlayerData(player, 0, player.name));
+                            rainbowedPlayers.put(player, new PlayerData(0, player.name));
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
                     }
                 } else {
                     player.sendMessage("You don't have permissions to execute this command!");
+                }
+            });
+
+            handler.<Player>register("draugpet", "[active+] Spawn yourself a draug pet (max.1 - active, max.2 - vip, max.3 - mvp)", (args, player) -> {
+                if(database.containsKey(player.uuid)) {
+                    if(database.get(player.uuid).getRank() >= 1) {
+                        PlayerData pd = database.get(player.uuid);
+                        if(pd.getDraugPets() < pd.getRank()) {
+                            Call.sendMessage(player.name + "[#b177fc] spawned in a draug pet!");
+                            pd.incrementDraug(1);
+                            BaseUnit baseUnit = UnitTypes.draug.create(player.getTeam());
+                            baseUnit.set(player.getX(), player.getY());
+                            baseUnit.add();
+                        } else {
+                            player.sendMessage("[#42a1f5]You reached the maximum draug pet limit for this game!");
+                        }
+                    } else {
+                        player.sendMessage("You don't have permissions to execute this command!");
+                    }
+                } else {
+                    player.sendMessage("You don't have permissions to execute this command!");
+                }
+            });
+
+            handler.<Player>register("info", "<playerid>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
+                if(args[0].length() > 0) {
+                    Player p = Utils.findPlayer(args[0]);
+                    if(p != null){
+                        if(database.containsKey(p.uuid)) {
+                            Call.onInfoMessage(player.con, Utils.formatMessage(p, Utils.statMessage));
+                        } else {
+                            player.sendMessage("[scarlet]Error: " + p.name + "'s playtime is lower than 60 seconds");
+                        }
+                    } else {
+                        player.sendMessage("[scarlet]Error: player not found or offline");
+                    }
+                } else {
+                    Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.statMessage));
+                }
+            });
+
+            handler.<Player>register("info", "Get information (playtime, buildings built, etc.) about yourself.", (args, player) -> { // self info
+                if (database.containsKey(player.uuid)) {
+                    Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.statMessage));
                 }
             });
 

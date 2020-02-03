@@ -6,14 +6,31 @@ import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
 
-import static mindustry.Vars.maps;
-import static mindustry.Vars.playerGroup;
+import static mindustry.Vars.*;
 
 public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
+    static String welcomeMessage = "";
+    static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
+            "\n" +
+            "[sky]%player%'s stats:\n" +
+            "[#4287f5]Playtime - %playtime% minutes.\n" +
+            "[#f54263]Games played - %games%.\n" +
+            "[#9342f5]Buildings built - %buildings%.";
+    static HashMap<Integer, String> rankNames = new HashMap<>();
+
+    public static void init(){
+        rankNames.put(0, "[#7d7d7d]<none>");
+        rankNames.put(1, "[sky]<active player>");
+        rankNames.put(2, "[#fcba03]<vip>");
+        rankNames.put(3, "[scarlet]<mvp>");
+        rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
+        rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
+    }
 
     public static class Pals {
         public static Color warning = (Color.getHSBColor(5, 85, 95));
@@ -76,30 +93,18 @@ public class Utils {
         return found;
     }
 
-    public static String hsvToRgb(float hue, float saturation, float value) {
+    public static String formatMessage(Player player, String message){
+        message = message.replaceAll("%player%", escapeCharacters(player.name));
+        message = message.replaceAll("%map%", world.getMap().name());
+        message = message.replaceAll("%wave%", String.valueOf(state.wave));
 
-        int h = (int)(hue * 6);
-        float f = hue * 6 - h;
-        float p = value * (1 - saturation);
-        float q = value * (1 - f * saturation);
-        float t = value * (1 - (1 - f) * saturation);
-
-        switch (h) {
-            case 0: return rgbToString(value, t, p);
-            case 1: return rgbToString(q, value, p);
-            case 2: return rgbToString(p, value, t);
-            case 3: return rgbToString(p, q, value);
-            case 4: return rgbToString(t, p, value);
-            case 5: return rgbToString(value, p, q);
-            default: throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + hue + ", " + saturation + ", " + value);
+        if(IoPlugin.database.containsKey(player.uuid)) {
+            message = message.replaceAll("%playtime%", String.valueOf(IoPlugin.database.get(player.uuid).getPlaytime()));
+            message = message.replaceAll("%games%", String.valueOf(IoPlugin.database.get(player.uuid).getGames()));
+            message = message.replaceAll("%buildings%", String.valueOf(IoPlugin.database.get(player.uuid).getBuildings()));
+            message = message.replaceAll("%rank%", rankNames.get(IoPlugin.database.get(player.uuid).getRank()));
         }
-    }
-
-    public static String rgbToString(float r, float g, float b) {
-        String rs = Integer.toHexString((int)(r * 256));
-        String gs = Integer.toHexString((int)(g * 256));
-        String bs = Integer.toHexString((int)(b * 256));
-        return rs + gs + bs;
+        return message;
     }
 
     public static void LogAction(String title, String message, MessageAuthor user, String victim){

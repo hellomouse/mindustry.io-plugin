@@ -224,13 +224,9 @@ public class IoPlugin extends Plugin {
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            for (Player p : playerGroup.all()) {
-                if (database.containsKey(p.uuid)) {
-                    PlayerData pd = database.get(p.uuid);
-                    pd.incrementGames();
-                    pd.resetDraug();
-                }
-                Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
+            for (PlayerData pd : database.values()) {
+                pd.incrementGames();
+                pd.resetDraug();
             }
         });
 

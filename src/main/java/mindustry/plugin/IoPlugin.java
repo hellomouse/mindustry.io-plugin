@@ -226,10 +226,12 @@ public class IoPlugin extends Plugin {
 
         Events.on(EventType.GameOverEvent.class, event -> {
             for (Player p : playerGroup.all()) {
+                if (database.containsKey(p.uuid)) {
+                    database.get(p.uuid).incrementGames();
+                }
                 Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
             }
             for (PlayerData pd : database.values()) {
-                pd.incrementGames();
                 pd.resetDraug();
             }
             spawnedPhantomPet.clear();

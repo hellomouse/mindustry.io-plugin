@@ -228,8 +228,8 @@ public class IoPlugin extends Plugin {
             for (Player p : playerGroup.all()) {
                 if (database.containsKey(p.uuid)) {
                     database.get(p.uuid).incrementGames();
+                    Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
                 }
-                Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
             }
             for (PlayerData pd : database.values()) {
                 pd.resetDraug();

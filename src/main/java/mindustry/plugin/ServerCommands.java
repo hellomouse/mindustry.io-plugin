@@ -18,7 +18,6 @@ import mindustry.gen.Call;
 import mindustry.maps.Map;
 import mindustry.maps.Maps;
 import mindustry.io.SaveIO;
-import mindustry.net.Administration;
 
 import mindustry.type.Mech;
 import org.javacord.api.entity.channel.TextChannel;
@@ -29,10 +28,6 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.InflaterInputStream;
 
@@ -569,7 +564,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("changeteam") {
                 {
-                    help = "<team> <playerid|ip|all> Change the provided player's team into the provided one.";
+                    help = "<playerid|ip|all> <team> Change the provided player's team into the provided one.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -623,7 +618,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("changeteamid") {
                 {
-                    help = "<team> <playerid|ip|all> Change the provided player's team into a generated int.";
+                    help = "<playerid|ip|all> <team> Change the provided player's team into a generated int.";
                     role = banRole;
                 }
                 public void run(Context ctx) {

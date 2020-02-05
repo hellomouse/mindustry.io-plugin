@@ -2,8 +2,6 @@ package mindustry.plugin;
 
 import mindustry.entities.type.Player;
 import mindustry.maps.Map;
-import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import java.awt.*;
 import java.util.HashMap;

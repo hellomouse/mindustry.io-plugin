@@ -7,9 +7,9 @@ import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import arc.struct.Array;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
-import mindustry.game.Team;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -36,6 +36,7 @@ public class IoPlugin extends Plugin {
     public static String serverName = "<untitled>";
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
     public static HashMap<Player, PlayerData> rainbowedPlayers = new HashMap<Player, PlayerData>(); // player, PlayerData
+    public static Array<Player> spawnedPhantomPet = new Array<>();
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     public static JSONObject data; //token, channel_id, role_id
@@ -193,11 +194,11 @@ public class IoPlugin extends Plugin {
                         break;
                     case 4:
                         Call.sendMessage("[orange]<[][white]io moderator[][orange]>[] " + player.name + " joined the server!");
-                        player.name = "[orange]<[white]mod[orange]>[] " + player.name;
+                        player.name = "[white]<mod>[] " + player.name;
                         break;
                     case 5:
                         Call.sendMessage("[orange]<[][white]io admin[][orange]>[] " + player.name + " joined the server!");
-                        player.name = "[orange]<[white]admin[orange]>[] " + player.name;
+                        player.name = "[white]<admin>[] " + player.name;
                         break;
                 }
             } else { // not in database
@@ -224,10 +225,14 @@ public class IoPlugin extends Plugin {
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
+            for (Player p : playerGroup.all()) {
+                Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
+            }
             for (PlayerData pd : database.values()) {
                 pd.incrementGames();
                 pd.resetDraug();
             }
+            spawnedPhantomPet.clear();
         });
 
 
@@ -361,7 +366,25 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("info", "<playerid>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
+            handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game)", (args, player) -> {
+                if(database.containsKey(player.uuid)) {
+                    if(database.get(player.uuid).getRank() >= 3) {
+                        if(!spawnedPhantomPet.contains(player)) {
+                            spawnedPhantomPet.add(player);
+                            BaseUnit baseUnit = UnitTypes.phantom.create(player.getTeam());
+                            baseUnit.set(player.getX(), player.getY());
+                            baseUnit.add();
+                            Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
+                        }
+                    } else {
+                        player.sendMessage("You don't have permissions to execute this command!");
+                    }
+                } else {
+                    player.sendMessage("You don't have permissions to execute this command!");
+                }
+            });
+
+            handler.<Player>register("stats", "<playerid>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
                 if(args[0].length() > 0) {
                     Player p = Utils.findPlayer(args[0]);
                     if(p != null){

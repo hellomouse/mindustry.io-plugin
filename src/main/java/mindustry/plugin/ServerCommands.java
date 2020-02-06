@@ -152,6 +152,13 @@ public class ServerCommands {
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to " + targetRank);
                             ctx.channel.sendMessage(eb);
                             Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        } else{
+                            if(IoPlugin.database.containsKey(target)){
+                                IoPlugin.database.get(target).setRank(targetRank);
+                                eb.setTitle("Command executed successfully");
+                                eb.setDescription("Promoted `" + target + "` to " + targetRank);
+                                ctx.channel.sendMessage(eb);
+                            }
                         }
                     }
                 }
@@ -393,7 +400,7 @@ public class ServerCommands {
                     for (Player player : playerGroup.all()) {
                         msg.append("· ").append(Utils.escapeCharacters(player.name));
                         if(!player.isAdmin) {
-                            msg.append(" : ").append(player.con.address).append("\n");
+                            msg.append(" : ").append(player.con.address).append(" : ").append(player.uuid).append("\n");
                         }
                     }
                     msg.append("```");

@@ -376,7 +376,6 @@ public class IoPlugin extends Plugin {
                                     public void run() {
                                         while (player.con.isConnected() && !baseUnit.dead && !intermission) { // teleport phantom pet back to owner every x seconds
                                             try {
-                                                Log.info(baseUnit.dst(player.getX(), player.getY()));
                                                 if(baseUnit.dst(player.getX(), player.getY()) > 150) {
                                                     baseUnit.set(player.getX(), player.getY());
                                                     baseUnit.clearBuilding();
@@ -425,10 +424,10 @@ public class IoPlugin extends Plugin {
                                 Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 60 seconds)");
                                 Thread lichPetLoop = new Thread() {
                                     public void run() {
-                                        while (!baseUnit.dead) { // teleport phantom pet back to owner every x seconds
-                                            try {
+                                        while (!baseUnit.dead) {
+                                            try { // deal 100 damage every second = 6000 damage in a minute to kill the lich
                                                 baseUnit.damage(100f);
-                                                Thread.sleep(1000); //
+                                                Thread.sleep(1000);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
@@ -482,12 +481,12 @@ public class IoPlugin extends Plugin {
     public static TextChannel getTextChannel(String id){
         Optional<Channel> dc = api.getChannelById(id);
         if (!dc.isPresent()) {
-            Log.err("[ERR!] discordplugin: channel not found!");
+            Log.err("[ERR!] discordplugin: channel not found! " + id);
             return null;
         }
         Optional<TextChannel> dtc = dc.get().asTextChannel();
         if (!dtc.isPresent()){
-            Log.err("[ERR!] discordplugin: textchannel not found!");
+            Log.err("[ERR!] discordplugin: textchannel not found! " + id);
             return null;
         }
         return dtc.get();
@@ -496,7 +495,7 @@ public class IoPlugin extends Plugin {
     public Role getRole(String id){
         Optional<Role> r1 = api.getRoleById(id);
         if (!r1.isPresent()) {
-            Log.err("[ERR!] discordplugin: adminrole not found!");
+            Log.err("[ERR!] discordplugin: adminrole not found! " + id);
             return null;
         }
         return r1.get();

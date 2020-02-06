@@ -328,7 +328,7 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("draugpet", "[active+] Spawn yourself a draug pet (max.1 - active, max.2 - vip, max.3 - mvp)", (args, player) -> {
+            handler.<Player>register("draugpet", "[active+] Spawn a draug mining drone for your team (disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves) {
                     if (database.containsKey(player.uuid)) {
                         int rank = database.get(player.uuid).getRank();
@@ -342,7 +342,8 @@ public class IoPlugin extends Plugin {
                                     baseUnit.add();
                                 }
                             } else {
-                                player.sendMessage("[#42a1f5]You reached the maximum draug pet limit for this game!");
+                                spawnedDraugPets.put(player.uuid, 0);
+                                player.sendMessage("[#42a1f5]This command will spawn in a draug mining bot, use it again to proceed.");
                             }
                         } else {
                             player.sendMessage("You don't have permissions to execute this command!");
@@ -355,7 +356,7 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game)", (args, player) -> {
+            handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game, disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
@@ -394,7 +395,7 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 60 seconds)", (args, player) -> {
+            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 60 seconds, disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {

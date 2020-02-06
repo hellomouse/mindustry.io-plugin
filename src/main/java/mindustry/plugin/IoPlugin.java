@@ -368,15 +368,22 @@ public class IoPlugin extends Plugin {
                                 Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
                                 Thread phantomPetLoop = new Thread() {
                                     public void run() {
-                                        while (baseUnit != null && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                        while (player.con.isConnected() && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
                                             try {
-                                                baseUnit.set(player.getX(), player.getY());
-                                                baseUnit.clearBuilding();
-                                                baseUnit.updateBuilding();
-                                                Thread.sleep(Utils.phantomPetTeleportTime * 1000); //
+                                                Log.info(baseUnit.dst(player.getX(), player.getY()));
+                                                if(baseUnit.dst(player.getX(), player.getY()) > 150) {
+                                                    baseUnit.set(player.getX(), player.getY());
+                                                    baseUnit.clearBuilding();
+                                                    baseUnit.updateBuilding();
+                                                    Thread.sleep(Utils.phantomPetTeleportTime * 1000);
+                                                }
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
+                                        } // loop end
+                                        if(!player.con.isConnected() && !baseUnit.dead) { // if player left, let him respawn it
+                                            baseUnit.kill();
+                                            spawnedPhantomPet.remove(player.uuid);
                                         }
                                     }
                                 };

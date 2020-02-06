@@ -342,7 +342,7 @@ public class IoPlugin extends Plugin {
                         int rank = database.get(player.uuid).getRank();
                         if (rank >= 1) {
                             if (spawnedDraugPets.containsKey(player.uuid)) {
-                                if (spawnedDraugPets.get(player.uuid) < rank) {
+                                if (spawnedDraugPets.get(player.uuid) < rank || player.isAdmin) {
                                     spawnedDraugPets.put(player.uuid, spawnedDraugPets.get(player.uuid) + 1);
                                     Call.sendMessage(player.name + "[#b177fc] spawned in a draug pet! " + spawnedDraugPets.get(player.uuid) + "/" + rank + " spawned.");
                                     BaseUnit baseUnit = UnitTypes.draug.create(player.getTeam());
@@ -417,7 +417,7 @@ public class IoPlugin extends Plugin {
                 if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
-                            if (!spawnedLichPet.contains(player.uuid)) {
+                            if (!spawnedLichPet.contains(player.uuid) || player.isAdmin) {
                                 spawnedLichPet.add(player.uuid);
                                 BaseUnit baseUnit = UnitTypes.lich.create(player.getTeam());
                                 baseUnit.set(player.getClosestCore().x, player.getClosestCore().y);

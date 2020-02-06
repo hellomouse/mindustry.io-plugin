@@ -380,8 +380,6 @@ public class IoPlugin extends Plugin {
                                             try {
                                                 if(baseUnit.dst(player.getX(), player.getY()) > 150) {
                                                     baseUnit.set(player.getX(), player.getY());
-                                                    baseUnit.clearBuilding();
-                                                    baseUnit.updateBuilding();
                                                     Thread.sleep(Utils.phantomPetTeleportTime * 1000);
                                                 }
                                             } catch (InterruptedException e) {

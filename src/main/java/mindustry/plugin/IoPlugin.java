@@ -449,6 +449,23 @@ public class IoPlugin extends Plugin {
                 }
             });
 
+            handler.<Player>register("spawn", "[vip+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
+                if(state.rules.attackMode || state.rules.waves) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 2) {
+                            player.onRespawn(player.getClosestCore().tile);
+                            player.sendMessage("Spawned!");
+                        } else {
+                            player.sendMessage("You don't have permissions to execute this command!");
+                        }
+                    } else {
+                        player.sendMessage("You don't have permissions to execute this command!");
+                    }
+                } else {
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
+                }
+            });
+
             handler.<Player>register("stats", "<playerid/playername>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
                 if(args[0].length() > 0) {
                     Player p = Utils.findPlayer(args[0]);

@@ -329,10 +329,10 @@ public class IoPlugin extends Plugin {
 
                         }
                     } else {
-                        player.sendMessage("You don't have permissions to execute this command!");
+                        player.sendMessage(Utils.noPermissionMessage);
                     }
                 } else {
-                    player.sendMessage("You don't have permissions to execute this command!");
+                    player.sendMessage(Utils.noPermissionMessage);
                 }
             });
 
@@ -354,10 +354,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]This command will spawn in a draug mining bot, use it again to proceed.");
                             }
                         } else {
-                            player.sendMessage("You don't have permissions to execute this command!");
+                            player.sendMessage(Utils.noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage("You don't have permissions to execute this command!");
+                        player.sendMessage(Utils.noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -401,10 +401,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]You already spawned a phantom pet in this game!");
                             }
                         } else {
-                            player.sendMessage("You don't have permissions to execute this command!");
+                            player.sendMessage(Utils.noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage("You don't have permissions to execute this command!");
+                        player.sendMessage(Utils.noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -439,10 +439,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
                             }
                         } else {
-                            player.sendMessage("You don't have permissions to execute this command!");
+                            player.sendMessage(Utils.noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage("You don't have permissions to execute this command!");
+                        player.sendMessage(Utils.noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -456,10 +456,10 @@ public class IoPlugin extends Plugin {
                             player.onRespawn(player.getClosestCore().tile);
                             player.sendMessage("Spawned!");
                         } else {
-                            player.sendMessage("You don't have permissions to execute this command!");
+                            player.sendMessage(Utils.noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage("You don't have permissions to execute this command!");
+                        player.sendMessage(Utils.noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");

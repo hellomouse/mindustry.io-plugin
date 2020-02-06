@@ -14,6 +14,7 @@ public class Utils {
     public static int chatMessageMaxSize = 256;
     public static int phantomPetTeleportTime = 1; // in seconds
     static String welcomeMessage = "";
+    static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
     static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +
             "[sky]%player%'s stats:\n" +

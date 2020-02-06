@@ -29,13 +29,14 @@ import mindustry.game.EventType;
 import mindustry.gen.Call;
 
 import static mindustry.Vars.*;
+import static mindustry.Vars.player;
 
 public class IoPlugin extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
-    public static HashMap<Player, PlayerData> rainbowedPlayers = new HashMap<Player, PlayerData>(); // player, PlayerData
+    public static Array<Player> rainbowedPlayers = new Array<>(); // player
     public static Array<Player> spawnedPhantomPet = new Array<>();
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
@@ -161,7 +162,7 @@ public class IoPlugin extends Plugin {
         }
 
         Events.on(EventType.PlayerLeave.class, event -> {
-            if(rainbowedPlayers.containsKey(player)) {
+            if(rainbowedPlayers.contains(player)) {
                 rainbowedPlayers.remove(player);
             }
         });
@@ -236,55 +237,6 @@ public class IoPlugin extends Plugin {
             }
             spawnedPhantomPet.clear();
         });
-
-
-        //TODO: find out why this breaks after some time
-        Thread rainbowLoop = new Thread() {
-            public void run() {
-                TimerTask task = new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        for (Map.Entry<Player, PlayerData> entry : rainbowedPlayers.entrySet()) {
-                            Player p = entry.getKey();
-                            if(!playerGroup.all().contains(p)){
-                                rainbowedPlayers.remove(player);
-                                return;
-                            }
-                            if(p==null) return;
-                            if(p.name==null) return;
-                            PlayerData pdata = entry.getValue();
-                            String playerNameUnmodified = pdata.realName;
-                            Integer hue = pdata.hue;
-                            if(hue < 360) {
-                                hue = hue + 1;
-                            } else{
-                                hue = 0;
-                            }
-
-
-                            Color hsb = Color.getHSBColor(hue / 360f, 1f, 1f);
-                            pdata.setHue(hue);
-                            String hex = "#" + Integer.toHexString(hsb.getRGB()).substring(2);
-                            String[] c = playerNameUnmodified.split(" ", 2);
-
-                            p.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
-                            rainbowedPlayers.replace(player, pdata);
-                        }
-                        try {
-                            Thread.sleep(75);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-
-                Timer timer = new Timer();
-                timer.schedule(task, new Date(), 75);
-            }
-        };
-
-        rainbowLoop.start();
     }
 
     //register commands that run on the server
@@ -330,14 +282,13 @@ public class IoPlugin extends Plugin {
             handler.<Player>register("rainbow", "[vip+] Give your username a rainbow animation", (args, player) -> {
                 if(database.containsKey(player.uuid)) {
                     if(database.get(player.uuid).getRank() >= 2) {
-                        if(rainbowedPlayers.containsKey(player)) {
+                        if(rainbowedPlayers.contains(player)) {
                             player.sendMessage("[sky]Rainbow effect toggled off.");
-                            String nameToSet = rainbowedPlayers.get(player).realName;
                             rainbowedPlayers.remove(player);
-                            player.name = nameToSet;
                         } else {
                             player.sendMessage("[sky]Rainbow effect toggled on.");
-                            rainbowedPlayers.put(player, new PlayerData(0, player.name));
+                            rainbowedPlayers.add(player);
+                            // TODO: put rainbow loop here so it doesnt break and disables automatically
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
@@ -382,6 +333,7 @@ public class IoPlugin extends Plugin {
                                     while(!baseUnit.dead) { // teleport phantom pet back to owner every x seconds
                                         try {
                                             baseUnit.set(player.getX(), player.getY());
+                                            baseUnit.updateTargeting();
                                             Thread.sleep(Utils.phantomPetTeleportTime * 1000); //
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();

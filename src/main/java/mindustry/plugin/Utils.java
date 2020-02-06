@@ -49,22 +49,6 @@ public class Utils {
         return string.replaceAll("\\[(.*?)\\]", "");
     }
 
-    public static String constructMessage(List<String> array) {
-        StringBuilder result = new StringBuilder();
-        for(String string : array){
-            result.append(string).append("\n");
-        }
-        return result.toString();
-    }
-
-    public static String stringArrayToString(List<String> array) {
-        StringBuilder result= new StringBuilder();
-        for(String string : array){
-            result.append(string);
-        }
-        return result.toString();
-    }
-
     public static Map getMapBySelector(String query) {
         Map found = null;
         try {
@@ -85,7 +69,7 @@ public class Utils {
     public static Player findPlayer(String identifier){
         Player found = null;
         for (Player player : playerGroup.all()) {
-            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier)) {
+            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier) || player.uuid.equals(identifier)) {
                 found = player;
             }
         }

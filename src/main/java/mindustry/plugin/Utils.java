@@ -12,7 +12,7 @@ import static mindustry.Vars.*;
 public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
-    public static int phantomPetTeleportTime = 6; // in seconds
+    public static int phantomPetTeleportTime = 5; // in seconds
     static String welcomeMessage = "";
     static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +

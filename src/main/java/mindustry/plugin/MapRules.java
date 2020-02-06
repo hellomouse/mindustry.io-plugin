@@ -9,7 +9,7 @@ import mindustry.world.Tile;
 
 public class MapRules {
     public static class Maps{
-        public static String minefield = "Minefield";
+        public static String minefield = "Minefield"; // pvp map
     }
 
     public static void run(){
@@ -23,7 +23,7 @@ public class MapRules {
                         Block block = tiles[x][y].block();
                         if(block!=null){
                             if(block == Blocks.shockMine){
-                                block.health = 10;
+                                block.health = 10; // set all mines health on the minefield map to 10
                             }
                         }
                     }

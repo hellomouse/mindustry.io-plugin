@@ -44,6 +44,7 @@ public class IoPlugin extends Plugin {
     public static Array<String> spawnedLichPet = new Array<>();
     public static HashMap<String, TempPlayerData> tempPlayerDatas = new HashMap<>(); // uuid, data
     public static HashMap<String, Integer> spawnedDraugPets = new HashMap<>(); // player, amount of draugs spawned
+    public static Boolean intermission = false;
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     public static JSONObject data; //token, channel_id, role_id
@@ -232,9 +233,14 @@ public class IoPlugin extends Plugin {
                     Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
                 }
             }
+            intermission = true;
+        });
+
+        Events.on(EventType.WorldLoadEvent.class, event -> {
             spawnedDraugPets.clear();
             spawnedPhantomPet.clear();
             spawnedLichPet.clear();
+            intermission = false;
         });
     }
 
@@ -368,7 +374,7 @@ public class IoPlugin extends Plugin {
                                 Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
                                 Thread phantomPetLoop = new Thread() {
                                     public void run() {
-                                        while (player.con.isConnected() && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                        while (player.con.isConnected() && !baseUnit.dead && !intermission) { // teleport phantom pet back to owner every x seconds
                                             try {
                                                 Log.info(baseUnit.dst(player.getX(), player.getY()));
                                                 if(baseUnit.dst(player.getX(), player.getY()) > 150) {
@@ -384,6 +390,10 @@ public class IoPlugin extends Plugin {
                                         if(!player.con.isConnected() && !baseUnit.dead) { // if player left, let him respawn it
                                             baseUnit.kill();
                                             spawnedPhantomPet.remove(player.uuid);
+                                        } else {
+                                            if(intermission){
+                                                baseUnit.kill();
+                                            }
                                         }
                                     }
                                 };
@@ -415,7 +425,7 @@ public class IoPlugin extends Plugin {
                                 Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 60 seconds)");
                                 Thread lichPetLoop = new Thread() {
                                     public void run() {
-                                        while (baseUnit != null && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                        while (!baseUnit.dead) { // teleport phantom pet back to owner every x seconds
                                             try {
                                                 baseUnit.damage(100f);
                                                 Thread.sleep(1000); //

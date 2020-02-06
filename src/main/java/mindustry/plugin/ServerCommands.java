@@ -779,7 +779,7 @@ public class ServerCommands {
             String donatorRole = data.getString("donator_roleid");
             handler.registerCommand(new RoleRestrictedCommand("redeemvip"){
                 {
-                    help = "<playerid|ip> Promote your in-game rank to donator [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    help = "<playerid|ip> Promote your in-game rank to VIP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
                     role = donatorRole;
                 }
 
@@ -826,6 +826,36 @@ public class ServerCommands {
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
+                            ctx.channel.sendMessage(eb);
+                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        }
+                    }
+                }
+
+            });
+        }
+
+        if (data.has("mvp_roleid")) {
+            String mvpRole = data.getString("mvp_roleid");
+            handler.registerCommand(new RoleRestrictedCommand("redeemmvp"){
+                {
+                    help = "<playerid|ip> Promote your in-game rank to MVP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    role = mvpRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1];
+                    if(target.length() > 0) {
+                        Player player = Utils.findPlayer(target);
+                        if(player!=null){
+                            if(IoPlugin.database.containsKey(player.uuid)) {
+                                IoPlugin.database.get(player.uuid).setRank(3);
+                            } else {
+                                IoPlugin.database.put(player.uuid, new PlayerData(3));
+                            }
+                            eb.setTitle("Command executed successfully");
+                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <mvp>.");
                             ctx.channel.sendMessage(eb);
                             Call.onKick(player.con, "Your rank was modified, please rejoin.");
                         }

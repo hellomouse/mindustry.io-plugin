@@ -337,7 +337,7 @@ public class IoPlugin extends Plugin {
             });
 
             handler.<Player>register("draugpet", "[active+] Spawn a draug mining drone for your team (disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves) {
+                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         int rank = database.get(player.uuid).getRank();
                         if (rank >= 1) {
@@ -365,7 +365,7 @@ public class IoPlugin extends Plugin {
             });
 
             handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game, disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves) {
+                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
                             if (!spawnedPhantomPet.contains(player.uuid)) {
@@ -414,7 +414,7 @@ public class IoPlugin extends Plugin {
             });
 
             handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 60 seconds, disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves) {
+                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
                             if (!spawnedLichPet.contains(player.uuid)) {
@@ -452,7 +452,7 @@ public class IoPlugin extends Plugin {
             });
 
             handler.<Player>register("spawn", "[vip+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves) {
+                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 2) {
                             player.onRespawn(player.getClosestCore().tile);

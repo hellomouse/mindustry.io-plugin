@@ -12,6 +12,7 @@ import static mindustry.Vars.*;
 public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
+    public static int phantomPetTeleportTime = 6; // in seconds
     static String welcomeMessage = "";
     static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +
@@ -22,10 +23,10 @@ public class Utils {
     static HashMap<Integer, String> rankNames = new HashMap<>();
 
     public static void init(){
-        rankNames.put(0, "[#7d7d7d]<none>");
-        rankNames.put(1, "[sky]<active player>");
-        rankNames.put(2, "[#fcba03]<vip>");
-        rankNames.put(3, "[scarlet]<mvp>");
+        rankNames.put(0, "[#7d7d7d]<none>[]");
+        rankNames.put(1, "[sky]<active player>[]");
+        rankNames.put(2, "[#fcba03]<vip>[]");
+        rankNames.put(3, "[scarlet]<mvp>[]");
         rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
         rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
     }

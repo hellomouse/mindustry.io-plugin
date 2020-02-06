@@ -240,6 +240,7 @@ public class IoPlugin extends Plugin {
             spawnedDraugPets.clear();
             spawnedPhantomPet.clear();
             spawnedLichPet.clear();
+            MapRules.run();
             intermission = false;
         });
     }

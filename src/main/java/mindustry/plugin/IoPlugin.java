@@ -413,7 +413,7 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 60 seconds, disabled on pvp)", (args, player) -> {
+            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 2 minutes, disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
@@ -423,12 +423,12 @@ public class IoPlugin extends Plugin {
                                 baseUnit.set(player.getClosestCore().x, player.getClosestCore().y);
                                 baseUnit.health = 200f;
                                 baseUnit.add();
-                                Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 60 seconds)");
+                                Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 2 minutes)");
                                 Thread lichPetLoop = new Thread() {
                                     public void run() {
                                         while (!baseUnit.dead) {
-                                            try { // deal 100 damage every second = 6000 damage in a minute to kill the lich
-                                                baseUnit.damage(100f);
+                                            try { // deal 50 damage every second = 6000 damage in 2 minutes to kill the lich
+                                                baseUnit.damage(50f);
                                                 Thread.sleep(1000);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();

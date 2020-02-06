@@ -433,7 +433,7 @@ public class IoPlugin extends Plugin {
                 }
             });
 
-            handler.<Player>register("stats", "<playerid>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
+            handler.<Player>register("stats", "<playerid/playername>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
                 if(args[0].length() > 0) {
                     Player p = Utils.findPlayer(args[0]);
                     if(p != null){

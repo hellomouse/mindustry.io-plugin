@@ -69,7 +69,7 @@ public class Utils {
     public static Player findPlayer(String identifier){
         Player found = null;
         for (Player player : playerGroup.all()) {
-            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier) || player.uuid.equals(identifier)) {
+            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier) || player.uuid.equals(identifier) || Utils.escapeColorCodes(player.name.toLowerCase()).equals(identifier.toLowerCase())) {
                 found = player;
             }
         }

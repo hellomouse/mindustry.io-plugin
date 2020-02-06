@@ -129,7 +129,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("setrank"){
                 {
-                    help = "<playerid|ip> <rank> Change the player's rank to the provided one.";
+                    help = "<playerid|ip|name> <rank> Change the player's rank to the provided one.";
                     role = adminRole;
                 }
 
@@ -211,7 +211,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("alert") {
                 {
-                    help = "<playerid|ip> <message> Alerts a player(s) using on-screen messages.";
+                    help = "<playerid|ip|name> <message> Alerts a player(s) using on-screen messages.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -510,7 +510,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("mech") {
                 {
-                    help = "<mechname> <playerid|ip|all> Change the provided player into a specific mech.";
+                    help = "<mechname> <playerid|ip|all|name> Change the provided player into a specific mech.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -571,7 +571,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("changeteam") {
                 {
-                    help = "<playerid|ip|all> <team> Change the provided player's team into the provided one.";
+                    help = "<playerid|ip|all|name> <team> Change the provided player's team into the provided one.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -625,7 +625,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("changeteamid") {
                 {
-                    help = "<playerid|ip|all> <team> Change the provided player's team into a generated int.";
+                    help = "<playerid|ip|all|name> <team> Change the provided player's team into a generated int.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
@@ -656,7 +656,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("rename"){
                 {
-                    help = "<playerid|ip> <name> Rename the provided player";
+                    help = "<playerid|ip|name> <name> Rename the provided player";
                     role = banRole;
                 }
 
@@ -816,7 +816,7 @@ public class ServerCommands {
             String activeRole = data.getString("activeplayer_roleid");
             handler.registerCommand(new RoleRestrictedCommand("redeemactive"){
                 {
-                    help = "<playerid|ip> Promote your in-game rank to active player [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    help = "<playerid|ip|name> Promote your in-game rank to active player [NOTE: Abusing this power and giving it to other players will result in a ban.]";
                     role = activeRole;
                 }
 
@@ -846,7 +846,7 @@ public class ServerCommands {
             String mvpRole = data.getString("mvp_roleid");
             handler.registerCommand(new RoleRestrictedCommand("redeemmvp"){
                 {
-                    help = "<playerid|ip> Promote your in-game rank to MVP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
+                    help = "<playerid|ip|name> Promote your in-game rank to MVP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
                     role = mvpRole;
                 }
 

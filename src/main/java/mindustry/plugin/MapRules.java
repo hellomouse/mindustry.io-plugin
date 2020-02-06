@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.gen.Call;
@@ -15,6 +16,7 @@ public class MapRules {
     public static void run(){
         Map map = Vars.world.getMap();
         if (map.name().equals(Maps.minefield)) {
+            Log.info("[MapRules]: Minefield action trigerred.");
             Call.sendMessage("[scarlet]Preparing minefield map, please wait.");
             Tile[][] tiles = Vars.world.getTiles();
             for(int x = 0; x < tiles.length; ++x) {
@@ -23,7 +25,7 @@ public class MapRules {
                         Block block = tiles[x][y].block();
                         if(block!=null){
                             if(block == Blocks.shockMine){
-                                block.health = 10; // set all mines health on the minefield map to 10
+                                tiles[x][y].ent().damage(30f); // leave shock mines with 10hp
                             }
                         }
                     }

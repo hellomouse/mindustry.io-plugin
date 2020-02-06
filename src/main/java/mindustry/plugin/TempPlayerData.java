@@ -8,4 +8,6 @@ public class TempPlayerData implements Serializable {
         this.hue = hue;
         this.realName = name;
     }
+
+    public void setHue(int i) { this.hue = i; }
 }

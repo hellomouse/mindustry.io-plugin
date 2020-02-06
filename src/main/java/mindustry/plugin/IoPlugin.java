@@ -42,6 +42,7 @@ public class IoPlugin extends Plugin {
     public static Array<String> rainbowedPlayers = new Array<>(); // player
     public static Array<String> spawnedPhantomPet = new Array<>();
     public static Array<String> spawnedLichPet = new Array<>();
+    public static HashMap<String, TempPlayerData> tempPlayerDatas = new HashMap<>(); // uuid, data
     public static HashMap<String, Integer> spawnedDraugPets = new HashMap<>(); // player, amount of draugs spawned
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
@@ -140,7 +141,7 @@ public class IoPlugin extends Plugin {
         // warning logs
 
         if (data.has("warnings_chat_channel_id")) {
-            TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
+            TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
             if (tc != null) {
                 HashMap<String, String> warnMessageBuffer = new HashMap<>();
                 Events.on(EventType.TapConfigEvent.class, event -> {
@@ -252,7 +253,7 @@ public class IoPlugin extends Plugin {
                 if (!data.has("warnings_chat_channel_id")) {
                     player.sendMessage("[scarlet]This command is disabled.");
                 } else {
-                    TextChannel tc = this.getTextChannel(data.getString("warnings_chat_channel_id"));
+                    TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
                     if (tc == null) {
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
@@ -283,10 +284,41 @@ public class IoPlugin extends Plugin {
                         if(rainbowedPlayers.contains(player.uuid)) {
                             player.sendMessage("[sky]Rainbow effect toggled off.");
                             rainbowedPlayers.remove(player.uuid);
+                            tempPlayerDatas.remove(player.uuid);
                         } else {
                             player.sendMessage("[sky]Rainbow effect toggled on.");
                             rainbowedPlayers.add(player.uuid);
-                            // TODO: put rainbow loop here so it doesnt break and disables automatically
+                            tempPlayerDatas.put(player.uuid, new TempPlayerData(0, player.name));
+                            Thread rainbowLoop = new Thread() {
+                                public void run() {
+                                    while(playerGroup.all().contains(player) && rainbowedPlayers.contains(player.uuid)) {
+                                        try {
+
+                                            TempPlayerData pdata = tempPlayerDatas.get(player.uuid);
+                                            String playerNameUnmodified = pdata.realName;
+                                            Integer hue = pdata.hue;
+                                            if (hue < 360) {
+                                                hue = hue + 1;
+                                            } else {
+                                                hue = 0;
+                                            }
+
+                                            String hex = "#" + Integer.toHexString(Color.getHSBColor(hue / 360f, 1f, 1f).getRGB()).substring(2);
+                                            String[] c = playerNameUnmodified.split(" ", 2);
+                                            player.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
+                                            pdata.setHue(hue);
+                                            tempPlayerDatas.replace(player.uuid, pdata);
+
+                                            Thread.sleep(50);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            };
+
+                            rainbowLoop.start();
+
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
@@ -430,7 +462,7 @@ public class IoPlugin extends Plugin {
 
 
     public static TextChannel getTextChannel(String id){
-        Optional<Channel> dc =  ((Optional<Channel>) api.getChannelById(id));
+        Optional<Channel> dc = api.getChannelById(id);
         if (!dc.isPresent()) {
             Log.err("[ERR!] discordplugin: channel not found!");
             return null;

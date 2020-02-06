@@ -175,6 +175,7 @@ public class IoPlugin extends Plugin {
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid).getRank();
                 if(rank==0) {
+                    player.name = player.name.replaceFirst("\\<(.*)\\>", "");
                     player.name = player.name.replaceAll("<", "");
                     player.name = player.name.replaceAll(">", "");
                 }
@@ -276,7 +277,7 @@ public class IoPlugin extends Plugin {
                 builder.append("[orange]List of players: \n");
                 for (Player p : Vars.playerGroup.all()) {
                     if(p.isAdmin) {
-                        builder.append("[scarlet]<ADMIN> ");
+                        builder.append("[scarlet]<ADMIN>[] ");
                     } else{
                         builder.append("[lightgray]");
                     }

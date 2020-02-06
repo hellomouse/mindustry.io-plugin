@@ -660,8 +660,8 @@ public class ServerCommands {
                     if(target.length() > 0 && name.length() > 0) {
                         Player player = Utils.findPlayer(target);
                         if(player!=null){
-                            if(IoPlugin.rainbowedPlayers.containsKey(player)) { // turn rainbow off if its enabled
-                                IoPlugin.rainbowedPlayers.remove(player);
+                            if(IoPlugin.rainbowedPlayers.contains(player.uuid)) { // turn rainbow off if its enabled
+                                IoPlugin.rainbowedPlayers.remove(player.uuid);
                             }
                             player.name = name;
                             eb.setTitle("Command executed successfully");

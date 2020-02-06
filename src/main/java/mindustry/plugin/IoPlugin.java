@@ -10,6 +10,9 @@ import java.util.*;
 import arc.struct.Array;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
+import mindustry.entities.type.EffectEntity;
+import mindustry.entities.type.base.BuilderDrone;
+import mindustry.entities.units.UnitState;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -36,8 +39,10 @@ public class IoPlugin extends Plugin {
     public static String prefix = ".";
     public static String serverName = "<untitled>";
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
-    public static Array<Player> rainbowedPlayers = new Array<>(); // player
-    public static Array<Player> spawnedPhantomPet = new Array<>();
+    public static Array<String> rainbowedPlayers = new Array<>(); // player
+    public static Array<String> spawnedPhantomPet = new Array<>();
+    public static Array<String> spawnedLichPet = new Array<>();
+    public static HashMap<String, Integer> spawnedDraugPets = new HashMap<>(); // player, amount of draugs spawned
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     public static JSONObject data; //token, channel_id, role_id
@@ -161,12 +166,6 @@ public class IoPlugin extends Plugin {
             }
         }
 
-        Events.on(EventType.PlayerLeave.class, event -> {
-            if(rainbowedPlayers.contains(player)) {
-                rainbowedPlayers.remove(player);
-            }
-        });
-
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
@@ -232,10 +231,9 @@ public class IoPlugin extends Plugin {
                     Call.onInfoToast(p.con, "[scarlet]+1 games played", 9);
                 }
             }
-            for (PlayerData pd : database.values()) {
-                pd.resetDraug();
-            }
+            spawnedDraugPets.clear();
             spawnedPhantomPet.clear();
+            spawnedLichPet.clear();
         });
     }
 
@@ -282,12 +280,12 @@ public class IoPlugin extends Plugin {
             handler.<Player>register("rainbow", "[vip+] Give your username a rainbow animation", (args, player) -> {
                 if(database.containsKey(player.uuid)) {
                     if(database.get(player.uuid).getRank() >= 2) {
-                        if(rainbowedPlayers.contains(player)) {
+                        if(rainbowedPlayers.contains(player.uuid)) {
                             player.sendMessage("[sky]Rainbow effect toggled off.");
-                            rainbowedPlayers.remove(player);
+                            rainbowedPlayers.remove(player.uuid);
                         } else {
                             player.sendMessage("[sky]Rainbow effect toggled on.");
-                            rainbowedPlayers.add(player);
+                            rainbowedPlayers.add(player.uuid);
                             // TODO: put rainbow loop here so it doesnt break and disables automatically
                         }
                     } else {
@@ -299,55 +297,106 @@ public class IoPlugin extends Plugin {
             });
 
             handler.<Player>register("draugpet", "[active+] Spawn yourself a draug pet (max.1 - active, max.2 - vip, max.3 - mvp)", (args, player) -> {
-                if(database.containsKey(player.uuid)) {
-                    if(database.get(player.uuid).getRank() >= 1) {
-                        PlayerData pd = database.get(player.uuid);
-                        if(pd.getDraugPets() < pd.getRank()) {
-                            Call.sendMessage(player.name + "[#b177fc] spawned in a draug pet!");
-                            pd.incrementDraug(1);
-                            BaseUnit baseUnit = UnitTypes.draug.create(player.getTeam());
-                            baseUnit.set(player.getX(), player.getY());
-                            baseUnit.add();
+                if(state.rules.attackMode || state.rules.waves) {
+                    if (database.containsKey(player.uuid)) {
+                        int rank = database.get(player.uuid).getRank();
+                        if (rank >= 1) {
+                            if (spawnedDraugPets.containsKey(player.uuid)) {
+                                if (spawnedDraugPets.get(player.uuid) < rank) {
+                                    spawnedDraugPets.put(player.uuid, spawnedDraugPets.get(player.uuid) + 1);
+                                    Call.sendMessage(player.name + "[#b177fc] spawned in a draug pet! " + spawnedDraugPets.get(player.uuid) + "/" + rank + " spawned.");
+                                    BaseUnit baseUnit = UnitTypes.draug.create(player.getTeam());
+                                    baseUnit.set(player.getX(), player.getY());
+                                    baseUnit.add();
+                                }
+                            } else {
+                                player.sendMessage("[#42a1f5]You reached the maximum draug pet limit for this game!");
+                            }
                         } else {
-                            player.sendMessage("[#42a1f5]You reached the maximum draug pet limit for this game!");
+                            player.sendMessage("You don't have permissions to execute this command!");
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
                     }
                 } else {
-                    player.sendMessage("You don't have permissions to execute this command!");
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
             });
 
             handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game)", (args, player) -> {
-                if(database.containsKey(player.uuid)) {
-                    if(database.get(player.uuid).getRank() >= 3) {
-                        if(!spawnedPhantomPet.contains(player)) {
-                            spawnedPhantomPet.add(player);
-                            BaseUnit baseUnit = UnitTypes.phantom.create(player.getTeam());
-                            baseUnit.set(player.getX(), player.getY());
-                            baseUnit.add();
-                            Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
-                            Thread phantomPetLoop = new Thread() {
-                                public void run() {
-                                    while(!baseUnit.dead) { // teleport phantom pet back to owner every x seconds
-                                        try {
-                                            baseUnit.set(player.getX(), player.getY());
-                                            baseUnit.updateTargeting();
-                                            Thread.sleep(Utils.phantomPetTeleportTime * 1000); //
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
+                if(state.rules.attackMode || state.rules.waves) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 3) {
+                            if (!spawnedPhantomPet.contains(player.uuid)) {
+                                spawnedPhantomPet.add(player.uuid);
+                                BuilderDrone baseUnit = (BuilderDrone) UnitTypes.phantom.create(player.getTeam());
+                                baseUnit.set(player.getX(), player.getY());
+                                baseUnit.add();
+                                Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
+                                Thread phantomPetLoop = new Thread() {
+                                    public void run() {
+                                        while (baseUnit != null && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                            try {
+                                                baseUnit.set(player.getX(), player.getY());
+                                                baseUnit.clearBuilding();
+                                                baseUnit.updateBuilding();
+                                                Thread.sleep(Utils.phantomPetTeleportTime * 1000); //
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
-                                }
-                            };
-                            phantomPetLoop.start();
+                                };
+                                phantomPetLoop.start();
+                            } else {
+                                player.sendMessage("[#42a1f5]You already spawned a phantom pet in this game!");
+                            }
+                        } else {
+                            player.sendMessage("You don't have permissions to execute this command!");
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");
                     }
                 } else {
-                    player.sendMessage("You don't have permissions to execute this command!");
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
+                }
+            });
+
+            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 60 seconds)", (args, player) -> {
+                if(state.rules.attackMode || state.rules.waves) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 3) {
+                            if (!spawnedLichPet.contains(player.uuid)) {
+                                spawnedLichPet.add(player.uuid);
+                                BaseUnit baseUnit = UnitTypes.lich.create(player.getTeam());
+                                baseUnit.set(player.getClosestCore().x, player.getClosestCore().y);
+                                baseUnit.health = 200f;
+                                baseUnit.add();
+                                Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 60 seconds)");
+                                Thread lichPetLoop = new Thread() {
+                                    public void run() {
+                                        while (baseUnit != null && !baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                            try {
+                                                baseUnit.damage(100f);
+                                                Thread.sleep(1000); //
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                };
+                                lichPetLoop.start();
+                            } else {
+                                player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
+                            }
+                        } else {
+                            player.sendMessage("You don't have permissions to execute this command!");
+                        }
+                    } else {
+                        player.sendMessage("You don't have permissions to execute this command!");
+                    }
+                } else {
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
             });
 

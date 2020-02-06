@@ -402,6 +402,8 @@ public class ServerCommands {
                         msg.append("· ").append(Utils.escapeCharacters(player.name));
                         if(!player.isAdmin) {
                             msg.append(" : ").append(player.con.address).append(" : ").append(player.uuid).append("\n");
+                        } else {
+                            msg.append("\n");
                         }
                     }
                     msg.append("```");

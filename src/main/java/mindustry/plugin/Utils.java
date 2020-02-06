@@ -20,6 +20,15 @@ public class Utils {
             "[#4287f5]Playtime - %playtime% minutes.\n" +
             "[#f54263]Games played - %games%.\n" +
             "[#9342f5]Buildings built - %buildings%.";
+
+    static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
+            "\n" +
+            "[sky]%player%, you have been promoted to [sky]<active>[]!\n" +
+            "[#4287f5]You reached a playtime of - %playtime% minutes! That's 10+ hours!\n" +
+            "[#f54263]You played a total of %games% games!\n" +
+            "[#9342f5]You built a total of %buildings%!\n" +
+            "[sky]Thank you for participating and enjoy your time on [orange]<[white]io[orange]>[sky]!";
+
     static HashMap<Integer, String> rankNames = new HashMap<>();
 
     public static void init(){
@@ -35,6 +44,12 @@ public class Utils {
         public static Color warning = (Color.getHSBColor(5, 85, 95));
         public static Color info = (Color.getHSBColor(45, 85, 95));
         public static Color error = (Color.getHSBColor(3, 78, 91));
+    }
+
+    public static class activeRequirements {
+        public static int playtime = 60 * 10;
+        public static int buildingsBuilt = 400 * 10;
+        public static int gamesPlayed = 1 * 10;
     }
 
     static double DistanceBetween(double x1, double y1, double x2, double y2) {

@@ -2,6 +2,7 @@ package mindustry.plugin;
 
 import mindustry.Vars;
 import mindustry.entities.type.Player;
+import mindustry.gen.Call;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -37,10 +38,17 @@ public class BotThread extends Thread {
             try {
                 Thread.sleep(60 * 1000);
 
-                // increment playtime for users in-game
+
+
                 for (Player p : Vars.playerGroup.all()) {
                     if(IoPlugin.database.containsKey(p.uuid)) {
-                        IoPlugin.database.get(p.uuid).incrementPlaytime(1); // 1 minute
+                        PlayerData pd = IoPlugin.database.get(p.uuid);
+                        // increment playtime for users in-game
+                        pd.incrementPlaytime(1); // 1 minute
+                        if(pd.getRank() == 0 && pd.getPlaytime() >= Utils.activeRequirements.playtime && pd.getBuildings() >= Utils.activeRequirements.buildingsBuilt && pd.getGames() >= Utils.activeRequirements.gamesPlayed){
+                            Call.onInfoMessage(p.con, Utils.promotionMessage);
+                            pd.setRank(1);
+                        }
                     } else {
                         IoPlugin.database.put(p.uuid, new PlayerData(0));
                     }

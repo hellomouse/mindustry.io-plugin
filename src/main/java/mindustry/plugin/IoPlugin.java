@@ -238,7 +238,7 @@ public class IoPlugin extends Plugin {
         });
 
 
-
+        //TODO: find out why this breaks after some time
         Thread rainbowLoop = new Thread() {
             public void run() {
                 TimerTask task = new TimerTask() {
@@ -377,6 +377,19 @@ public class IoPlugin extends Plugin {
                             baseUnit.set(player.getX(), player.getY());
                             baseUnit.add();
                             Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
+                            Thread phantomPetLoop = new Thread() {
+                                public void run() {
+                                    while(!baseUnit.dead) { // teleport phantom pet back to owner every x seconds
+                                        try {
+                                            baseUnit.set(player.getX(), player.getY());
+                                            Thread.sleep(Utils.phantomPetTeleportTime * 1000); //
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            };
+                            phantomPetLoop.start();
                         }
                     } else {
                         player.sendMessage("You don't have permissions to execute this command!");

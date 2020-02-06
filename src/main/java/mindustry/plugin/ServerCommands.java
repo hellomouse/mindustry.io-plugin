@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import arc.graphics.Color;
 import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
@@ -810,6 +811,20 @@ public class ServerCommands {
                 }
 
             });
+            /*handler.registerCommand(new Command("sendm"){ // use sendm to send embed messages when needed locally, disable for now
+                public void run(Context ctx){
+                    EmbedBuilder eb = new EmbedBuilder()
+                            .setColor(Utils.Pals.info)
+                            .setTitle("Support mindustry.io by donating, and receive custom ranks!")
+                            .setUrl("https://donate.mindustry.io/")
+                            .setDescription("By donating, you directly help me pay for the monthly server bills I receive for hosting 4 servers with **150+** concurrent players daily.")
+                            .addField("VIP", "**VIP** is obtainable through __nitro boosting__ the server or __donating $1.59+__ to the server.", false)
+                            .addField("__**MVP**__", "**MVP** is a more enchanced **vip** rank, obtainable only through __donating $3.39+__ to the server.", false)
+                            .addField("Where do I get it?", "You can purchase **vip** & **mvp** ranks here: https://donate.mindustry.io", false)
+                            .addField("\uD83E\uDD14 io is pay2win???", "Nope. All perks vips & mvp's gain are aesthetic items **or** items that indirectly help the team. Powerful commands that could give you an advantage are __disabled on pvp.__", true);
+                    ctx.channel.sendMessage(eb);
+                }
+            });*/
         }
 
         if (data.has("activeplayer_roleid")) {

@@ -278,24 +278,16 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder()
                             .setTimestampToNow();
                     String target = ctx.args[1];
-                    Boolean found = false;
-                    int id = -1;
-                    try {
-                        id = Integer.parseInt(target);
-                    } catch (NumberFormatException ex) {}
                     if (target.length() > 0) {
-                        for (Player p : playerGroup.all()) {
-                            if (p.con.address.equals(target) || p.id == id) {
-                                found = true;
-                                netServer.admins.banPlayer(p.uuid);
-                                eb.setTitle("Command executed.");
-                                eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
-                                ctx.channel.sendMessage(eb);
-                                Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
-                                Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned permanently.");
-                            }
-                        }
-                        if(!found){
+                        Player p = Utils.findPlayer(target);
+                        if (p != null) {
+                            netServer.admins.banPlayer(p.uuid);
+                            eb.setTitle("Command executed.");
+                            eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
+                            ctx.channel.sendMessage(eb);
+                            Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
+                            Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned permanently.");
+                        } else {
                             eb.setTitle("Command terminated");
                             eb.setColor(Utils.Pals.error);
                             eb.setDescription("Player not online. Use %blacklist <ip> to ban an offline player.".replace("%", IoPlugin.prefix));
@@ -364,30 +356,20 @@ public class ServerCommands {
                     role = banRole;
                 }
                 public void run(Context ctx) {
-                    String target;
-                    if(ctx.args.length==2){ target = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: %kick <ip/id>".replace("%", IoPlugin.prefix)); return;}
+                    String target = ctx.args[1];
 
-                    int id = -1;
-                    try {
-                        id = Integer.parseInt(target);
-                    } catch (NumberFormatException ignored) {}
-                    if (target.length() > 0) {
-                        for (Player p : playerGroup.all()) {
-                            if (p.con.address.equals(target) || p.id == id) {
-                                eb.setTitle("Command executed.");
-                                eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
-                                Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been kicked.");
-                                Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
-                                ctx.channel.sendMessage(eb);
-                                //Utils.LogAction("kick", "Remotely executed kick command", ctx.author, p.name + " : " + p.con.address);
-                            }
-                        }
+                    Player p = Utils.findPlayer(target);
+                    if (p != null) {
+                        eb.setTitle("Command executed.");
+                        eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
+                        Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been kicked.");
+                        Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                     } else {
                         eb.setTitle("Command terminated.");
                         eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Not enough arguments / usage: `kick <ip/id>`");
-                        ctx.channel.sendMessage(eb);
+                        eb.setDescription("Player not online / not found.");
                     }
+                    ctx.channel.sendMessage(eb);
                 }
             });
 

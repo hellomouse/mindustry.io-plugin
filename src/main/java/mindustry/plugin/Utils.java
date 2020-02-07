@@ -1,7 +1,10 @@
 package mindustry.plugin;
 
+import arc.struct.Array;
+import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.maps.Map;
+import mindustry.world.Block;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -39,6 +42,9 @@ public class Utils {
         rankNames.put(3, "[scarlet]<mvp>[]");
         rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
         rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
+
+        activeRequirements.bannedBlocks.add(Blocks.conveyor);
+        activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
     }
 
     public static class Pals {
@@ -48,6 +54,7 @@ public class Utils {
     }
 
     public static class activeRequirements {
+        public static Array<Block> bannedBlocks = new Array<>();
         public static int playtime = 60 * 10;
         public static int buildingsBuilt = 800 * 10;
         public static int gamesPlayed = 1 * 10;

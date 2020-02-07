@@ -222,7 +222,11 @@ public class IoPlugin extends Plugin {
             if(event.player!= null){
                 if (!event.breaking) {
                     if(database.containsKey(event.player.uuid)) {
-                        database.get(event.player.uuid).incrementBuilding(1);
+                        if(event.tile.block()!=null) {
+                            if(!Utils.activeRequirements.bannedBlocks.contains(event.tile.block())) {
+                                database.get(event.player.uuid).incrementBuilding(1);
+                            }
+                        }
                     }
                 }
             }

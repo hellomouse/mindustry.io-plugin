@@ -49,7 +49,7 @@ public class Utils {
 
     public static class activeRequirements {
         public static int playtime = 60 * 10;
-        public static int buildingsBuilt = 400 * 10;
+        public static int buildingsBuilt = 800 * 10;
         public static int gamesPlayed = 1 * 10;
     }
 

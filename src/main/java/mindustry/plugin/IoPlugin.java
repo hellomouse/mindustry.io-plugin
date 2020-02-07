@@ -13,6 +13,7 @@ import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.EffectEntity;
 import mindustry.entities.type.base.BuilderDrone;
 import mindustry.entities.units.UnitState;
+import mindustry.net.Administration;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -380,6 +381,7 @@ public class IoPlugin extends Plugin {
                                             try {
                                                 if(baseUnit.dst(player.getX(), player.getY()) > 150) {
                                                     baseUnit.set(player.getX(), player.getY());
+                                                    baseUnit.clearBuilding(); // lets hope this doesnt crash ?
                                                     Thread.sleep(Utils.phantomPetTeleportTime * 1000);
                                                 }
                                             } catch (InterruptedException e) {

@@ -248,6 +248,9 @@ public class IoPlugin extends Plugin {
             spawnedLichPet.clear();
             MapRules.run();
             intermission = false;
+            for(Player p : playerGroup.all()) {
+                Call.onInfoMessage(p.con, Utils.formatMessage(p, Utils.welcomeMessage));
+            }
         });
     }
 
@@ -304,7 +307,7 @@ public class IoPlugin extends Plugin {
                             tempPlayerDatas.put(player.uuid, new TempPlayerData(0, player.name));
                             Thread rainbowLoop = new Thread() {
                                 public void run() {
-                                    while(playerGroup.all().contains(player) && rainbowedPlayers.contains(player.uuid)) {
+                                    while(playerGroup.all().contains(player) && rainbowedPlayers.contains(player.uuid) && !intermission) {
                                         try {
 
                                             TempPlayerData pdata = tempPlayerDatas.get(player.uuid);

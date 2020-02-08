@@ -1,18 +1,17 @@
 package mindustry.plugin;
 
-import java.io.Serializable;
+import java.io.*;
 
 public class PlayerData implements Serializable {
     public Integer rank = 0;
     public Integer playTime = 0;
     public Integer buildingsBuilt = 0;
-    public Integer enemiesKilled = 0;
+    public String playerName = "";
     public Integer gamesPlayed = 0;
 
-
-    public PlayerData(Integer rank, Integer playTime){
+    public PlayerData(Integer rank, String name){
         this.rank = rank;
-        this.playTime = playTime;
+        this.playerName = name;
     }
 
     public PlayerData(int rank){
@@ -41,4 +40,22 @@ public class PlayerData implements Serializable {
     public void incrementGames() {
         this.gamesPlayed = gamesPlayed + 1;
     }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeInt(rank);
+        stream.writeInt(playTime);
+        stream.writeInt(buildingsBuilt);
+        stream.writeInt(gamesPlayed);
+        stream.writeObject(playerName);
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        rank = stream.readInt();
+        playTime = stream.readInt();
+        buildingsBuilt = stream.readInt();
+        gamesPlayed = stream.readInt();
+        playerName = (String) stream.readObject();
+    }
+
+
 }

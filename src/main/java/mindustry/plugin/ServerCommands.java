@@ -144,7 +144,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(targetRank);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank));
+                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank, player.name));
                             }
                             if(targetRank==5) { // give admin to administrators
                                 netServer.admins.adminPlayer(player.uuid, player.usid);
@@ -688,6 +688,30 @@ public class ServerCommands {
 
             });
 
+            handler.registerCommand(new RoleRestrictedCommand("getrank"){
+                {
+                    help = "<rankid> Returns all players and their uuids for the specified rank.";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    int targetRank = Integer.parseInt(ctx.args[1]);
+                    if(targetRank > 0) {
+                        StringBuilder msg = new StringBuilder().append("**Players with rank** `").append(Utils.rankNames.get(targetRank)).append("`:```");
+                        for(java.util.Map.Entry<String, PlayerData> entrySet : IoPlugin.database.entrySet()) {
+                            String uuid = entrySet.getKey();
+                            PlayerData pd = entrySet.getValue();
+                            if(uuid != null && pd != null) {
+                                msg.append("· ").append(Utils.escapeCharacters(Utils.escapeColorCodes(pd.playerName))).append(" : ").append(uuid).append("\n");
+                            }
+                        }
+                        ctx.reply(String.valueOf(msg));
+                    }
+                }
+
+            });
+
             /*handler.registerCommand(new RoleRestrictedCommand("teleport") {
                 {
                     help = "<playerid|ip|all> <playerid|ip|all> Teleport player1 to player2.";
@@ -784,7 +808,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(2);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(2));
+                                IoPlugin.database.put(player.uuid, new PlayerData(2, player.name));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <vip>.");
@@ -828,7 +852,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(1);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(1));
+                                IoPlugin.database.put(player.uuid, new PlayerData(1, player.name));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
@@ -858,7 +882,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(3);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(3));
+                                IoPlugin.database.put(player.uuid, new PlayerData(3, player.name));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <mvp>.");

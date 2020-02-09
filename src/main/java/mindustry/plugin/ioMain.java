@@ -42,7 +42,6 @@ public class ioMain extends Plugin {
     public static String serverName = "<untitled>";
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
     public static Array<String> rainbowedPlayers = new Array<>(); // player
-    public static Array<String> spawnedPhantomPet = new Array<>();
     public static Array<String> spawnedLichPet = new Array<>();
     public static HashMap<String, TempPlayerData> tempPlayerDatas = new HashMap<>(); // uuid, data
     public static HashMap<String, Integer> spawnedDraugPets = new HashMap<>(); // player, amount of draugs spawned
@@ -245,7 +244,6 @@ public class ioMain extends Plugin {
 
         Events.on(EventType.WorldLoadEvent.class, event -> {
             spawnedDraugPets.clear();
-            spawnedPhantomPet.clear();
             spawnedLichPet.clear();
             MapRules.run();
             intermission = false;
@@ -373,30 +371,6 @@ public class ioMain extends Plugin {
                 }
             });
 
-            handler.<Player>register("phantompet", "[mvp+] Spawn yourself a phantom builder pet (max. 1 per game, disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
-                    if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 3) {
-                            if (!spawnedPhantomPet.contains(player.uuid)) {
-                                spawnedPhantomPet.add(player.uuid);
-                                BuilderDrone baseUnit = (BuilderDrone) UnitTypes.phantom.create(player.getTeam());
-                                baseUnit.set(player.getX(), player.getY());
-                                baseUnit.add();
-                                Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
-                            } else {
-                                player.sendMessage("[#42a1f5]You already spawned a phantom pet in this game!");
-                            }
-                        } else {
-                            player.sendMessage(noPermissionMessage);
-                        }
-                    } else {
-                        player.sendMessage(noPermissionMessage);
-                    }
-                } else {
-                    player.sendMessage("[scarlet] This command is disabled on pvp.");
-                }
-            });
-
             handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 2 minutes, disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
@@ -410,13 +384,12 @@ public class ioMain extends Plugin {
                                 Call.sendMessage(player.name + "[#ff0000] spawned in a lich defense pet! (lasts 2 minutes)");
                                 Thread lichPetLoop = new Thread() {
                                     public void run() {
-                                        while (!baseUnit.dead) {
-                                            try { // deal 50 damage every second = 6000 damage in 2 minutes to kill the lich
-                                                baseUnit.damage(50f);
-                                                Thread.sleep(1000);
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                        try {
+                                            Thread.sleep(1000 * 60 * 2); // wait 2 minutes
+                                            baseUnit.kill();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                            baseUnit.kill();
                                         }
                                     }
                                 };

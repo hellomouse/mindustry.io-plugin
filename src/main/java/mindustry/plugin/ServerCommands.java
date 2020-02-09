@@ -798,6 +798,9 @@ public class ServerCommands {
                             case "wraith":
                                 desiredUnit = UnitTypes.wraith;
                                 break;
+                            default:
+                                desiredUnit = UnitTypes.dagger;
+                                break;
                         }
 
                         EmbedBuilder eb = new EmbedBuilder();
@@ -827,7 +830,7 @@ public class ServerCommands {
                     String targetUnit = ctx.args[2].toLowerCase();
                     UnitType desiredUnit = UnitTypes.dagger;
                     if(target.length() > 0 && targetUnit.length() > 0) {
-                        switch(targetUnit){
+                        switch(targetUnit) {
                             case "draug":
                                 desiredUnit = UnitTypes.draug;
                                 break;
@@ -869,6 +872,9 @@ public class ServerCommands {
                                 break;
                             case "wraith":
                                 desiredUnit = UnitTypes.wraith;
+                                break;
+                            default:
+                                desiredUnit = UnitTypes.dagger;
                                 break;
                         }
 

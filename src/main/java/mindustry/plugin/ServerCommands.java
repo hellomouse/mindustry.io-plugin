@@ -1,5 +1,6 @@
 package mindustry.plugin;
 
+import mindustry.Vars;
 import mindustry.content.Mechs;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
@@ -810,6 +811,81 @@ public class ServerCommands {
                             });
                             eb.setTitle("Command executed successfully.");
                             eb.setDescription("Spawned " + amount + " " + targetUnit + " near " + Utils.escapeCharacters(player.name) + ".");
+                            ctx.channel.sendMessage(eb);
+                        }
+                    }
+                }
+            });
+
+            handler.registerCommand(new RoleRestrictedCommand("killunits") {
+                {
+                    help = "<playerid|ip|name> <unit> Kills all units of the team of the specified player";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String target = ctx.args[1];
+                    String targetUnit = ctx.args[2].toLowerCase();
+                    UnitType desiredUnit = UnitTypes.dagger;
+                    if(target.length() > 0 && targetUnit.length() > 0) {
+                        switch(targetUnit){
+                            case "draug":
+                                desiredUnit = UnitTypes.draug;
+                                break;
+                            case "chaosarray":
+                                desiredUnit = UnitTypes.chaosArray;
+                                break;
+                            case "crawler":
+                                desiredUnit = UnitTypes.crawler;
+                                break;
+                            case "eradicator":
+                                desiredUnit = UnitTypes.eradicator;
+                                break;
+                            case "eruptor":
+                                desiredUnit = UnitTypes.eruptor;
+                                break;
+                            case "fortress":
+                                desiredUnit = UnitTypes.fortress;
+                                break;
+                            case "ghoul":
+                                desiredUnit = UnitTypes.ghoul;
+                                break;
+                            case "lich":
+                                desiredUnit = UnitTypes.lich;
+                                break;
+                            case "phantom":
+                                desiredUnit = UnitTypes.phantom;
+                                break;
+                            case "reaper":
+                                desiredUnit = UnitTypes.reaper;
+                                break;
+                            case "revenant":
+                                desiredUnit = UnitTypes.revenant;
+                                break;
+                            case "spirit":
+                                desiredUnit = UnitTypes.spirit;
+                                break;
+                            case "titan":
+                                desiredUnit = UnitTypes.titan;
+                                break;
+                            case "wraith":
+                                desiredUnit = UnitTypes.wraith;
+                                break;
+                        }
+
+                        EmbedBuilder eb = new EmbedBuilder();
+                        Player player = findPlayer(target);
+                        if(player!=null){
+                            int amount = 0;
+                            for(BaseUnit unit : Vars.unitGroup.all()) {
+                                if(unit.getTeam() == player.getTeam()){
+                                    if(unit.getType() == desiredUnit) {
+                                        unit.kill();
+                                        amount++;
+                                    }
+                                }
+                            }
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Killed " + amount + " " + targetUnit + "s on team " + player.getTeam());
                             ctx.channel.sendMessage(eb);
                         }
                     }

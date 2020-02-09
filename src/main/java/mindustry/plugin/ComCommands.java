@@ -16,6 +16,7 @@ import mindustry.plugin.discordcommands.DiscordCommands;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static mindustry.Vars.*;
@@ -148,11 +149,16 @@ public class ComCommands {
 
             public void run(Context ctx) {
                 EmbedBuilder eb = new EmbedBuilder();
-                String target = ctx.args[1];
+                String target = "";
+                if(ctx.args.length > 1) {
+                    target = ctx.args[1];
+                }
                 List<Role> authorRoles = ctx.author.asUser().get().getRoles(ctx.event.getServer().get()); // javacord gay
-                List<String> roles = null;
+                List<String> roles = new ArrayList<>();
                 for(Role r : authorRoles){
-                    roles.add(r.getIdAsString());
+                    if(r!=null) {
+                        roles.add(r.getIdAsString());
+                    }
                 }
                 if(target.length() > 0 && roles != null) {
                     int rank = 0;

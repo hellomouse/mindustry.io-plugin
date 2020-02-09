@@ -885,8 +885,13 @@ public class ServerCommands {
                             for(BaseUnit unit : Vars.unitGroup.all()) {
                                 if(unit.getTeam() == player.getTeam()){
                                     if(unit.getType() == desiredUnit) {
-                                        unit.kill();
-                                        amount++;
+                                        try {
+                                            unit.kill();
+                                            amount++;
+                                            Thread.sleep(1);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
                             }

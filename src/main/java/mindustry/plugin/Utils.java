@@ -14,8 +14,7 @@ import static mindustry.Vars.*;
 public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
-    public static int phantomPetTeleportTime = 1; // in seconds
-    public static float respawnTimeEnforced = 1f;
+    public static float respawnTimeEnforced = 0.01f;
     public static int respawnTimeEnforcedDuration = 10; // duration of insta spawn
     static String welcomeMessage = "";
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";

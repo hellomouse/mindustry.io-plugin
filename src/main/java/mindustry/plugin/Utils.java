@@ -27,7 +27,8 @@ public class Utils {
             "[#4287f5]You reached a playtime of - %playtime% minutes! That's 10+ hours!\n" +
             "[#f54263]You played a total of %games% games!\n" +
             "[#9342f5]You built a total of %buildings%!\n" +
-            "[sky]Thank you for participating and enjoy your time on [orange]<[white]io[orange]>[sky]!";
+            "[sky]Thank you for participating and enjoy your time on [orange]<[white]io[orange]>[sky]!\n"+
+            "[scarlet]Please rejoin for the change to take effect.";
 
     static HashMap<Integer, String> rankNames = new HashMap<>();
     static HashMap<String, Integer> rankRoles = new HashMap<>();
@@ -35,12 +36,12 @@ public class Utils {
     public static void init(){
         rankNames.put(0, "[#7d7d7d]<none>[]");
         rankNames.put(1, "[sky]<active player>[]");
-        rankNames.put(2, "[#fcba03]<vip>[]");
-        rankNames.put(3, "[scarlet]<mvp>[]");
+        rankNames.put(2, "[#fcba03]<regular>[]");
+        rankNames.put(3, "[scarlet]<donator>[]");
         rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
         rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
 
-        rankRoles.put("627985513600516109", 1);
+        //rankRoles.put("627985513600516109", 1);
         rankRoles.put("636968410441318430", 2);
         rankRoles.put("674778262857187347", 3);
         rankRoles.put("624959361789329410", 4);

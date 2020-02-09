@@ -19,12 +19,7 @@ public class Utils {
     public static int respawnTimeEnforcedDuration = 10; // duration of insta spawn
     static String welcomeMessage = "";
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
-    static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
-            "\n" +
-            "[sky]%player%'s stats:\n" +
-            "[#4287f5]Playtime - %playtime% minutes.\n" +
-            "[#f54263]Games played - %games%.\n" +
-            "[#9342f5]Buildings built - %buildings%.";
+    static String statMessage = "";
 
     static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +
@@ -52,6 +47,8 @@ public class Utils {
 
         activeRequirements.bannedBlocks.add(Blocks.conveyor);
         activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
+        activeRequirements.bannedBlocks.add(Blocks.junction);
+        activeRequirements.bannedBlocks.add(Blocks.router);
     }
 
     public static class Pals {
@@ -63,7 +60,7 @@ public class Utils {
     public static class activeRequirements {
         public static Array<Block> bannedBlocks = new Array<>();
         public static int playtime = 60 * 10;
-        public static int buildingsBuilt = 800 * 10;
+        public static int buildingsBuilt = 1000 * 10;
         public static int gamesPlayed = 1 * 10;
     }
 

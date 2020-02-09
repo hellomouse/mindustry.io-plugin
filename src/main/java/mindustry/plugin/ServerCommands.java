@@ -1,6 +1,8 @@
 package mindustry.plugin;
 
 import mindustry.content.Mechs;
+import mindustry.content.UnitTypes;
+import mindustry.entities.type.BaseUnit;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
 import mindustry.plugin.discordcommands.DiscordCommands;
@@ -20,6 +22,7 @@ import mindustry.maps.Maps;
 import mindustry.io.SaveIO;
 
 import mindustry.type.Mech;
+import mindustry.type.UnitType;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
@@ -29,6 +32,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 import java.util.zip.InflaterInputStream;
 
 import static mindustry.Vars.*;
@@ -688,6 +692,30 @@ public class ServerCommands {
 
             });
 
+            handler.registerCommand(new RoleRestrictedCommand("statmessage"){
+                {
+                    help = "<newmessage> Change / set a stat message";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    eb.setTitle("Command executed successfully");
+                    String message = ctx.message;
+                    if(message.length() > 0) {
+                        statMessage = message;
+                        eb.setDescription("Changed stat message.");
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("No message provided.");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+
+            });
+
+
             handler.registerCommand(new RoleRestrictedCommand("getrank"){
                 {
                     help = "<rankid> Returns all players and their uuids for the specified rank.";
@@ -715,83 +743,78 @@ public class ServerCommands {
 
             });
 
-            /*handler.registerCommand(new RoleRestrictedCommand("teleport") {
+            handler.registerCommand(new RoleRestrictedCommand("spawn") {
                 {
-                    help = "<playerid|ip|all> <playerid|ip|all> Teleport player1 to player2.";
+                    help = "<playerid|ip|name> <unit> <amount> Change the provided player into a specific mech.";
                     role = banRole;
                 }
                 public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
-
-                    String target1 = ctx.args[1];
-                    String target2 = ctx.args[2];
-
-                    Player from = Utils.findPlayer(target1);
-                    Player to = Utils.findPlayer(target2);
-
-                    if(target1.equals("all") && to != null) {
-                        Administration.Config.strict.set(false);
-                        for (Player p : playerGroup.all()) {
-                            Call.onPositionSet(p.con, to.getX(), to.getY());
+                    String target = ctx.args[1];
+                    String targetUnit = ctx.args[2].toLowerCase();
+                    int amount = Integer.parseInt(ctx.args[3]);
+                    UnitType desiredUnit = UnitTypes.dagger;
+                    if(target.length() > 0 && targetUnit.length() > 0 && amount > 0 && amount < 1000) {
+                        switch(targetUnit){
+                            case "draug":
+                                desiredUnit = UnitTypes.draug;
+                                break;
+                            case "chaosarray":
+                                desiredUnit = UnitTypes.chaosArray;
+                                break;
+                            case "crawler":
+                                desiredUnit = UnitTypes.crawler;
+                                break;
+                            case "eradicator":
+                                desiredUnit = UnitTypes.eradicator;
+                                break;
+                            case "eruptor":
+                                desiredUnit = UnitTypes.eruptor;
+                                break;
+                            case "fortress":
+                                desiredUnit = UnitTypes.fortress;
+                                break;
+                            case "ghoul":
+                                desiredUnit = UnitTypes.ghoul;
+                                break;
+                            case "lich":
+                                desiredUnit = UnitTypes.lich;
+                                break;
+                            case "phantom":
+                                desiredUnit = UnitTypes.phantom;
+                                break;
+                            case "reaper":
+                                desiredUnit = UnitTypes.reaper;
+                                break;
+                            case "revenant":
+                                desiredUnit = UnitTypes.revenant;
+                                break;
+                            case "spirit":
+                                desiredUnit = UnitTypes.spirit;
+                                break;
+                            case "titan":
+                                desiredUnit = UnitTypes.titan;
+                                break;
+                            case "wraith":
+                                desiredUnit = UnitTypes.wraith;
+                                break;
                         }
-                        Administration.Config.strict.set(true);
-                        eb.setTitle("Command executed successfully.");
-                        eb.setDescription("Teleported everyone to (" + to.x + ", " + to.y + ")");
-                        ctx.channel.sendMessage(eb);
-                        return;
-                    }
 
-                    if(from != null && to != null){
-                        Administration.Config.strict.set(false);
-                        Call.onPositionSet(from.con, to.getX(), to.getY());
-                        Administration.Config.strict.set(true);
-                        eb.setTitle("Command executed successfully.");
-                        eb.setDescription("Teleported " + Utils.escapeCharacters(from.name) +" to (" + to.x + ", " + to.y + ")");
-                        ctx.channel.sendMessage(eb);
+                        EmbedBuilder eb = new EmbedBuilder();
+                        Player player = findPlayer(target);
+                        if(player!=null){
+                            UnitType finalDesiredUnit = desiredUnit;
+                            IntStream.range(0, amount).forEach(i -> {
+                                BaseUnit unit = finalDesiredUnit.create(player.getTeam());
+                                unit.set(player.getX(), player.getY());
+                                unit.add();
+                            });
+                            eb.setTitle("Command executed successfully.");
+                            eb.setDescription("Spawned " + amount + " " + targetUnit + " near " + Utils.escapeCharacters(player.name) + ".");
+                            ctx.channel.sendMessage(eb);
+                        }
                     }
                 }
             });
-
-            handler.registerCommand(new RoleRestrictedCommand("teleportpos") {
-                {
-                    help = "<playerid|ip|all> <x> <y> Teleport the provided player(s) into the specified position";
-                    role = banRole;
-                }
-                public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
-
-                    String target = ctx.args[1];
-                    String tox = ctx.args[2];
-                    String toy = ctx.args[3];
-
-                    Player from = Utils.findPlayer(target);
-                    Integer x = Integer.parseInt(tox);
-                    Integer y = Integer.parseInt(toy);
-
-                    if(target.equals("all") && x != null && y != null) {
-                        Administration.Config.strict.set(false);
-                        for (Player p : playerGroup.all()) {
-                            Call.onPositionSet(p.con, x, y);
-                        }
-                        Administration.Config.strict.set(true);
-                        eb.setTitle("Command executed successfully.");
-                        eb.setDescription("Teleported everyone to (" + x + ", " + y + ")");
-                        ctx.channel.sendMessage(eb);
-                        return;
-                    }
-
-                    if(from != null && x != null && y != null){
-                        Administration.Config.strict.set(false);
-                        Call.onPositionSet(from.con, x, y);
-                        Administration.Config.strict.set(true);
-                        eb.setTitle("Command executed successfully.");
-                        eb.setDescription("Teleported " + Utils.escapeCharacters(from.name) +" to (" + x + ", " + y + ")");
-                        ctx.channel.sendMessage(eb);
-                    }
-                }
-            });*/
-
-            //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }
 
             /*handler.registerCommand(new Command("sendm"){ // use sendm to send embed messages when needed locally, disable for now

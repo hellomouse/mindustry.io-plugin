@@ -189,7 +189,7 @@ public class ioMain extends Plugin {
                         player.name = "[sky]<active>[] " + player.name;
                         break;
                     case 2:
-                        Call.sendMessage("[#fcba03]regulat player " + player.name + " joined the server!");
+                        Call.sendMessage("[#fcba03]regular player " + player.name + " joined the server!");
                         player.name = "[#fcba03]<vip>[] " + player.name;
                         break;
                     case 3:

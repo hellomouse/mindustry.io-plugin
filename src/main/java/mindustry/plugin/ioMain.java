@@ -8,12 +8,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import arc.struct.Array;
+import mindustry.content.Mechs;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.EffectEntity;
 import mindustry.entities.type.base.BuilderDrone;
 import mindustry.entities.units.UnitState;
 import mindustry.net.Administration;
+import mindustry.world.meta.BlockFlag;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -293,7 +295,7 @@ public class ioMain extends Plugin {
                 player.sendMessage(builder.toString());
             });
 
-            handler.<Player>register("rainbow", "[vip+] Give your username a rainbow animation", (args, player) -> {
+            handler.<Player>register("rainbow", "[regular+] Give your username a rainbow animation", (args, player) -> {
                 if(database.containsKey(player.uuid)) {
                     if(database.get(player.uuid).getRank() >= 2) {
                         if(rainbowedPlayers.contains(player.uuid)) {
@@ -371,7 +373,7 @@ public class ioMain extends Plugin {
                 }
             });
 
-            handler.<Player>register("lichpet", "[mvp+] Spawn yourself a lich defense pet (max. 1 per game, lasts 2 minutes, disabled on pvp)", (args, player) -> {
+            handler.<Player>register("lichpet", "[donator+] Spawn yourself a lich defense pet (max. 1 per game, lasts 2 minutes, disabled on pvp)", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
@@ -408,12 +410,29 @@ public class ioMain extends Plugin {
                 }
             });
 
-            handler.<Player>register("spawn", "[vip+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
+            handler.<Player>register("spawn", "[active+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
                 if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 2) {
+                        if (database.get(player.uuid).getRank() >= 1) {
                             player.onRespawn(player.getClosestCore().tile);
                             player.sendMessage("Spawned!");
+                        } else {
+                            player.sendMessage(noPermissionMessage);
+                        }
+                    } else {
+                        player.sendMessage(noPermissionMessage);
+                    }
+                } else {
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
+                }
+            });
+
+            handler.<Player>register("buildpower", "[donator+] Increase your build power 5x, making you build almost instantly.", (args, player) -> {
+                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 3) {
+                            player.mech.buildPower = 5f;
+                            player.sendMessage("Buildpower applied!");
                         } else {
                             player.sendMessage(noPermissionMessage);
                         }

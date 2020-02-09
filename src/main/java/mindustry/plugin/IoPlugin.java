@@ -206,7 +206,7 @@ public class IoPlugin extends Plugin {
                         break;
                 }
             } else { // not in database
-                database.put(player.uuid, new PlayerData(0, player.name));
+                database.put(player.uuid, new PlayerData(0));
 
                 player.name = player.name.replaceAll("<", "");
                 player.name = player.name.replaceAll(">", "");

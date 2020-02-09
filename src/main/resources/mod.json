@@ -1,7 +1,7 @@
 {
   "name": "ioPlugin",
   "author": "Various, see https://github.com/fuzzbuck/mindustry.io-plugin/blob/master/CONTRIBUTORS.MD",
-  "main": "mindustry.plugin.IoPlugin",
+  "main": "mindustry.plugin.ioMain",
   "description": "Allows interaction with discord & vice versa, makes moderation easier.",
-  "version": 1.3
+  "version": 1.4
 }

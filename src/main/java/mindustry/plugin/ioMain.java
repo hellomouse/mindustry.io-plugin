@@ -34,8 +34,9 @@ import mindustry.gen.Call;
 
 import static mindustry.Vars.*;
 import static mindustry.Vars.player;
+import static mindustry.plugin.Utils.*;
 
-public class IoPlugin extends Plugin {
+public class ioMain extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";
@@ -52,7 +53,7 @@ public class IoPlugin extends Plugin {
 
 
     //register event handlers and create variables in the constructor
-    public IoPlugin() throws InterruptedException {
+    public ioMain() throws InterruptedException {
         Utils.init();
 
         try {
@@ -116,7 +117,7 @@ public class IoPlugin extends Plugin {
             Log.warn("[WARN!] discordplugin: no server_name setting detected.");
         }
 
-        // setup database
+
 
         // live chat
         if (data.has("live_chat_channel_id")) {
@@ -124,13 +125,13 @@ public class IoPlugin extends Plugin {
             if (tc != null) {
                 HashMap<String, String> messageBuffer = new HashMap<>();
                 Events.on(EventType.PlayerChatEvent.class, event -> {
-                    messageBuffer.put(Utils.escapeCharacters(event.player.name), Utils.escapeCharacters(event.message));
-                    if(messageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
+                    messageBuffer.put(escapeCharacters(event.player.name), escapeCharacters(event.message));
+                    if(messageBuffer.size() >= messageBufferSize) { // if message buffer size is below the expected size
                         EmbedBuilder eb = new EmbedBuilder().setTitle(new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
                         for (Map.Entry<String, String> entry : messageBuffer.entrySet()) {
                             String username = entry.getKey();
                             String message = entry.getValue();
-                            eb.addField(Utils.escapeCharacters(username), Utils.escapeCharacters(message));
+                            eb.addField(escapeCharacters(username), escapeCharacters(message));
                         }
                         tc.sendMessage(eb);
                         messageBuffer.clear();
@@ -151,14 +152,14 @@ public class IoPlugin extends Plugin {
 
                         warnMessageBuffer.put("Block: " + event.tile.block().name +  " Location: (" + event.tile.x + ", " + event.tile.y + ") Configuration: " + event.value, event.player.name);
 
-                        if(warnMessageBuffer.size() >= Utils.messageBufferSize) { // if message buffer size is below the expected size
+                        if(warnMessageBuffer.size() >= messageBufferSize) { // if message buffer size is below the expected size
                             EmbedBuilder eb = new EmbedBuilder().setTitle("Logs from " + new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
-                            eb.setColor(Utils.Pals.warning);
+                            eb.setColor(Pals.warning);
                             eb.setTimestampToNow();
                             for (Map.Entry<String, String> entry : warnMessageBuffer.entrySet()) {
                                 String message = entry.getKey();
                                 String username = entry.getValue();
-                                eb.addField(Utils.escapeCharacters(username), message);
+                                eb.addField(escapeCharacters(username), message);
                             }
                             tc.sendMessage(eb);
                             warnMessageBuffer.clear();
@@ -212,8 +213,8 @@ public class IoPlugin extends Plugin {
                 player.name = player.name.replaceAll(">", "");
             }
 
-            if(Utils.welcomeMessage.length() > 0){
-                Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.welcomeMessage));
+            if(welcomeMessage.length() > 0){
+                Call.onInfoMessage(player.con, formatMessage(player, welcomeMessage));
             }
         });
 
@@ -223,7 +224,7 @@ public class IoPlugin extends Plugin {
                 if (!event.breaking) {
                     if(database.containsKey(event.player.uuid)) {
                         if(event.tile.block()!=null) {
-                            if(!Utils.activeRequirements.bannedBlocks.contains(event.tile.block())) {
+                            if(!activeRequirements.bannedBlocks.contains(event.tile.block())) {
                                 database.get(event.player.uuid).incrementBuilding(1);
                             }
                         }
@@ -249,7 +250,7 @@ public class IoPlugin extends Plugin {
             MapRules.run();
             intermission = false;
             for(Player p : playerGroup.all()) {
-                Call.onInfoMessage(p.con, Utils.formatMessage(p, Utils.welcomeMessage));
+                Call.onInfoMessage(p.con, formatMessage(p, welcomeMessage));
             }
         });
     }
@@ -274,7 +275,7 @@ public class IoPlugin extends Plugin {
                         player.sendMessage("[scarlet]This command is disabled.");
                         return;
                     }
-                    tc.sendMessage(Utils.escapeCharacters(player.name) + " *@mindustry* : `" + args[0] + "`");
+                    tc.sendMessage(escapeCharacters(player.name) + " *@mindustry* : `" + args[0] + "`");
                     player.sendMessage("[scarlet]Successfully sent message to moderators.");
                 }
 
@@ -321,7 +322,7 @@ public class IoPlugin extends Plugin {
 
                                             String hex = "#" + Integer.toHexString(Color.getHSBColor(hue / 360f, 1f, 1f).getRGB()).substring(2);
                                             String[] c = playerNameUnmodified.split(" ", 2);
-                                            player.name = c[0] + " [" + hex + "]" + Utils.escapeColorCodes(c[1]);
+                                            player.name = c[0] + " [" + hex + "]" + escapeColorCodes(c[1]);
                                             pdata.setHue(hue);
                                             tempPlayerDatas.replace(player.uuid, pdata);
 
@@ -337,10 +338,10 @@ public class IoPlugin extends Plugin {
 
                         }
                     } else {
-                        player.sendMessage(Utils.noPermissionMessage);
+                        player.sendMessage(noPermissionMessage);
                     }
                 } else {
-                    player.sendMessage(Utils.noPermissionMessage);
+                    player.sendMessage(noPermissionMessage);
                 }
             });
 
@@ -362,10 +363,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]This command will spawn in a draug mining bot, use it again to proceed.");
                             }
                         } else {
-                            player.sendMessage(Utils.noPermissionMessage);
+                            player.sendMessage(noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage(Utils.noPermissionMessage);
+                        player.sendMessage(noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -389,7 +390,7 @@ public class IoPlugin extends Plugin {
                                                 if(baseUnit.dst(player.getX(), player.getY()) > 150) {
                                                     baseUnit.set(player.getX(), player.getY());
                                                     baseUnit.clearBuilding(); // lets hope this doesnt crash ?
-                                                    Thread.sleep(Utils.phantomPetTeleportTime * 1000);
+                                                    Thread.sleep(phantomPetTeleportTime * 1000);
                                                 }
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
@@ -410,10 +411,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]You already spawned a phantom pet in this game!");
                             }
                         } else {
-                            player.sendMessage(Utils.noPermissionMessage);
+                            player.sendMessage(noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage(Utils.noPermissionMessage);
+                        player.sendMessage(noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -448,10 +449,10 @@ public class IoPlugin extends Plugin {
                                 player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
                             }
                         } else {
-                            player.sendMessage(Utils.noPermissionMessage);
+                            player.sendMessage(noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage(Utils.noPermissionMessage);
+                        player.sendMessage(noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -465,10 +466,10 @@ public class IoPlugin extends Plugin {
                             player.onRespawn(player.getClosestCore().tile);
                             player.sendMessage("Spawned!");
                         } else {
-                            player.sendMessage(Utils.noPermissionMessage);
+                            player.sendMessage(noPermissionMessage);
                         }
                     } else {
-                        player.sendMessage(Utils.noPermissionMessage);
+                        player.sendMessage(noPermissionMessage);
                     }
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
@@ -477,10 +478,10 @@ public class IoPlugin extends Plugin {
 
             handler.<Player>register("stats", "<playerid/playername>", "Get information (playtime, buildings built, etc.) of the specified user. [get playerid from /players]", (args, player) -> {
                 if(args[0].length() > 0) {
-                    Player p = Utils.findPlayer(args[0]);
+                    Player p = findPlayer(args[0]);
                     if(p != null){
                         if(database.containsKey(p.uuid)) {
-                            Call.onInfoMessage(player.con, Utils.formatMessage(p, Utils.statMessage));
+                            Call.onInfoMessage(player.con, formatMessage(p, statMessage));
                         } else {
                             player.sendMessage("[scarlet]Error: " + p.name + "'s playtime is lower than 60 seconds");
                         }
@@ -488,13 +489,13 @@ public class IoPlugin extends Plugin {
                         player.sendMessage("[scarlet]Error: player not found or offline");
                     }
                 } else {
-                    Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.statMessage));
+                    Call.onInfoMessage(player.con, formatMessage(player, statMessage));
                 }
             });
 
             handler.<Player>register("info", "Get information (playtime, buildings built, etc.) about yourself.", (args, player) -> { // self info
                 if (database.containsKey(player.uuid)) {
-                    Call.onInfoMessage(player.con, Utils.formatMessage(player, Utils.statMessage));
+                    Call.onInfoMessage(player.con, formatMessage(player, statMessage));
                 }
             });
 

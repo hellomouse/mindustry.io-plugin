@@ -1,6 +1,5 @@
 package mindustry.plugin;
 
-import arc.graphics.Color;
 import mindustry.content.Mechs;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
@@ -33,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.zip.InflaterInputStream;
 
 import static mindustry.Vars.*;
+import static mindustry.plugin.Utils.*;
 
 public class ServerCommands {
 
@@ -82,16 +82,16 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Not enough arguments, use `%changemap <mapname|mapid>`".replace("%", IoPlugin.prefix));
+                        eb.setColor(Pals.error);
+                        eb.setDescription("Not enough arguments, use `%changemap <mapname|mapid>`".replace("%", ioMain.prefix));
                         ctx.channel.sendMessage(eb);
                         return;
                     }
-                    Map found = Utils.getMapBySelector(ctx.message.trim());
+                    Map found = getMapBySelector(ctx.message.trim());
                     if (found == null) {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Map \"" + Utils.escapeCharacters(ctx.message.trim()) + "\" not found!");
+                        eb.setColor(Pals.error);
+                        eb.setDescription("Map \"" + escapeCharacters(ctx.message.trim()) + "\" not found!");
                         ctx.channel.sendMessage(eb);
                         return;
                     }
@@ -139,23 +139,23 @@ public class ServerCommands {
                     String target = ctx.args[1];
                     int targetRank = Integer.parseInt(ctx.args[2]);
                     if(target.length() > 0 && targetRank > -1 && targetRank < 6) {
-                        Player player = Utils.findPlayer(target);
+                        Player player = findPlayer(target);
                         if(player!=null){
-                            if(IoPlugin.database.containsKey(player.uuid)) {
-                                IoPlugin.database.get(player.uuid).setRank(targetRank);
+                            if(ioMain.database.containsKey(player.uuid)) {
+                                ioMain.database.get(player.uuid).setRank(targetRank);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank));
+                                ioMain.database.put(player.uuid, new PlayerData(targetRank));
                             }
                             if(targetRank==5) { // give admin to administrators
                                 netServer.admins.adminPlayer(player.uuid, player.usid);
                             }
                             eb.setTitle("Command executed successfully");
-                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to " + targetRank);
+                            eb.setDescription("Promoted " + escapeCharacters(player.name) + " to " + targetRank);
                             ctx.channel.sendMessage(eb);
                             Call.onKick(player.con, "Your rank was modified, please rejoin.");
                         } else{
-                            if(IoPlugin.database.containsKey(target)){
-                                IoPlugin.database.get(target).setRank(targetRank);
+                            if(ioMain.database.containsKey(target)){
+                                ioMain.database.get(target).setRank(targetRank);
                                 eb.setTitle("Command executed successfully");
                                 eb.setDescription("Promoted `" + target + "` to " + targetRank);
                                 ctx.channel.sendMessage(eb);
@@ -189,11 +189,11 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
-                    ctx.message = Utils.escapeCharacters(ctx.message);
+                    ctx.message = escapeCharacters(ctx.message);
 
                     if (ctx.message.length() <= 0) {
                         eb.setTitle("Command terminated");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("No message given");
                         ctx.channel.sendMessage(eb);
                         return;
@@ -218,10 +218,10 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
                     String target = ctx.args[1].toLowerCase();
-                    ctx.message = Utils.escapeCharacters(ctx.message);
+                    ctx.message = escapeCharacters(ctx.message);
                     if (ctx.message == null) {
                         eb.setTitle("Command terminated");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("No message given");
                         ctx.channel.sendMessage(eb);
                         return;
@@ -234,15 +234,15 @@ public class ServerCommands {
                         eb.setDescription("Alert was sent to all players.");
                         ctx.channel.sendMessage(eb);
                     } else{
-                        Player p = Utils.findPlayer(target);
+                        Player p = findPlayer(target);
                         if (p != null) {
                             Call.onInfoMessage(p.con, ctx.message.split(" ", 2)[1]);
                             eb.setTitle("Command executed");
-                            eb.setDescription("Alert was sent to " + Utils.escapeCharacters(p.name));
+                            eb.setDescription("Alert was sent to " + escapeCharacters(p.name));
                             ctx.channel.sendMessage(eb);
                         } else {
                             eb.setTitle("Command terminated");
-                            eb.setColor(Utils.Pals.error);
+                            eb.setColor(Pals.error);
                             eb.setDescription("Player could not be found or is offline.");
                             ctx.channel.sendMessage(eb);
                         }
@@ -279,24 +279,24 @@ public class ServerCommands {
                             .setTimestampToNow();
                     String target = ctx.args[1];
                     if (target.length() > 0) {
-                        Player p = Utils.findPlayer(target);
+                        Player p = findPlayer(target);
                         if (p != null) {
                             netServer.admins.banPlayer(p.uuid);
                             eb.setTitle("Command executed.");
                             eb.setDescription("Banned " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully!");
                             ctx.channel.sendMessage(eb);
                             Call.onKick(p.con, "You've been banned by: " + ctx.author.getName() + ". Appeal at http://discord.mindustry.io");
-                            Call.sendMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been banned permanently.");
+                            Call.sendMessage("[scarlet]" + escapeCharacters(p.name) + " has been banned permanently.");
                         } else {
                             eb.setTitle("Command terminated");
-                            eb.setColor(Utils.Pals.error);
-                            eb.setDescription("Player not online. Use %blacklist <ip> to ban an offline player.".replace("%", IoPlugin.prefix));
+                            eb.setColor(Pals.error);
+                            eb.setDescription("Player not online. Use %blacklist <ip> to ban an offline player.".replace("%", ioMain.prefix));
                             ctx.channel.sendMessage(eb);
                         }
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Not enough arguments / usage: `%ban <id/ip>`".replace("%", IoPlugin.prefix));
+                        eb.setColor(Pals.error);
+                        eb.setDescription("Not enough arguments / usage: `%ban <id/ip>`".replace("%", ioMain.prefix));
                         ctx.channel.sendMessage(eb);
                     }
                 }
@@ -319,8 +319,8 @@ public class ServerCommands {
                         ctx.channel.sendMessage(eb);
                     } else {
                         eb.setTitle("Command terminated");
-                        eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Not enough arguments / usage: `%blacklist <ip>`".replace("%", IoPlugin.prefix));
+                        eb.setColor(Pals.error);
+                        eb.setDescription("Not enough arguments / usage: `%blacklist <ip>`".replace("%", ioMain.prefix));
                         ctx.channel.sendMessage(eb);
                     }
                 }
@@ -333,7 +333,7 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String ip;
-                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: %unban <ip>".replace("%", IoPlugin.prefix)); return;}
+                    if(ctx.args.length==2){ ip = ctx.args[1]; } else {ctx.reply("Invalid arguments provided, use the following format: %unban <ip>".replace("%", ioMain.prefix)); return;}
 
                     if (netServer.admins.unbanPlayerIP(ip)) {
                         eb.setTitle("Command executed.");
@@ -341,7 +341,7 @@ public class ServerCommands {
                         ctx.channel.sendMessage(eb);
                     } else {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("No such ban exists.");
                         ctx.channel.sendMessage(eb);
                     }
@@ -358,15 +358,15 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     String target = ctx.args[1];
 
-                    Player p = Utils.findPlayer(target);
+                    Player p = findPlayer(target);
                     if (p != null) {
                         eb.setTitle("Command executed.");
                         eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
-                        Call.sendChatMessage("[scarlet]" + Utils.escapeCharacters(p.name) + " has been kicked.");
+                        Call.sendChatMessage("[scarlet]" + escapeCharacters(p.name) + " has been kicked.");
                         Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                     } else {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("Player not online / not found.");
                     }
                     ctx.channel.sendMessage(eb);
@@ -381,7 +381,7 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     StringBuilder msg = new StringBuilder("**Players online: " + playerGroup.size() + "**\n```\n");
                     for (Player player : playerGroup.all()) {
-                        msg.append("· ").append(Utils.escapeCharacters(player.name));
+                        msg.append("· ").append(escapeCharacters(player.name));
                         if(!player.isAdmin) {
                             msg.append(" : ").append(player.con.address).append(" : ").append(player.uuid).append("\n");
                         } else {
@@ -409,13 +409,13 @@ public class ServerCommands {
                     }
                     if (ml.size != 1) {
                         eb.setTitle("Map upload terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("You need to add one valid .msav file!");
                         ctx.channel.sendMessage(eb);
                         return;
                     } else if (Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName()).exists()) {
                         eb.setTitle("Map upload terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("There is already a map with this name on the server!");
                         ctx.channel.sendMessage(eb);
                         return;
@@ -429,7 +429,7 @@ public class ServerCommands {
                         byte[] data = cf.get();
                         if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
                             eb.setTitle("Map upload terminated.");
-                            eb.setColor(Utils.Pals.error);
+                            eb.setColor(Pals.error);
                             eb.setDescription("Map file corrupted or invalid.");
                             ctx.channel.sendMessage(eb);
                             return;
@@ -447,7 +447,7 @@ public class ServerCommands {
             });
             handler.registerCommand(new RoleRestrictedCommand("removemap") {
                 {
-                    help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the %maps command)".replace("%", IoPlugin.prefix);
+                    help = "<mapname/mapid> Remove a map from the playlist (use mapname/mapid retrieved from the %maps command)".replace("%", ioMain.prefix);
                     role = banRole;
                 }
                 @Override
@@ -455,15 +455,15 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     if (ctx.args.length < 2) {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
-                        eb.setDescription("Not enough arguments, use `%removemap <mapname/mapid>`".replace("%", IoPlugin.prefix));
+                        eb.setColor(Pals.error);
+                        eb.setDescription("Not enough arguments, use `%removemap <mapname/mapid>`".replace("%", ioMain.prefix));
                         ctx.channel.sendMessage(eb);
                         return;
                     }
-                    Map found = Utils.getMapBySelector(ctx.message.trim());
+                    Map found = getMapBySelector(ctx.message.trim());
                     if (found == null) {
                         eb.setTitle("Command terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("Map not found");
                         ctx.channel.sendMessage(eb);
                         return;
@@ -543,11 +543,11 @@ public class ServerCommands {
                             ctx.channel.sendMessage(eb);
                             return;
                         }
-                        Player player = Utils.findPlayer(target);
+                        Player player = findPlayer(target);
                         if(player!=null){
                             player.mech = desiredMech;
                             eb.setTitle("Command executed successfully.");
-                            eb.setDescription("Changed " + Utils.escapeCharacters(player.name) + "s mech into " + desiredMech.name);
+                            eb.setDescription("Changed " + escapeCharacters(player.name) + "s mech into " + desiredMech.name);
                             ctx.channel.sendMessage(eb);
                         }
                     }
@@ -597,11 +597,11 @@ public class ServerCommands {
                             ctx.channel.sendMessage(eb);
                             return;
                         }
-                        Player player = Utils.findPlayer(target);
+                        Player player = findPlayer(target);
                         if(player!=null){
                             player.setTeam(desiredTeam);
                             eb.setTitle("Command executed successfully.");
-                            eb.setDescription("Changed " + Utils.escapeCharacters(player.name) + "s team to " + desiredTeam.name);
+                            eb.setDescription("Changed " + escapeCharacters(player.name) + "s team to " + desiredTeam.name);
                             ctx.channel.sendMessage(eb);
                         }
                     }
@@ -628,11 +628,11 @@ public class ServerCommands {
                             ctx.channel.sendMessage(eb);
                             return;
                         }
-                        Player player = Utils.findPlayer(target);
+                        Player player = findPlayer(target);
                         if(player!=null){
                             player.setTeam(Team.get(targetTeam));
                             eb.setTitle("Command executed successfully.");
-                            eb.setDescription("Changed " + Utils.escapeCharacters(player.name) + "s team to " + targetTeam);
+                            eb.setDescription("Changed " + escapeCharacters(player.name) + "s team to " + targetTeam);
                             ctx.channel.sendMessage(eb);
                         }
                     }
@@ -650,14 +650,14 @@ public class ServerCommands {
                     String target = ctx.args[1];
                     String name = ctx.message.substring(target.length() + 1);
                     if(target.length() > 0 && name.length() > 0) {
-                        Player player = Utils.findPlayer(target);
+                        Player player = findPlayer(target);
                         if(player!=null){
-                            if(IoPlugin.rainbowedPlayers.contains(player.uuid)) { // turn rainbow off if its enabled
-                                IoPlugin.rainbowedPlayers.remove(player.uuid);
+                            if(ioMain.rainbowedPlayers.contains(player.uuid)) { // turn rainbow off if its enabled
+                                ioMain.rainbowedPlayers.remove(player.uuid);
                             }
                             player.name = name;
                             eb.setTitle("Command executed successfully");
-                            eb.setDescription("Changed name to " + Utils.escapeCharacters(player.name));
+                            eb.setDescription("Changed name to " + escapeCharacters(player.name));
                             ctx.channel.sendMessage(eb);
                             Call.onInfoToast(player.con, "[scarlet]Your name was changed by a moderator.", 10);
                         }
@@ -677,7 +677,7 @@ public class ServerCommands {
                     eb.setTitle("Command executed successfully");
                     String message = ctx.message;
                     if(message.length() > 0 && !message.equals("disable")) {
-                        Utils.welcomeMessage = message;
+                        welcomeMessage = message;
                         eb.setDescription("Changed welcome message.");
                         ctx.channel.sendMessage(eb);
                     } else {
@@ -698,8 +698,8 @@ public class ServerCommands {
                     EmbedBuilder eb = new EmbedBuilder();
                     int targetRank = Integer.parseInt(ctx.args[1]);
                     if(targetRank > 0) {
-                        StringBuilder msg = new StringBuilder().append("**Players with rank** `").append(Utils.rankNames.get(targetRank)).append("`:```");
-                        for(java.util.Map.Entry<String, PlayerData> entrySet : IoPlugin.database.entrySet()) {
+                        StringBuilder msg = new StringBuilder().append("**Players with rank** `").append(rankNames.get(targetRank)).append("`:```");
+                        for(java.util.Map.Entry<String, PlayerData> entrySet : ioMain.database.entrySet()) {
                             String uuid = entrySet.getKey();
                             PlayerData pd = entrySet.getValue();
                             if(uuid != null && pd != null) {
@@ -794,34 +794,6 @@ public class ServerCommands {
             //TODO: add a lot of commands that moderators can use to mess with players real-time (e. kill, freeze, teleport, etc.)
         }
 
-        if (data.has("donator_roleid")) {
-            String donatorRole = data.getString("donator_roleid");
-            handler.registerCommand(new RoleRestrictedCommand("redeemvip"){
-                {
-                    help = "<playerid|ip> Promote your in-game rank to VIP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
-                    role = donatorRole;
-                }
-
-                public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
-                    String target = ctx.args[1];
-                    if(target.length() > 0) {
-                        Player player = Utils.findPlayer(target);
-                        if(player!=null){
-                            if(IoPlugin.database.containsKey(player.uuid)) {
-                                IoPlugin.database.get(player.uuid).setRank(2);
-                            } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(2));
-                            }
-                            eb.setTitle("Command executed successfully");
-                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <vip>.");
-                            ctx.channel.sendMessage(eb);
-                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
-                        }
-                    }
-                }
-
-            });
             /*handler.registerCommand(new Command("sendm"){ // use sendm to send embed messages when needed locally, disable for now
                 public void run(Context ctx){
                     EmbedBuilder eb = new EmbedBuilder()
@@ -836,71 +808,10 @@ public class ServerCommands {
                     ctx.channel.sendMessage(eb);
                 }
             });*/
-        }
-
-        if (data.has("activeplayer_roleid")) {
-            String activeRole = data.getString("activeplayer_roleid");
-            handler.registerCommand(new RoleRestrictedCommand("redeemactive"){
-                {
-                    help = "<playerid|ip|name> Promote your in-game rank to active player [NOTE: Abusing this power and giving it to other players will result in a ban.]";
-                    role = activeRole;
-                }
-
-                public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
-                    String target = ctx.args[1];
-                    if(target.length() > 0) {
-                        Player player = Utils.findPlayer(target);
-                        if(player!=null){
-                            if(IoPlugin.database.containsKey(player.uuid)) {
-                                IoPlugin.database.get(player.uuid).setRank(1);
-                            } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(1));
-                            }
-                            eb.setTitle("Command executed successfully");
-                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
-                            ctx.channel.sendMessage(eb);
-                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
-                        }
-                    }
-                }
-
-            });
-        }
-
-        if (data.has("mvp_roleid")) {
-            String mvpRole = data.getString("mvp_roleid");
-            handler.registerCommand(new RoleRestrictedCommand("redeemmvp"){
-                {
-                    help = "<playerid|ip|name> Promote your in-game rank to MVP [NOTE: Abusing this power and giving it to other players will result in a ban.]";
-                    role = mvpRole;
-                }
-
-                public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
-                    String target = ctx.args[1];
-                    if(target.length() > 0) {
-                        Player player = Utils.findPlayer(target);
-                        if(player!=null){
-                            if(IoPlugin.database.containsKey(player.uuid)) {
-                                IoPlugin.database.get(player.uuid).setRank(3);
-                            } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(3));
-                            }
-                            eb.setTitle("Command executed successfully");
-                            eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <mvp>.");
-                            ctx.channel.sendMessage(eb);
-                            Call.onKick(player.con, "Your rank was modified, please rejoin.");
-                        }
-                    }
-                }
-
-            });
-        }
 
 
         if(data.has("mapSubmissions_id")){
-            TextChannel tc = IoPlugin.getTextChannel(IoPlugin.data.getString("mapSubmissions_id"));
+            TextChannel tc = ioMain.getTextChannel(ioMain.data.getString("mapSubmissions_id"));
             handler.registerCommand(new Command("submitmap") {
                 {
                     help = "<.msav attachment> Submit a new map to be added into the server playlist in a .msav file format.";
@@ -915,13 +826,13 @@ public class ServerCommands {
                     }
                     if (ml.size != 1) {
                         eb.setTitle("Map upload terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("You need to add one valid .msav file!");
                         ctx.channel.sendMessage(eb);
                         return;
                     } else if (Core.settings.getDataDirectory().child("maps").child(ml.get(0).getFileName()).exists()) {
                         eb.setTitle("Map upload terminated.");
-                        eb.setColor(Utils.Pals.error);
+                        eb.setColor(Pals.error);
                         eb.setDescription("There is already a map with this name on the server!");
                         ctx.channel.sendMessage(eb);
                         return;
@@ -932,7 +843,7 @@ public class ServerCommands {
                         byte[] data = cf.get();
                         if (!SaveIO.isSaveValid(new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data))))) {
                             eb.setTitle("Map upload terminated.");
-                            eb.setColor(Utils.Pals.error);
+                            eb.setColor(Pals.error);
                             eb.setDescription("Map file corrupted or invalid.");
                             ctx.channel.sendMessage(eb);
                             return;
@@ -944,7 +855,7 @@ public class ServerCommands {
                     eb.setDescription(ml.get(0).getFileName() + " was successfully queued for review by moderators!");
                     ctx.channel.sendMessage(eb);
                     EmbedBuilder eb2 = new EmbedBuilder()
-                            .setTitle("A map submission has been made for " + IoPlugin.serverName)
+                            .setTitle("A map submission has been made for " + ioMain.serverName)
                             .setAuthor(ctx.author)
                             .setTimestampToNow()
                             .addField("Name", ml.get(0).getFileName())

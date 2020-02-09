@@ -8,7 +8,6 @@ import mindustry.world.Block;
 
 import java.awt.*;
 import java.util.HashMap;
-import java.util.List;
 
 import static mindustry.Vars.*;
 
@@ -16,6 +15,8 @@ public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
     public static int phantomPetTeleportTime = 1; // in seconds
+    public static float respawnTimeEnforced = 1f;
+    public static int respawnTimeEnforcedDuration = 10; // duration of insta spawn
     static String welcomeMessage = "";
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
     static String statMessage = "mindustry[orange]<[white].io[orange]>[white]\n" +
@@ -34,6 +35,7 @@ public class Utils {
             "[sky]Thank you for participating and enjoy your time on [orange]<[white]io[orange]>[sky]!";
 
     static HashMap<Integer, String> rankNames = new HashMap<>();
+    static HashMap<String, Integer> rankRoles = new HashMap<>();
 
     public static void init(){
         rankNames.put(0, "[#7d7d7d]<none>[]");
@@ -42,6 +44,11 @@ public class Utils {
         rankNames.put(3, "[scarlet]<mvp>[]");
         rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
         rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
+
+        rankRoles.put("627985513600516109", 1);
+        rankRoles.put("636968410441318430", 2);
+        rankRoles.put("674778262857187347", 3);
+        rankRoles.put("624959361789329410", 4);
 
         activeRequirements.bannedBlocks.add(Blocks.conveyor);
         activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
@@ -58,10 +65,6 @@ public class Utils {
         public static int playtime = 60 * 10;
         public static int buildingsBuilt = 800 * 10;
         public static int gamesPlayed = 1 * 10;
-    }
-
-    static double DistanceBetween(double x1, double y1, double x2, double y2) {
-        return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
     public static String escapeCharacters(String string){
@@ -92,7 +95,7 @@ public class Utils {
     public static Player findPlayer(String identifier){
         Player found = null;
         for (Player player : playerGroup.all()) {
-            if (player.con.address.equals(identifier) || String.valueOf(player.id).equals(identifier) || player.uuid.equals(identifier) || Utils.escapeColorCodes(player.name.toLowerCase()).equals(identifier.toLowerCase())) {
+            if (player.con.address.equals(identifier.replaceAll(" ", "")) || String.valueOf(player.id).equals(identifier.replaceAll(" ", "")) || player.uuid.equals(identifier.replaceAll(" ", "")) || Utils.escapeColorCodes(player.name.toLowerCase().replaceAll(" ", "")).equals(identifier.toLowerCase().replaceAll(" ", ""))) {
                 found = player;
             }
         }
@@ -104,11 +107,11 @@ public class Utils {
         message = message.replaceAll("%map%", world.getMap().name());
         message = message.replaceAll("%wave%", String.valueOf(state.wave));
 
-        if(IoPlugin.database.containsKey(player.uuid)) {
-            message = message.replaceAll("%playtime%", String.valueOf(IoPlugin.database.get(player.uuid).getPlaytime()));
-            message = message.replaceAll("%games%", String.valueOf(IoPlugin.database.get(player.uuid).getGames()));
-            message = message.replaceAll("%buildings%", String.valueOf(IoPlugin.database.get(player.uuid).getBuildings()));
-            message = message.replaceAll("%rank%", rankNames.get(IoPlugin.database.get(player.uuid).getRank()));
+        if(ioMain.database.containsKey(player.uuid)) {
+            message = message.replaceAll("%playtime%", String.valueOf(ioMain.database.get(player.uuid).getPlaytime()));
+            message = message.replaceAll("%games%", String.valueOf(ioMain.database.get(player.uuid).getGames()));
+            message = message.replaceAll("%buildings%", String.valueOf(ioMain.database.get(player.uuid).getBuildings()));
+            message = message.replaceAll("%rank%", rankNames.get(ioMain.database.get(player.uuid).getRank()));
         }
         return message;
     }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import mindustry.plugin.IoPlugin;
+import mindustry.plugin.ioMain;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -48,10 +48,10 @@ public class DiscordCommands implements MessageCreateListener {
         for(MessageCreatedListener listener: messageCreatedListenerRegistry) listener.run(event);
 
         String message = event.getMessageContent();
-        if (!message.startsWith(IoPlugin.prefix)) return;
+        if (!message.startsWith(ioMain.prefix)) return;
         String[] args = message.split(" ");
         int commandLength = args[0].length();
-        args[0] = args[0].substring(IoPlugin.prefix.length());
+        args[0] = args[0].substring(ioMain.prefix.length());
         String name = args[0];
 
         String newMessage = null;

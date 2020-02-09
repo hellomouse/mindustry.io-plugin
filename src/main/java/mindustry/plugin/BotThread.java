@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 
+import static mindustry.plugin.Utils.*;
+
 public class BotThread extends Thread {
     public DiscordApi api;
     private Thread mt;
@@ -30,7 +32,7 @@ public class BotThread extends Thread {
         this.api.addMessageCreateListener(commandHandler);
         new ComCommands().registerCommands(commandHandler);
         new ServerCommands(data).registerCommands(commandHandler);
-        new MessageCreatedListeners(data).registerListeners(commandHandler);
+        //new MessageCreatedListeners(data).registerListeners(commandHandler);
     }
 
     public void run(){
@@ -41,16 +43,16 @@ public class BotThread extends Thread {
 
 
                 for (Player p : Vars.playerGroup.all()) {
-                    if(IoPlugin.database.containsKey(p.uuid)) {
-                        PlayerData pd = IoPlugin.database.get(p.uuid);
+                    if(ioMain.database.containsKey(p.uuid)) {
+                        PlayerData pd = ioMain.database.get(p.uuid);
                         // increment playtime for users in-game
                         pd.incrementPlaytime(1); // 1 minute
-                        if(pd.getRank() == 0 && pd.getPlaytime() >= Utils.activeRequirements.playtime && pd.getBuildings() >= Utils.activeRequirements.buildingsBuilt && pd.getGames() >= Utils.activeRequirements.gamesPlayed){
-                            Call.onInfoMessage(p.con, Utils.promotionMessage);
+                        if(pd.getRank() == 0 && pd.getPlaytime() >= activeRequirements.playtime && pd.getBuildings() >= activeRequirements.buildingsBuilt && pd.getGames() >= activeRequirements.gamesPlayed){
+                            Call.onInfoMessage(p.con, promotionMessage);
                             pd.setRank(1);
                         }
                     } else {
-                        IoPlugin.database.put(p.uuid, new PlayerData(0));
+                        ioMain.database.put(p.uuid, new PlayerData(0));
                     }
                 }
 
@@ -61,7 +63,7 @@ public class BotThread extends Thread {
                     FileOutputStream fos=new FileOutputStream(fileOne);
                     ObjectOutputStream oos=new ObjectOutputStream(fos);
 
-                    oos.writeObject(IoPlugin.database);
+                    oos.writeObject(ioMain.database);
                     oos.flush();
                     oos.close();
                     fos.close();

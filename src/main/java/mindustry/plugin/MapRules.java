@@ -3,6 +3,7 @@ package mindustry.plugin;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.game.Rules;
 import mindustry.gen.Call;
 import mindustry.maps.Map;
 import mindustry.net.Administration;
@@ -11,12 +12,32 @@ import mindustry.world.Tile;
 
 import java.net.Inet4Address;
 
+import static mindustry.plugin.Utils.*;
+
 public class MapRules {
     public static class Maps{
         public static String minefield = "Minefield"; // pvp map
     }
 
+
     public static void onMapLoad(){
+        Rules rules = Vars.world.getMap().rules();
+        Rules orig = rules.copy();
+        rules.respawnTime = respawnTimeEnforced;
+        Vars.state.rules = rules.copy();
+
+        Thread normalRules = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(1000 * respawnTimeEnforcedDuration);
+                    Vars.state.rules = orig;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        normalRules.run();
+
         Administration.ActionFilter filter = new Administration.ActionFilter() {
             @Override
             public boolean allow(Administration.PlayerAction playerAction) {

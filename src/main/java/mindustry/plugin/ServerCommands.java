@@ -144,7 +144,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(targetRank);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank, player.name));
+                                IoPlugin.database.put(player.uuid, new PlayerData(targetRank));
                             }
                             if(targetRank==5) { // give admin to administrators
                                 netServer.admins.adminPlayer(player.uuid, player.usid);
@@ -703,9 +703,12 @@ public class ServerCommands {
                             String uuid = entrySet.getKey();
                             PlayerData pd = entrySet.getValue();
                             if(uuid != null && pd != null) {
-                                msg.append("· ").append(Utils.escapeCharacters(Utils.escapeColorCodes(pd.playerName))).append(" : ").append(uuid).append("\n");
+                                if(pd.getRank() == targetRank) {
+                                    msg.append("· ").append(uuid).append("\n");
+                                }
                             }
                         }
+                        msg.append("```");
                         ctx.reply(String.valueOf(msg));
                     }
                 }
@@ -808,7 +811,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(2);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(2, player.name));
+                                IoPlugin.database.put(player.uuid, new PlayerData(2));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <vip>.");
@@ -852,7 +855,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(1);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(1, player.name));
+                                IoPlugin.database.put(player.uuid, new PlayerData(1));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <active player>.");
@@ -882,7 +885,7 @@ public class ServerCommands {
                             if(IoPlugin.database.containsKey(player.uuid)) {
                                 IoPlugin.database.get(player.uuid).setRank(3);
                             } else {
-                                IoPlugin.database.put(player.uuid, new PlayerData(3, player.name));
+                                IoPlugin.database.put(player.uuid, new PlayerData(3));
                             }
                             eb.setTitle("Command executed successfully");
                             eb.setDescription("Promoted " + Utils.escapeCharacters(player.name) + " to <mvp>.");

@@ -383,30 +383,6 @@ public class ioMain extends Plugin {
                                 baseUnit.set(player.getX(), player.getY());
                                 baseUnit.add();
                                 Call.sendMessage(player.name + "[#fc77f1] spawned in a phantom pet!");
-                                Thread phantomPetLoop = new Thread() {
-                                    public void run() {
-                                        while (player.con.isConnected() && !baseUnit.dead && !intermission) { // teleport phantom pet back to owner every x seconds
-                                            try {
-                                                if(baseUnit.dst(player.getX(), player.getY()) > 150) {
-                                                    baseUnit.set(player.getX(), player.getY());
-                                                    baseUnit.clearBuilding(); // lets hope this doesnt crash ?
-                                                    Thread.sleep(phantomPetTeleportTime * 1000);
-                                                }
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        } // loop end
-                                        if(!player.con.isConnected() && !baseUnit.dead) { // if player left, let him respawn it
-                                            baseUnit.kill();
-                                            spawnedPhantomPet.remove(player.uuid);
-                                        } else {
-                                            if(intermission){
-                                                baseUnit.kill();
-                                            }
-                                        }
-                                    }
-                                };
-                                phantomPetLoop.start();
                             } else {
                                 player.sendMessage("[#42a1f5]You already spawned a phantom pet in this game!");
                             }

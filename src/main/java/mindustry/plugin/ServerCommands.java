@@ -745,7 +745,7 @@ public class ServerCommands {
 
             handler.registerCommand(new RoleRestrictedCommand("spawn") {
                 {
-                    help = "<playerid|ip|name> <unit> <amount> Change the provided player into a specific mech.";
+                    help = "<playerid|ip|name> <unit> <amount> Spawn x units at the location of the specified player";
                     role = banRole;
                 }
                 public void run(Context ctx) {

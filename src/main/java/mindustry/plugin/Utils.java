@@ -108,7 +108,7 @@ public class Utils {
             message = message.replaceAll("%playtime%", String.valueOf(ioMain.database.get(player.uuid).getPlaytime()));
             message = message.replaceAll("%games%", String.valueOf(ioMain.database.get(player.uuid).getGames()));
             message = message.replaceAll("%buildings%", String.valueOf(ioMain.database.get(player.uuid).getBuildings()));
-            message = message.replaceAll("%rank%", rankNames.get(ioMain.database.get(player.uuid).getRank()));
+            message = message.replaceAll("%rank%", escapeColorCodes(rankNames.get(ioMain.database.get(player.uuid).getRank())));
         }
         return message;
     }

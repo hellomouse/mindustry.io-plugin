@@ -3,6 +3,7 @@ package mindustry.plugin;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.entities.type.Player;
 import mindustry.game.Rules;
 import mindustry.gen.Call;
 import mindustry.maps.Map;
@@ -30,6 +31,9 @@ public class MapRules {
             public void run() {
                 try {
                     Thread.sleep(1000 * respawnTimeEnforcedDuration);
+                    for(Player p : Vars.playerGroup.all()){
+                        p.onRespawn(p.getClosestCore().tile);
+                    }
                     Vars.state.rules = orig;
                 } catch (InterruptedException e) {
                     e.printStackTrace();

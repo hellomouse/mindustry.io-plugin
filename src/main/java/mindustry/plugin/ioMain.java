@@ -14,8 +14,10 @@ import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
 import mindustry.game.Schematic;
+import mindustry.game.Schematic.Stile;
 import mindustry.world.Pos;
 import mindustry.world.Tile;
+import mindustry.world.blocks.PowerBlock;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -411,7 +413,7 @@ public class ioMain extends Plugin {
                 }
             });
 
-            handler.<Player>register("powergen", "[donator+] Spawn yourself a power generator.", (args, player) -> {
+            /*handler.<Player>register("powergen", "[donator+] Spawn yourself a power generator.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
@@ -423,14 +425,17 @@ public class ioMain extends Plugin {
                                         int x = (int) player.getX();
                                         int y = (int) player.getY();
 
-                                        Schematic.Stile rtgTile = powerSchem.tiles.find(s -> s.block == Blocks.rtgGenerator);
+                                        Stile rtgTile = null;
+                                        for(Stile st : powerSchem.tiles) {
+                                            rtgTile = st;
+                                        }
                                         if (rtgTile == null)
                                             throw new IllegalArgumentException("Schematic has no rtg tile! Fatal error.");
                                         int ox = x - rtgTile.x, oy = y - rtgTile.y;
 
                                         Tile rtgGenWorld = null;
 
-                                        for(Schematic.Stile st : powerSchem.tiles) {
+                                        for(Stile st : powerSchem.tiles) {
                                             Tile tile = world.tile(st.x + ox, st.y + oy);
                                             if (tile == null) return;
 
@@ -477,7 +482,7 @@ public class ioMain extends Plugin {
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
-            });
+            });*/
 
             handler.<Player>register("spawn", "[active+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {

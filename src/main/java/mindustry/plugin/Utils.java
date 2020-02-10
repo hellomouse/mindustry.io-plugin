@@ -22,7 +22,7 @@ public class Utils {
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
     static String statMessage = "";
 
-    public static Schematic powerSchem = Schematics.readBase64("bXNjaAB4nEVQAQrDIBA79exgY+wNe0DfNNwqpeBUrKPs97NVM8G7YC4mSgMNgtibt6VbdJ958Y8YNptm6zWd11cycdyMc6SnJUyWTk+Ts01fuqzBmTRG462ja8rzWCQ2mRwSEd0JS7RNEkX9y84wCH0gUecLK6ljVXrV7kiB5eYhqla0iw6FbFouSOKsu8mq6EmOruCmMKeQipGKMcdIxUjFSMVI1b32nO11BfXf0PgN3V0Kqtof5zwb/Q==");
+    public static Schematic powerSchem;
 
     static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +
@@ -44,7 +44,7 @@ public class Utils {
         rankNames.put(4, "[orange]<[][white]io moderator[][orange]>[]");
         rankNames.put(5, "[orange]<[][white]io administrator[][orange]>[]");
 
-        //rankRoles.put("627985513600516109", 1);
+        rankRoles.put("627985513600516109", 1);
         rankRoles.put("636968410441318430", 2);
         rankRoles.put("674778262857187347", 3);
         rankRoles.put("624959361789329410", 4);
@@ -53,6 +53,8 @@ public class Utils {
         activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
         activeRequirements.bannedBlocks.add(Blocks.junction);
         activeRequirements.bannedBlocks.add(Blocks.router);
+        
+        powerSchem = Schematics.readBase64("bXNjaAB4nEVQAQrDIBA79exgY+wNe0DfNNwqpeBUrKPs97NVM8G7YC4mSgMNgtibt6VbdJ958Y8YNptm6zWd11cycdyMc6SnJUyWTk+Ts01fuqzBmTRG462ja8rzWCQ2mRwSEd0JS7RNEkX9y84wCH0gUecLK6ljVXrV7kiB5eYhqla0iw6FbFouSOKsu8mq6EmOruCmMKeQipGKMcdIxUjFSMVI1b32nO11BfXf0PgN3V0Kqtof5zwb/Q==");
     }
 
     public static class Pals {

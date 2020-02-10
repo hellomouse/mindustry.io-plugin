@@ -346,7 +346,7 @@ public class ioMain extends Plugin {
             });
 
             handler.<Player>register("draugpet", "[active+] Spawn a draug mining drone for your team (disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
+                if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         int rank = database.get(player.uuid).getRank();
                         if (rank >= 1) {
@@ -374,7 +374,7 @@ public class ioMain extends Plugin {
             });
 
             handler.<Player>register("lichpet", "[donator+] Spawn yourself a lich defense pet (max. 1 per game, lasts 2 minutes, disabled on pvp)", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
+                if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
                             if (!spawnedLichPet.contains(player.uuid) || player.isAdmin) {
@@ -411,7 +411,7 @@ public class ioMain extends Plugin {
             });
 
             handler.<Player>register("spawn", "[active+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
+                if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 1) {
                             player.onRespawn(player.getClosestCore().tile);
@@ -428,7 +428,7 @@ public class ioMain extends Plugin {
             });
 
             handler.<Player>register("buildpower", "[donator+] Increase your build power 5x, making you build almost instantly.", (args, player) -> {
-                if(state.rules.attackMode || state.rules.waves || player.isAdmin) {
+                if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
                             player.mech.buildPower = 5f;

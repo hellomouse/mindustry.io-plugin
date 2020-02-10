@@ -3,6 +3,8 @@ package mindustry.plugin;
 import arc.struct.Array;
 import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
+import mindustry.game.Schematic;
+import mindustry.game.Schematics;
 import mindustry.maps.Map;
 import mindustry.world.Block;
 
@@ -19,6 +21,8 @@ public class Utils {
     static String welcomeMessage = "";
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
     static String statMessage = "";
+
+    public static Schematic powerSchem = Schematics.readBase64("bXNjaAB4nEVQAQrDIBA79exgY+wNe0DfNNwqpeBUrKPs97NVM8G7YC4mSgMNgtibt6VbdJ958Y8YNptm6zWd11cycdyMc6SnJUyWTk+Ts01fuqzBmTRG462ja8rzWCQ2mRwSEd0JS7RNEkX9y84wCH0gUecLK6ljVXrV7kiB5eYhqla0iw6FbFouSOKsu8mq6EmOruCmMKeQipGKMcdIxUjFSMVI1b32nO11BfXf0PgN3V0Kqtof5zwb/Q==");
 
     static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +

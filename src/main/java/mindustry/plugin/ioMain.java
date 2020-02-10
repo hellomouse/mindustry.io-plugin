@@ -6,16 +6,16 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import arc.struct.Array;
-import mindustry.content.Mechs;
+import mindustry.content.Blocks;
+import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
-import mindustry.entities.type.EffectEntity;
-import mindustry.entities.type.base.BuilderDrone;
-import mindustry.entities.units.UnitState;
-import mindustry.net.Administration;
-import mindustry.world.meta.BlockFlag;
+import mindustry.game.Schematic;
+import mindustry.world.Pos;
+import mindustry.world.Tile;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -35,7 +35,6 @@ import mindustry.game.EventType;
 import mindustry.gen.Call;
 
 import static mindustry.Vars.*;
-import static mindustry.Vars.player;
 import static mindustry.plugin.Utils.*;
 
 public class ioMain extends Plugin {
@@ -45,6 +44,7 @@ public class ioMain extends Plugin {
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
     public static Array<String> rainbowedPlayers = new Array<>(); // player
     public static Array<String> spawnedLichPet = new Array<>();
+    public static Array<String> spawnedPowerGen = new Array<>();
     public static HashMap<String, TempPlayerData> tempPlayerDatas = new HashMap<>(); // uuid, data
     public static HashMap<String, Integer> spawnedDraugPets = new HashMap<>(); // player, amount of draugs spawned
     public static Boolean intermission = false;
@@ -247,6 +247,7 @@ public class ioMain extends Plugin {
         Events.on(EventType.WorldLoadEvent.class, event -> {
             spawnedDraugPets.clear();
             spawnedLichPet.clear();
+            spawnedPowerGen.clear();
             MapRules.run();
             intermission = false;
             for(Player p : playerGroup.all()) {
@@ -396,6 +397,74 @@ public class ioMain extends Plugin {
                                     }
                                 };
                                 lichPetLoop.start();
+                            } else {
+                                player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
+                            }
+                        } else {
+                            player.sendMessage(noPermissionMessage);
+                        }
+                    } else {
+                        player.sendMessage(noPermissionMessage);
+                    }
+                } else {
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
+                }
+            });
+
+            handler.<Player>register("powergen", "[donator+] Spawn yourself a power generator.", (args, player) -> {
+                if(!state.rules.pvp || player.isAdmin) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 3) {
+                            if (!spawnedPowerGen.contains(player.uuid) || player.isAdmin) {
+                                spawnedPowerGen.add(player.uuid);
+                                Call.sendMessage(player.name + "[#ff82d1] spawned in a power generator!");
+                                Thread powerGenLoop = new Thread() {
+                                    public void run() {
+                                        int x = (int) player.getX();
+                                        int y = (int) player.getY();
+
+                                        Schematic.Stile rtgTile = powerSchem.tiles.find(s -> s.block == Blocks.rtgGenerator);
+                                        if (rtgTile == null)
+                                            throw new IllegalArgumentException("Schematic has no rtg tile! Fatal error.");
+                                        int ox = x - rtgTile.x, oy = y - rtgTile.y;
+
+                                        Tile rtgGenWorld = null;
+
+                                        for(Schematic.Stile st : powerSchem.tiles) {
+                                            Tile tile = world.tile(st.x + ox, st.y + oy);
+                                            if (tile == null) return;
+
+                                            if (tile.link().block() != Blocks.air) {
+                                                tile.link().removeNet();
+                                            }
+
+                                            tile.setNet(st.block, player.getTeam(), st.rotation);
+
+                                            if (st.block.posConfig) {
+                                                tile.configureAny(Pos.get(tile.x - st.x + Pos.x(st.config), tile.y - st.y + Pos.y(st.config)));
+                                            } else {
+                                                tile.configureAny(st.config);
+                                            }
+
+                                            if (tile.block() == Blocks.rtgGenerator) {
+                                                rtgGenWorld = tile;
+                                            }
+
+                                        }
+
+                                        while(rtgGenWorld != null && rtgGenWorld.block() == Blocks.rtgGenerator){
+                                            try {
+                                                Call.transferItemTo(Items.thorium, 1, rtgGenWorld.drawx(), rtgGenWorld.drawy(), rtgGenWorld);
+                                                Thread.sleep(6000);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        player.sendMessage("[scarlet]Your power generator was destroyed!");
+                                    }
+                                };
+                                powerGenLoop.start();
+
                             } else {
                                 player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
                             }

@@ -192,7 +192,7 @@ public class ioMain extends Plugin {
                         break;
                     case 2:
                         Call.sendMessage("[#fcba03]regular player " + player.name + " joined the server!");
-                        player.name = "[#fcba03]<vip>[] " + player.name;
+                        player.name = "[#fcba03]<regular>[] " + player.name;
                         break;
                     case 3:
                         Call.sendMessage("[scarlet]donator " + player.name + " joined the server!");

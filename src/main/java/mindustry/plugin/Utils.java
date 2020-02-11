@@ -45,7 +45,7 @@ public class Utils {
             "\n" +
             "[sky]Please join our discord:\n" +
             "http://discord.mindustry.io\n" +
-            "[grey]request manual verification in #verification-requests";
+            "[#7a7a7a]request manual verification in #verification-requests";
 
     static HashMap<Integer, String> rankNames = new HashMap<>();
     static HashMap<String, Integer> rankRoles = new HashMap<>();
@@ -117,7 +117,7 @@ public class Utils {
     public static Player findPlayer(String identifier){
         Player found = null;
         for (Player player : playerGroup.all()) {
-            if (player.con.address.equals(identifier.replaceAll(" ", "")) || String.valueOf(player.id).equals(identifier.replaceAll(" ", "")) || player.uuid.equals(identifier.replaceAll(" ", "")) || Utils.escapeColorCodes(player.name.toLowerCase().replaceAll(" ", "")).equals(identifier.toLowerCase().replaceAll(" ", ""))) {
+            if (player.con.address.equals(identifier.replaceAll(" ", "")) || String.valueOf(player.id).equals(identifier.replaceAll(" ", "")) || player.uuid.equals(identifier.replaceAll(" ", "")) || escapeColorCodes(player.name.toLowerCase().replaceAll(" ", "")).replaceAll("<.*?>", "").equals(identifier.toLowerCase().replaceAll(" ", ""))) {
                 found = player;
             }
         }

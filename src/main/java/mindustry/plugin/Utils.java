@@ -58,12 +58,12 @@ public class Utils {
         activeRequirements.bannedBlocks.add(Blocks.junction);
         activeRequirements.bannedBlocks.add(Blocks.router);
 
-        try {
+        /*try {
             powerSchem = Schematics.read(new Fi("schematic.msch"));
         } catch (IOException e) {
             Log.err("Error reading powergen file");
             e.printStackTrace();
-        }
+        }*/
     }
 
     public static class Pals {

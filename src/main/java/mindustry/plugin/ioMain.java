@@ -165,45 +165,50 @@ public class ioMain extends Plugin {
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
-
-            if(verification) {
-                if (verifiedIPs.containsKey(player.uuid)) {
-                    Boolean verified = verifiedIPs.get(player.uuid);
-                    if (!verified) {
-                        Log.info("Unverified player joined: " + player.name);
-                        Call.onInfoMessage(player.con, verificationMessage);
-                    }
-                } else {
-                    String url = "https://ip.teoh.io/api/vpn/" + player.con.address;
-                    String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
-
-                    JSONObject json = new JSONObject(new JSONTokener(pjson));
-                    Boolean cont = true;
-
-                    if(!json.has("vpn_or_proxy")) cont = false;
-                    if(cont) {
-                        if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
-                            Log.info("IP verification failed for: " + player.name);
-                            verifiedIPs.put(player.uuid, false);
-                            Call.onInfoMessage(player.con, verificationMessage);
-                            if (data.has("warnings_chat_channel_id")) {
-                                TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
-                                if (tc != null) {
-                                    EmbedBuilder eb = new EmbedBuilder().setTitle("IP verification failure: " + serverName);
-                                    eb.addField("IP", player.con.address);
-                                    eb.addField("Username", escapeCharacters(player.name));
-                                    eb.addField("UUID", player.uuid);
-                                    eb.setColor(Pals.info);
-                                    tc.sendMessage(eb);
-                                }
+            Thread verThread = new Thread() {
+                public void run(){
+                    if(verification) {
+                        if (verifiedIPs.containsKey(player.uuid)) {
+                            Boolean verified = verifiedIPs.get(player.uuid);
+                            if (!verified) {
+                                Log.info("Unverified player joined: " + player.name);
+                                Call.onInfoMessage(player.con, verificationMessage);
                             }
                         } else {
-                            Log.info("IP verification success for: " + player.name);
-                            verifiedIPs.put(player.uuid, true); // verification successful
+                            String url = "https://ip.teoh.io/api/vpn/" + player.con.address;
+                            String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+                            JSONObject json = new JSONObject(new JSONTokener(pjson));
+                            Boolean cont = true;
+
+                            if (!json.has("vpn_or_proxy")) cont = false;
+                            if (cont) {
+                                if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
+                                    Log.info("IP verification failed for: " + player.name);
+                                    verifiedIPs.put(player.uuid, false);
+                                    Call.onInfoMessage(player.con, verificationMessage);
+                                    if (data.has("warnings_chat_channel_id")) {
+                                        TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
+                                        if (tc != null) {
+                                            EmbedBuilder eb = new EmbedBuilder().setTitle("IP verification failure: " + serverName);
+                                            eb.addField("IP", player.con.address);
+                                            eb.addField("Username", escapeCharacters(player.name));
+                                            eb.addField("UUID", player.uuid);
+                                            eb.setColor(Pals.info);
+                                            tc.sendMessage(eb);
+                                        }
+                                    }
+                                } else {
+                                    Log.info("IP verification success for: " + player.name);
+                                    verifiedIPs.put(player.uuid, true); // verification successful
+                                }
+                            }
                         }
                     }
                 }
-            }
+            };
+            verThread.start();
+
 
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid).getRank();

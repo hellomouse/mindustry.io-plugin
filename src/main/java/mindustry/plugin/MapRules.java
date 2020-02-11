@@ -48,7 +48,7 @@ public class MapRules {
                 if(ioMain.verifiedIPs.containsKey(playerAction.player.uuid) && verification){
                     if(!ioMain.verifiedIPs.get(playerAction.player.uuid)){
                         Call.onInfoToast(playerAction.player.con, "[scarlet]Your IP was flagged as a VPN, please join http://discord.mindustry.io and request manual verification.", 5f);
-                        playerAction.player.sendMessage("[grey]Cannot build while flagged.");
+                        playerAction.player.sendMessage("[#7a7a7a]Cannot build while flagged.");
                         return false;
                     }
                 }

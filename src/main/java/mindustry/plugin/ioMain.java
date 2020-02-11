@@ -113,7 +113,7 @@ public class ioMain extends Plugin {
                 ois.close();
                 fis.close();
 
-                Log.info("discordplugin: database loaded successfully");
+                Log.info("discordplugin: ip_database loaded successfully");
             }
         } catch(Exception e){
             e.printStackTrace();
@@ -161,7 +161,7 @@ public class ioMain extends Plugin {
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
-            
+
             if(verification) {
                 if (verifiedIPs.containsKey(player.uuid)) {
                     Boolean verified = verifiedIPs.get(player.uuid);
@@ -174,6 +174,9 @@ public class ioMain extends Plugin {
                     String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
 
                     JSONObject json = new JSONObject(new JSONTokener(pjson));
+
+                    if(json.getString("vpn_or_proxy")==null) return;
+
                     if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
                         Log.info("IP verification failed for: " + player.name);
                         verifiedIPs.put(player.uuid, false);
@@ -553,6 +556,30 @@ public class ioMain extends Plugin {
 
             handler.<Player>register("info", "Get information (playtime, buildings built, etc.) about yourself.", (args, player) -> { // self info
                 if (database.containsKey(player.uuid)) {
+                    Call.onInfoMessage(player.con, formatMessage(player, statMessage));
+                }
+            });
+
+            handler.<Player>register("verify", "<playerid/playername>", "<mod+> Verify the specified player and allow them to build.", (args, player) -> {
+                if(args[0].length() > 0) {
+                    if (database.containsKey(player.uuid)) {
+                        if (database.get(player.uuid).getRank() >= 3) {
+                            Player p = findPlayer(args[0]);
+                            if (p != null) {
+                                if (verifiedIPs.containsKey(p.uuid)) {
+                                    verifiedIPs.put(p.uuid, true);
+                                    player.sendMessage("[sky]Verified " + p.name + " successfully.");
+                                } else {
+                                    player.sendMessage("[scarlet]Error: uuid not found in ip database");
+                                }
+                            } else {
+                                player.sendMessage("[scarlet]Error: player not found or offline");
+                            }
+                        } else {
+                            Call.onInfoMessage(noPermissionMessage);
+                        }
+                    }
+                } else {
                     Call.onInfoMessage(player.con, formatMessage(player, statMessage));
                 }
             });

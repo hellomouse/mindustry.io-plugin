@@ -425,10 +425,7 @@ public class ioMain extends Plugin {
                                         int x = (int) player.getX();
                                         int y = (int) player.getY();
 
-                                        Stile rtgTile = null;
-                                        for(Stile st : powerSchem.tiles) {
-                                            rtgTile = st;
-                                        }
+                                        Stile rtgTile = powerSchem.tiles.find(s -> s.block == Blocks.rtgGenerator);
                                         if (rtgTile == null)
                                             throw new IllegalArgumentException("Schematic has no rtg tile! Fatal error.");
                                         int ox = x - rtgTile.x, oy = y - rtgTile.y;

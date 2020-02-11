@@ -48,7 +48,6 @@ public class MapRules {
                 if(player!=null){ uuid = player.uuid; }
 
                 if(uuid==null){
-                    Log.info("uuid is null");
                     return true;
                 }
 

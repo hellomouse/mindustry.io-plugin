@@ -671,6 +671,30 @@ public class ServerCommands {
 
             });
 
+            handler.registerCommand(new RoleRestrictedCommand("verify"){
+                {
+                    help = "<uuid> Verify the provided UUID and allow them to join the server.";
+                    role = banRole;
+                }
+
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1];
+                    if(ioMain.verifiedIPs.containsKey(target)) {
+                        ioMain.verifiedIPs.put(target, true);
+                        eb.setTitle("Command executed successfully");
+                        eb.setDescription("Verified " + escapeCharacters(target));
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("Couldn't find " + escapeCharacters(target) + " in the database.");
+                        eb.setColor(Pals.error);
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+
+            });
+
             handler.registerCommand(new RoleRestrictedCommand("motd"){
                 {
                     help = "<newmessage> Change / set a welcome message";

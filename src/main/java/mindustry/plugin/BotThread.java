@@ -72,6 +72,22 @@ public class BotThread extends Thread {
                     e.printStackTrace();
                 }
 
+                // save verified ips
+
+                try {
+                    File fileTwo =new File("ipdatabase.io");
+                    FileOutputStream fos=new FileOutputStream(fileTwo);
+                    ObjectOutputStream oos=new ObjectOutputStream(fos);
+
+                    oos.writeObject(ioMain.database);
+                    oos.flush();
+                    oos.close();
+                    fos.close();
+
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
             } catch (Exception e) {}
         }
         if (data.has("serverdown_role_id")){

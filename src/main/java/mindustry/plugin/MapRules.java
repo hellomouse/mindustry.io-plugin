@@ -45,6 +45,13 @@ public class MapRules {
                 if(playerAction.type == Administration.ActionType.rotate) {
                     return false;
                 }
+                if(ioMain.verifiedIPs.containsKey(playerAction.player.uuid) && verification){
+                    if(!ioMain.verifiedIPs.get(playerAction.player.uuid)){
+                        Call.onInfoToast(playerAction.player.con, "[scarlet]Your IP was flagged as a VPN, please join http://discord.mindustry.io and request manual verification.", 5f);
+                        playerAction.player.sendMessage("[grey]Cannot build while flagged.");
+                        return false;
+                    }
+                }
                 return true;
             }
         };
@@ -64,7 +71,7 @@ public class MapRules {
                         Block block = tiles[x][y].block();
                         if(block!=null){
                             if(block == Blocks.shockMine){
-                                tiles[x][y].ent().damage(30f); // leave shock mines with 10hp
+                                Call.onTileDamage(tiles[x][y], 30f); // damage mines 30hp, leaving them with 10hp
                             }
                         }
                     }

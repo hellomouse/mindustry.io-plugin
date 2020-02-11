@@ -22,6 +22,8 @@ dependencies{
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:server:$mindustryVersion"
 
+    compile "org.glassfish.jersey.core:jersey-client:2.25.1"
+
     compile group: 'org.json', name: 'json', version: '20190722'
     //javacord
     implementation 'org.javacord:javacord:3.0.4'

@@ -6,18 +6,10 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import arc.struct.Array;
-import mindustry.content.Blocks;
-import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
-import mindustry.game.Schematic;
-import mindustry.game.Schematic.Stile;
-import mindustry.world.Pos;
-import mindustry.world.Tile;
-import mindustry.world.blocks.PowerBlock;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
@@ -36,6 +28,9 @@ import mindustry.entities.type.Player;
 import mindustry.game.EventType;
 import mindustry.gen.Call;
 
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+
 import static mindustry.Vars.*;
 import static mindustry.plugin.Utils.*;
 
@@ -44,6 +39,7 @@ public class ioMain extends Plugin {
     public static String prefix = ".";
     public static String serverName = "<untitled>";
     public static HashMap<String, PlayerData> database  = new HashMap<String, PlayerData>(); // uuid, rank
+    public static HashMap<String, Boolean> verifiedIPs = new HashMap<>(); // uuid, verified?
     public static Array<String> rainbowedPlayers = new Array<>(); // player
     public static Array<String> spawnedLichPet = new Array<>();
     public static Array<String> spawnedPowerGen = new Array<>();
@@ -105,6 +101,24 @@ public class ioMain extends Plugin {
             e.printStackTrace();
         }
 
+        // setup ipdatabase
+        try {
+            File toRead = new File("ipdatabase.io");
+            if(toRead.length() > 0) {
+                FileInputStream fis = new FileInputStream(toRead);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+                verifiedIPs = (HashMap<String, Boolean>) ois.readObject();
+
+                ois.close();
+                fis.close();
+
+                Log.info("discordplugin: database loaded successfully");
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
         // setup prefix
         if (data.has("prefix")) {
             prefix = String.valueOf(data.getString("prefix").charAt(0));
@@ -144,38 +158,43 @@ public class ioMain extends Plugin {
         }
 
 
-        // warning logs
-
-        if (data.has("warnings_chat_channel_id")) {
-            TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
-            if (tc != null) {
-                HashMap<String, String> warnMessageBuffer = new HashMap<>();
-                Events.on(EventType.TapConfigEvent.class, event -> {
-                    if(event.player != null) {
-
-                        warnMessageBuffer.put("Block: " + event.tile.block().name +  " Location: (" + event.tile.x + ", " + event.tile.y + ") Configuration: " + event.value, event.player.name);
-
-                        if(warnMessageBuffer.size() >= messageBufferSize) { // if message buffer size is below the expected size
-                            EmbedBuilder eb = new EmbedBuilder().setTitle("Logs from " + new SimpleDateFormat("yyyy_MM_dd").format(Calendar.getInstance().getTime()));
-                            eb.setColor(Pals.warning);
-                            eb.setTimestampToNow();
-                            for (Map.Entry<String, String> entry : warnMessageBuffer.entrySet()) {
-                                String message = entry.getKey();
-                                String username = entry.getValue();
-                                eb.addField(escapeCharacters(username), message);
-                            }
-                            tc.sendMessage(eb);
-                            warnMessageBuffer.clear();
-                        }
-                    }
-                });
-
-            }
-        }
-
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
             Player player = event.player;
+            
+            if(verification) {
+                if (verifiedIPs.containsKey(player.uuid)) {
+                    Boolean verified = verifiedIPs.get(player.uuid);
+                    if (!verified) {
+                        Log.info("Unverified player joined: " + player.name);
+                        Call.onInfoMessage(player.con, verificationMessage);
+                    }
+                } else {
+                    String url = "https://ip.teoh.io/api/vpn/" + player.con.address;
+                    String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+                    JSONObject json = new JSONObject(new JSONTokener(pjson));
+                    if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
+                        Log.info("IP verification failed for: " + player.name);
+                        verifiedIPs.put(player.uuid, false);
+                        Call.onInfoMessage(player.con, verificationMessage);
+                        if (data.has("warnings_chat_channel_id")) {
+                            TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
+                            if (tc != null) {
+                                EmbedBuilder eb = new EmbedBuilder().setTitle("IP verification failure: " + serverName);
+                                eb.addField("IP", player.con.address);
+                                eb.addField("Username", escapeCharacters(player.name));
+                                eb.addField("UUID", player.uuid);
+                                eb.setColor(Pals.info);
+                                tc.sendMessage(eb);
+                            }
+                        }
+                    } else {
+                        Log.info("IP verification success for: " + player.name);
+                        verifiedIPs.put(player.uuid, true); // verification successful
+                    }
+                }
+            }
 
             if(database.containsKey(player.uuid)) {
                 int rank = database.get(player.uuid).getRank();

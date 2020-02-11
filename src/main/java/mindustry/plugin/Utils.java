@@ -7,6 +7,7 @@ import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
+import mindustry.gen.Call;
 import mindustry.maps.Map;
 import mindustry.world.Block;
 
@@ -26,6 +27,9 @@ public class Utils {
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
     static String statMessage = "";
 
+    // wheter ip verification is in place (detect vpns, disallow their build rights)
+    static Boolean verification = true;
+
     public static Schematic powerSchem;
 
     static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
@@ -36,6 +40,12 @@ public class Utils {
             "[#9342f5]You built a total of %buildings%!\n" +
             "[sky]Thank you for participating and enjoy your time on [orange]<[white]io[orange]>[sky]!\n"+
             "[scarlet]Please rejoin for the change to take effect.";
+
+    static String verificationMessage = "[scarlet]Your IP was flagged as a VPN.\n" +
+            "\n" +
+            "[sky]Please join our discord:\n" +
+            "http://discord.mindustry.io\n" +
+            "[grey]request manual verification in #verification-requests";
 
     static HashMap<Integer, String> rankNames = new HashMap<>();
     static HashMap<String, Integer> rankRoles = new HashMap<>();

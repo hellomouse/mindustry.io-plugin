@@ -8,14 +8,18 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import arc.struct.Array;
+import mindustry.content.Blocks;
+import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
+import mindustry.world.Tile;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -103,17 +107,17 @@ public class ioMain extends Plugin {
 
         // setup ipdatabase
         try {
-            File toRead = new File("ipdatabase.io");
-            if(toRead.length() > 0) {
-                FileInputStream fis = new FileInputStream(toRead);
-                ObjectInputStream ois = new ObjectInputStream(fis);
+            File toRead2 = new File("ipdb.io");
+            if(toRead2.length() > 0) {
+                FileInputStream fis2 = new FileInputStream(toRead2);
+                ObjectInputStream ois2 = new ObjectInputStream(fis2);
 
-                verifiedIPs = (HashMap<String, Boolean>) ois.readObject();
+                verifiedIPs = (HashMap<String, Boolean>) ois2.readObject();
 
-                ois.close();
-                fis.close();
+                ois2.close();
+                fis2.close();
 
-                Log.info("discordplugin: ip_database loaded successfully");
+                Log.info("discordplugin: ip database loaded successfully");
             }
         } catch(Exception e){
             e.printStackTrace();
@@ -174,27 +178,29 @@ public class ioMain extends Plugin {
                     String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
 
                     JSONObject json = new JSONObject(new JSONTokener(pjson));
+                    Boolean cont = true;
 
-                    if(json.getString("vpn_or_proxy")==null) return;
-
-                    if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
-                        Log.info("IP verification failed for: " + player.name);
-                        verifiedIPs.put(player.uuid, false);
-                        Call.onInfoMessage(player.con, verificationMessage);
-                        if (data.has("warnings_chat_channel_id")) {
-                            TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
-                            if (tc != null) {
-                                EmbedBuilder eb = new EmbedBuilder().setTitle("IP verification failure: " + serverName);
-                                eb.addField("IP", player.con.address);
-                                eb.addField("Username", escapeCharacters(player.name));
-                                eb.addField("UUID", player.uuid);
-                                eb.setColor(Pals.info);
-                                tc.sendMessage(eb);
+                    if(!json.has("vpn_or_proxy")) cont = false;
+                    if(cont) {
+                        if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
+                            Log.info("IP verification failed for: " + player.name);
+                            verifiedIPs.put(player.uuid, false);
+                            Call.onInfoMessage(player.con, verificationMessage);
+                            if (data.has("warnings_chat_channel_id")) {
+                                TextChannel tc = getTextChannel(data.getString("warnings_chat_channel_id"));
+                                if (tc != null) {
+                                    EmbedBuilder eb = new EmbedBuilder().setTitle("IP verification failure: " + serverName);
+                                    eb.addField("IP", player.con.address);
+                                    eb.addField("Username", escapeCharacters(player.name));
+                                    eb.addField("UUID", player.uuid);
+                                    eb.setColor(Pals.info);
+                                    tc.sendMessage(eb);
+                                }
                             }
+                        } else {
+                            Log.info("IP verification success for: " + player.name);
+                            verifiedIPs.put(player.uuid, true); // verification successful
                         }
-                    } else {
-                        Log.info("IP verification success for: " + player.name);
-                        verifiedIPs.put(player.uuid, true); // verification successful
                     }
                 }
             }
@@ -435,7 +441,7 @@ public class ioMain extends Plugin {
                 }
             });
 
-            /*handler.<Player>register("powergen", "[donator+] Spawn yourself a power generator.", (args, player) -> {
+            handler.<Player>register("powergen", "[donator+] Spawn yourself a power generator.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {
                     if (database.containsKey(player.uuid)) {
                         if (database.get(player.uuid).getRank() >= 3) {
@@ -444,41 +450,19 @@ public class ioMain extends Plugin {
                                 Call.sendMessage(player.name + "[#ff82d1] spawned in a power generator!");
                                 Thread powerGenLoop = new Thread() {
                                     public void run() {
-                                        int x = (int) player.getX();
-                                        int y = (int) player.getY();
+                                        float x = player.getX();
+                                        float y = player.getY();
 
-                                        Stile rtgTile = powerSchem.tiles.find(s -> s.block == Blocks.rtgGenerator);
-                                        if (rtgTile == null)
-                                            throw new IllegalArgumentException("Schematic has no rtg tile! Fatal error.");
-                                        int ox = x - rtgTile.x, oy = y - rtgTile.y;
+                                        Tile rtgTile = world.tileWorld(x, y);
+                                        if(rtgTile==null) return;
 
-                                        Tile rtgGenWorld = null;
-
-                                        for(Stile st : powerSchem.tiles) {
-                                            Tile tile = world.tile(st.x + ox, st.y + oy);
-                                            if (tile == null) return;
-
-                                            if (tile.link().block() != Blocks.air) {
-                                                tile.link().removeNet();
-                                            }
-
-                                            tile.setNet(st.block, player.getTeam(), st.rotation);
-
-                                            if (st.block.posConfig) {
-                                                tile.configureAny(Pos.get(tile.x - st.x + Pos.x(st.config), tile.y - st.y + Pos.y(st.config)));
-                                            } else {
-                                                tile.configureAny(st.config);
-                                            }
-
-                                            if (tile.block() == Blocks.rtgGenerator) {
-                                                rtgGenWorld = tile;
-                                            }
-
+                                        if (!rtgTile.solid()){
+                                            rtgTile.setNet(Blocks.rtgGenerator, player.getTeam(), 0);
                                         }
 
-                                        while(rtgGenWorld != null && rtgGenWorld.block() == Blocks.rtgGenerator){
+                                        while(rtgTile.block() == Blocks.rtgGenerator){
                                             try {
-                                                Call.transferItemTo(Items.thorium, 1, rtgGenWorld.drawx(), rtgGenWorld.drawy(), rtgGenWorld);
+                                                Call.transferItemTo(Items.thorium, 1, rtgTile.drawx(), rtgTile.drawy(), rtgTile);
                                                 Thread.sleep(6000);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
@@ -490,7 +474,7 @@ public class ioMain extends Plugin {
                                 powerGenLoop.start();
 
                             } else {
-                                player.sendMessage("[#42a1f5]You already spawned a lich defense pet in this game!");
+                                player.sendMessage("[#ff82d1]You already spawned a power generator in this game!");
                             }
                         } else {
                             player.sendMessage(noPermissionMessage);
@@ -501,7 +485,7 @@ public class ioMain extends Plugin {
                 } else {
                     player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
-            });*/
+            });
 
             handler.<Player>register("spawn", "[active+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {
@@ -563,7 +547,7 @@ public class ioMain extends Plugin {
             handler.<Player>register("verify", "<playerid/playername>", "<mod+> Verify the specified player and allow them to build.", (args, player) -> {
                 if(args[0].length() > 0) {
                     if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 3) {
+                        if (database.get(player.uuid).getRank() >= 4) { // 4 = moderator
                             Player p = findPlayer(args[0]);
                             if (p != null) {
                                 if (verifiedIPs.containsKey(p.uuid)) {

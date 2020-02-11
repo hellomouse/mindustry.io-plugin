@@ -11,8 +11,6 @@ import mindustry.net.Administration;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 
-import java.net.Inet4Address;
-
 import static mindustry.plugin.Utils.*;
 
 public class MapRules {
@@ -45,9 +43,18 @@ public class MapRules {
                 if(playerAction.type == Administration.ActionType.rotate) {
                     return false;
                 }
-                if(ioMain.verifiedIPs.containsKey(playerAction.player.uuid) && verification){
-                    if(!ioMain.verifiedIPs.get(playerAction.player.uuid)){
-                        Call.onInfoToast(playerAction.player.con, "[scarlet]Your IP was flagged as a VPN, please join http://discord.mindustry.io and request manual verification.", 5f);
+                Player player = playerAction.player;
+                String uuid = null;
+                if(player!=null){ uuid = player.uuid; }
+
+                if(uuid==null){
+                    Log.info("uuid is null");
+                    return true;
+                }
+
+                if(ioMain.verifiedIPs.containsKey(uuid) && verification){
+                    if(!ioMain.verifiedIPs.get(uuid)){
+                        Call.onInfoToast(player.con, "[scarlet]Your IP was flagged as a VPN, please join http://discord.mindustry.io and request manual verification.", 5f);
                         playerAction.player.sendMessage("[#7a7a7a]Cannot build while flagged.");
                         return false;
                     }

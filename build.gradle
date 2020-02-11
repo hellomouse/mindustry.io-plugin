@@ -12,8 +12,8 @@ repositories{
 
 ext{
     //the build number that this plugin is made for
-    mindustryVersion = 'v103' // v100 doesn't seem to exist on gitpack, use this for now
-    arcVersion = 'v103'
+    mindustryVersion = 'v104' // v100 doesn't seem to exist on gitpack, use this for now
+    arcVersion = 'v104'
 }
 
 dependencies{

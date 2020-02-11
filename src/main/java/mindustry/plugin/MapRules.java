@@ -25,16 +25,13 @@ public class MapRules {
         Rules rules = Vars.world.getMap().rules();
         Rules orig = rules.copy();
         rules.respawnTime = respawnTimeEnforced;
-        Vars.state.rules = rules.copy();
+        Call.onSetRules(rules);
 
         Thread normalRules = new Thread() {
             public void run() {
                 try {
                     Thread.sleep(1000 * respawnTimeEnforcedDuration);
-                    for(Player p : Vars.playerGroup.all()){
-                        p.onRespawn(p.getClosestCore().tile);
-                    }
-                    Vars.state.rules = orig;
+                    Call.onSetRules(orig);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -1,6 +1,8 @@
 package mindustry.plugin;
 
+import arc.files.Fi;
 import arc.struct.Array;
+import arc.util.Log;
 import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.game.Schematic;
@@ -9,6 +11,8 @@ import mindustry.maps.Map;
 import mindustry.world.Block;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 import static mindustry.Vars.*;
@@ -16,7 +20,7 @@ import static mindustry.Vars.*;
 public class Utils {
     static int messageBufferSize = 24; // number of messages sent at once to discord
     public static int chatMessageMaxSize = 256;
-    public static float respawnTimeEnforced = 0.01f;
+    public static float respawnTimeEnforced = 1f;
     public static int respawnTimeEnforcedDuration = 10; // duration of insta spawn
     static String welcomeMessage = "";
     static String noPermissionMessage = "You don't have permissions to execute this command! Purchase vip at https://donate.mindustry.io";
@@ -53,8 +57,13 @@ public class Utils {
         activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
         activeRequirements.bannedBlocks.add(Blocks.junction);
         activeRequirements.bannedBlocks.add(Blocks.router);
-        
-        powerSchem = Schematics.readBase64("bXNjaAB4nEVQAQrDIBA79exgY+wNe0DfNNwqpeBUrKPs97NVM8G7YC4mSgMNgtibt6VbdJ958Y8YNptm6zWd11cycdyMc6SnJUyWTk+Ts01fuqzBmTRG462ja8rzWCQ2mRwSEd0JS7RNEkX9y84wCH0gUecLK6ljVXrV7kiB5eYhqla0iw6FbFouSOKsu8mq6EmOruCmMKeQipGKMcdIxUjFSMVI1b32nO11BfXf0PgN3V0Kqtof5zwb/Q==");
+
+        try {
+            powerSchem = Schematics.read(new Fi("schematic.msch"));
+        } catch (IOException e) {
+            Log.err("Error reading powergen file");
+            e.printStackTrace();
+        }
     }
 
     public static class Pals {

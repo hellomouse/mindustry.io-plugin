@@ -53,6 +53,7 @@ public class ioMain extends Plugin {
     private final String fileNotFoundErrorMessage = "File not found: config\\mods\\settings.json";
     private JSONObject alldata;
     public static JSONObject data; //token, channel_id, role_id
+    public static String apiKey = "";
 
 
     //register event handlers and create variables in the constructor
@@ -161,6 +162,10 @@ public class ioMain extends Plugin {
             }
         }
 
+        if(data.has("api_key")){
+            apiKey = data.getString("api_key");
+            Log.info("apiKey set successfully");
+        }
 
         // player joined
         Events.on(EventType.PlayerJoin.class, event -> {
@@ -175,15 +180,15 @@ public class ioMain extends Plugin {
                                 Call.onInfoMessage(player.con, verificationMessage);
                             }
                         } else {
-                            String url = "https://ip.teoh.io/api/vpn/" + player.con.address;
+                            String url = "http://api.vpnblocker.net/v2/json/" + player.con.address + "/" + apiKey;
                             String pjson = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get(String.class);
 
                             JSONObject json = new JSONObject(new JSONTokener(pjson));
                             Boolean cont = true;
 
-                            if (!json.has("vpn_or_proxy")) cont = false;
+                            if (!json.has("host-ip")) cont = false;
                             if (cont) {
-                                if (!json.getString("vpn_or_proxy").equals("no")) { // verification failed
+                                if (json.getBoolean("host-ip")) { // verification failed
                                     Log.info("IP verification failed for: " + player.name);
                                     verifiedIPs.put(player.uuid, false);
                                     Call.onInfoMessage(player.con, verificationMessage);

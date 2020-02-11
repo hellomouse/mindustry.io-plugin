@@ -72,14 +72,15 @@ public class BotThread extends Thread {
                     e.printStackTrace();
                 }
 
-                // save verified ips
+
+                // save verified ips database
 
                 try {
-                    File fileTwo =new File("ipdatabase.io");
+                    File fileTwo =new File("ipdb.io");
                     FileOutputStream fos=new FileOutputStream(fileTwo);
                     ObjectOutputStream oos=new ObjectOutputStream(fos);
 
-                    oos.writeObject(ioMain.database);
+                    oos.writeObject(ioMain.verifiedIPs);
                     oos.flush();
                     oos.close();
                     fos.close();

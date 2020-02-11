@@ -30,8 +30,6 @@ public class Utils {
     // wheter ip verification is in place (detect vpns, disallow their build rights)
     static Boolean verification = true;
 
-    public static Schematic powerSchem;
-
     static String promotionMessage =  "mindustry[orange]<[white].io[orange]>[white]\n" +
             "\n" +
             "[sky]%player%, you have been promoted to [sky]<active>[]!\n" +
@@ -67,13 +65,6 @@ public class Utils {
         activeRequirements.bannedBlocks.add(Blocks.titaniumConveyor);
         activeRequirements.bannedBlocks.add(Blocks.junction);
         activeRequirements.bannedBlocks.add(Blocks.router);
-
-        /*try {
-            powerSchem = Schematics.read(new Fi("schematic.msch"));
-        } catch (IOException e) {
-            Log.err("Error reading powergen file");
-            e.printStackTrace();
-        }*/
     }
 
     public static class Pals {

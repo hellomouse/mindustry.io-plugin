@@ -1,6 +1,7 @@
 package mindustry.plugin;
 
 import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.content.Mechs;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
@@ -24,6 +25,8 @@ import mindustry.io.SaveIO;
 
 import mindustry.type.Mech;
 import mindustry.type.UnitType;
+import mindustry.world.Block;
+import mindustry.world.Tile;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAttachment;
 
@@ -505,37 +508,13 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String target = ctx.args[1];
-                    String targetMech = ctx.args[2].toLowerCase();
+                    String targetMech = ctx.args[2];
                     Mech desiredMech = Mechs.alpha;
                     if(target.length() > 0 && targetMech.length() > 0) {
-                        switch(targetMech){
-                            case "alpha":
-                                break;
-                            case "delta":
-                                desiredMech = Mechs.delta;
-                                break;
-                            case "tau":
-                                desiredMech = Mechs.tau;
-                                break;
-                            case "dart":
-                                desiredMech = Mechs.dart;
-                                break;
-                            case "glaive":
-                                desiredMech = Mechs.glaive;
-                                break;
-                            case "javelin":
-                                desiredMech = Mechs.javelin;
-                                break;
-                            case "omega":
-                                desiredMech = Mechs.omega;
-                                break;
-                            case "trident":
-                                desiredMech = Mechs.trident;
-                                break;
-                            default:
-                                desiredMech = Mechs.starter;
-                                break;
-                        }
+                        try {
+                            Field field = Mechs.class.getDeclaredField(targetMech);
+                            desiredMech = (Mech)field.get(null);
+                        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
 
                         EmbedBuilder eb = new EmbedBuilder();
 
@@ -566,31 +545,9 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String target = ctx.args[1];
-                    String targetTeam = ctx.args[2].toLowerCase();
+                    String targetTeam = ctx.args[2];
                     Team desiredTeam = Team.crux;
                     if(target.length() > 0 && targetTeam.length() > 0) {
-                        switch(targetTeam){
-                            case "crux":
-                                break;
-                            case "blue":
-                                desiredTeam = Team.blue;
-                                break;
-                            case "derelict":
-                                desiredTeam = Team.derelict;
-                                break;
-                            case "green":
-                                desiredTeam = Team.green;
-                                break;
-                            case "purple":
-                                desiredTeam = Team.purple;
-                                break;
-                            case "sharded":
-                                desiredTeam = Team.sharded;
-                                break;
-                            default:
-                                break;
-                        }
-
                         EmbedBuilder eb = new EmbedBuilder();
 
                         if(target.equals("all")) {
@@ -775,57 +732,14 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String target = ctx.args[1];
-                    String targetUnit = ctx.args[2].toLowerCase();
+                    String targetUnit = ctx.args[2];
                     int amount = Integer.parseInt(ctx.args[3]);
                     UnitType desiredUnit = UnitTypes.dagger;
                     if(target.length() > 0 && targetUnit.length() > 0 && amount > 0 && amount < 1000) {
-                        switch(targetUnit){
-                            case "draug":
-                                desiredUnit = UnitTypes.draug;
-                                break;
-                            case "chaosarray":
-                                desiredUnit = UnitTypes.chaosArray;
-                                break;
-                            case "crawler":
-                                desiredUnit = UnitTypes.crawler;
-                                break;
-                            case "eradicator":
-                                desiredUnit = UnitTypes.eradicator;
-                                break;
-                            case "eruptor":
-                                desiredUnit = UnitTypes.eruptor;
-                                break;
-                            case "fortress":
-                                desiredUnit = UnitTypes.fortress;
-                                break;
-                            case "ghoul":
-                                desiredUnit = UnitTypes.ghoul;
-                                break;
-                            case "lich":
-                                desiredUnit = UnitTypes.lich;
-                                break;
-                            case "phantom":
-                                desiredUnit = UnitTypes.phantom;
-                                break;
-                            case "reaper":
-                                desiredUnit = UnitTypes.reaper;
-                                break;
-                            case "revenant":
-                                desiredUnit = UnitTypes.revenant;
-                                break;
-                            case "spirit":
-                                desiredUnit = UnitTypes.spirit;
-                                break;
-                            case "titan":
-                                desiredUnit = UnitTypes.titan;
-                                break;
-                            case "wraith":
-                                desiredUnit = UnitTypes.wraith;
-                                break;
-                            default:
-                                desiredUnit = UnitTypes.dagger;
-                                break;
-                        }
+                        try {
+                            Field field = UnitTypes.class.getDeclaredField(targetUnit);
+                            desiredUnit = (UnitType)field.get(null);
+                        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
 
                         EmbedBuilder eb = new EmbedBuilder();
                         Player player = findPlayer(target);
@@ -851,56 +765,13 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     String target = ctx.args[1];
-                    String targetUnit = ctx.args[2].toLowerCase();
+                    String targetUnit = ctx.args[2];
                     UnitType desiredUnit = UnitTypes.dagger;
                     if(target.length() > 0 && targetUnit.length() > 0) {
-                        switch(targetUnit) {
-                            case "draug":
-                                desiredUnit = UnitTypes.draug;
-                                break;
-                            case "chaosarray":
-                                desiredUnit = UnitTypes.chaosArray;
-                                break;
-                            case "crawler":
-                                desiredUnit = UnitTypes.crawler;
-                                break;
-                            case "eradicator":
-                                desiredUnit = UnitTypes.eradicator;
-                                break;
-                            case "eruptor":
-                                desiredUnit = UnitTypes.eruptor;
-                                break;
-                            case "fortress":
-                                desiredUnit = UnitTypes.fortress;
-                                break;
-                            case "ghoul":
-                                desiredUnit = UnitTypes.ghoul;
-                                break;
-                            case "lich":
-                                desiredUnit = UnitTypes.lich;
-                                break;
-                            case "phantom":
-                                desiredUnit = UnitTypes.phantom;
-                                break;
-                            case "reaper":
-                                desiredUnit = UnitTypes.reaper;
-                                break;
-                            case "revenant":
-                                desiredUnit = UnitTypes.revenant;
-                                break;
-                            case "spirit":
-                                desiredUnit = UnitTypes.spirit;
-                                break;
-                            case "titan":
-                                desiredUnit = UnitTypes.titan;
-                                break;
-                            case "wraith":
-                                desiredUnit = UnitTypes.wraith;
-                                break;
-                            default:
-                                desiredUnit = UnitTypes.dagger;
-                                break;
-                        }
+                        try {
+                            Field field = UnitTypes.class.getDeclaredField(targetUnit);
+                            desiredUnit = (UnitType)field.get(null);
+                        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
 
                         EmbedBuilder eb = new EmbedBuilder();
                         Player player = findPlayer(target);
@@ -918,6 +789,37 @@ public class ServerCommands {
                             eb.setDescription("Killed " + amount + " " + targetUnit + "s on team " + player.getTeam());
                             ctx.channel.sendMessage(eb);
                         }
+                    }
+                }
+            });
+
+            handler.registerCommand(new RoleRestrictedCommand("setblock") {
+                {
+                    help = "<playerid|ip|name> <block> Create a block at the player's current location and on the player's current team.";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String target = ctx.args[1];
+                    String targetBlock = ctx.args[2];
+                    Block desiredBlock = Blocks.copperWall;
+
+                    try {
+                        Field field = Blocks.class.getDeclaredField(targetBlock);
+                        desiredBlock = (Block)field.get(null);
+                    } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+
+                    EmbedBuilder eb = new EmbedBuilder();
+                    Player player = findPlayer(target);
+
+                    if(player!=null){
+                        float x = player.getX();
+                        float y = player.getY();
+                        Tile tile = world.tileWorld(x, y);
+                        tile.setNet(desiredBlock, player.getTeam(), 0);
+
+                        eb.setTitle("Command executed successfully.");
+                        eb.setDescription("Spawned " + desiredBlock.name + " on " + Utils.escapeCharacters(player.name) + "'s position.");
+                        ctx.channel.sendMessage(eb);
                     }
                 }
             });

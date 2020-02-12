@@ -12,6 +12,7 @@ import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
+import mindustry.mod.Mod;
 import mindustry.world.Tile;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -19,7 +20,6 @@ import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -38,7 +38,7 @@ import javax.ws.rs.core.MediaType;
 import static mindustry.Vars.*;
 import static mindustry.plugin.Utils.*;
 
-public class ioMain extends Plugin {
+public class ioMain extends Mod {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";

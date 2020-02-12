@@ -108,7 +108,7 @@ public class Utils {
     public static Player findPlayer(String identifier){
         Player found = null;
         for (Player player : playerGroup.all()) {
-            if (player.con.address.equals(identifier.replaceAll(" ", "")) || String.valueOf(player.id).equals(identifier.replaceAll(" ", "")) || player.uuid.equals(identifier.replaceAll(" ", "")) || escapeColorCodes(player.name.toLowerCase().replaceAll(" ", "")).replaceAll("<.*?>", "").equals(identifier.toLowerCase().replaceAll(" ", ""))) {
+            if (player.con.address.equals(identifier.replaceAll(" ", "")) || String.valueOf(player.id).equals(identifier.replaceAll(" ", "")) || player.uuid.equals(identifier.replaceAll(" ", "")) || escapeColorCodes(player.name.toLowerCase().replaceAll(" ", "")).replaceAll("<.*?>", "").contains(identifier.toLowerCase().replaceAll(" ", ""))) {
                 found = player;
             }
         }

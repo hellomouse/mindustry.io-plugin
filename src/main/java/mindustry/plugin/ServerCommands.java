@@ -549,7 +549,6 @@ public class ServerCommands {
                     Team desiredTeam = Team.crux;
                     if(target.length() > 0 && targetTeam.length() > 0) {
                         EmbedBuilder eb = new EmbedBuilder();
-
                         if(target.equals("all")) {
                             for (Player p : playerGroup.all()) {
                                 p.setTeam(desiredTeam);

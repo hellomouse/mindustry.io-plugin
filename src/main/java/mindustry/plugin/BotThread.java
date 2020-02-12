@@ -48,7 +48,7 @@ public class BotThread extends Thread {
                         // increment playtime for users in-game
                         pd.incrementPlaytime(1); // 1 minute
                         if(pd.getRank() == 0 && pd.getPlaytime() >= activeRequirements.playtime && pd.getBuildings() >= activeRequirements.buildingsBuilt && pd.getGames() >= activeRequirements.gamesPlayed){
-                            Call.onInfoMessage(p.con, promotionMessage);
+                            Call.onInfoMessage(p.con, Utils.formatMessage(p, promotionMessage));
                             pd.setRank(1);
                         }
                     } else {

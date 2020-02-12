@@ -197,7 +197,6 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
-                    ctx.message = escapeCharacters(ctx.message);
 
                     if (ctx.message.length() <= 0) {
                         eb.setTitle("Command terminated");
@@ -226,14 +225,7 @@ public class ServerCommands {
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
                     String target = ctx.args[1].toLowerCase();
-                    ctx.message = escapeCharacters(ctx.message);
-                    if (ctx.message == null) {
-                        eb.setTitle("Command terminated");
-                        eb.setColor(Pals.error);
-                        eb.setDescription("No message given");
-                        ctx.channel.sendMessage(eb);
-                        return;
-                    }
+
                     if(target.equals("all")) {
                         for (Player p : playerGroup.all()) {
                             Call.onInfoMessage(p.con, ctx.message.split(" ", 2)[1]);
@@ -257,6 +249,39 @@ public class ServerCommands {
                     }
                 }
             });
+
+            /*handler.registerCommand(new RoleRestrictedCommand("sethudtext") {
+                {
+                    help = "<playerid|ip|name> <message> Sets the HUD text";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    String target = ctx.args[1].toLowerCase();
+
+                    if(target.equals("all")) {
+                        for (Player p : playerGroup.all()) {
+                            Call.setHudText(p.con, ctx.message.split(" ", 2)[1]);
+                        }
+                        eb.setTitle("Command executed");
+                        eb.setDescription("Alert was sent to all players.");
+                        ctx.channel.sendMessage(eb);
+                    } else{
+                        Player p = findPlayer(target);
+                        if (p != null) {
+                            Call.setHudText(p.con, ctx.message.split(" ", 2)[1]);
+                            eb.setTitle("Command executed");
+                            eb.setDescription("Alert was sent to " + escapeCharacters(p.name));
+                            ctx.channel.sendMessage(eb);
+                        } else {
+                            eb.setTitle("Command terminated");
+                            eb.setColor(Pals.error);
+                            eb.setDescription("Player could not be found or is offline.");
+                            ctx.channel.sendMessage(eb);
+                        }
+                    }
+                }
+            });*/
 
             handler.registerCommand(new RoleRestrictedCommand("gameover") {
                 {

@@ -5,6 +5,8 @@ import mindustry.content.Blocks;
 import mindustry.content.Mechs;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
+import mindustry.game.Teams;
+import mindustry.net.Administration;
 import mindustry.plugin.discordcommands.Command;
 import mindustry.plugin.discordcommands.Context;
 import mindustry.plugin.discordcommands.DiscordCommands;
@@ -245,6 +247,7 @@ public class ServerCommands {
                             eb.setColor(Pals.error);
                             eb.setDescription("Player could not be found or is offline.");
                             ctx.channel.sendMessage(eb);
+
                         }
                     }
                 }
@@ -572,7 +575,14 @@ public class ServerCommands {
                     String target = ctx.args[1];
                     String targetTeam = ctx.args[2];
                     Team desiredTeam = Team.crux;
+
+
                     if(target.length() > 0 && targetTeam.length() > 0) {
+                        try {
+                            Field field = Teams.class.getDeclaredField(targetTeam);
+                            desiredTeam = (Team)field.get(null);
+                        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+
                         EmbedBuilder eb = new EmbedBuilder();
                         if(target.equals("all")) {
                             for (Player p : playerGroup.all()) {

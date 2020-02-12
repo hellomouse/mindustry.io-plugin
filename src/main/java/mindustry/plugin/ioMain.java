@@ -38,7 +38,7 @@ import javax.ws.rs.core.MediaType;
 import static mindustry.Vars.*;
 import static mindustry.plugin.Utils.*;
 
-public class ioMain extends Mod {
+public class ioMain extends Plugin {
     public static DiscordApi api = null;
     public static String prefix = ".";
     public static String serverName = "<untitled>";

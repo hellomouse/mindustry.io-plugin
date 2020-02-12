@@ -361,6 +361,7 @@ public class ServerCommands {
                     }
                 }
             });
+
             handler.registerCommand(new RoleRestrictedCommand("unban") {
                 EmbedBuilder eb = new EmbedBuilder();
                 {
@@ -384,6 +385,30 @@ public class ServerCommands {
                 }
             });
 
+            handler.registerCommand(new RoleRestrictedCommand("unvotekick") {
+                EmbedBuilder eb = new EmbedBuilder();
+                {
+                    help = "<id> Unvotekickban the specified player";
+                    role = banRole;
+                }
+                public void run(Context ctx) {
+                    String target = ctx.args[1];
+                    Administration.PlayerInfo info = netServer.admins.getInfo(target);
+
+                    if (info != null) {
+                        info.lastKicked = 0;
+                        eb.setTitle("Command executed.");
+                        eb.setDescription("Unvotekickbanned `" + target + "` succeessfully.");
+                        ctx.channel.sendMessage(eb);
+                    } else {
+                        eb.setTitle("Command terminated.");
+                        eb.setColor(Pals.error);
+                        eb.setDescription("That ID isn't votekickbanned!");
+                        ctx.channel.sendMessage(eb);
+                    }
+                }
+            });
+
             handler.registerCommand(new RoleRestrictedCommand("kick") {
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTimestampToNow();
@@ -398,7 +423,7 @@ public class ServerCommands {
                     if (p != null) {
                         eb.setTitle("Command executed.");
                         eb.setDescription("Kicked " + p.name + "(#" + p.id + ") `" + p.con.address + "` successfully.");
-                        Call.sendChatMessage("[scarlet]" + escapeCharacters(p.name) + " has been kicked.");
+                        Call.sendMessage("[scarlet]" + escapeCharacters(p.name) + " has been kicked.");
                         Call.onKick(p.con, "You've been kicked by: " + ctx.author.getName());
                     } else {
                         eb.setTitle("Command terminated.");

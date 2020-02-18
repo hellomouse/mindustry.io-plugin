@@ -36,6 +36,9 @@ public class MapRules {
             String uuid = player.uuid;
             if (uuid == null) return false;
 
+            // disable checks for moderators and admins
+            if (ioMain.getRank(player) >= 4 || player.isAdmin) return true;
+
             if (ioMain.verifiedIPs.containsKey(uuid) && verification) {
                 if (!ioMain.verifiedIPs.get(uuid)) {
                     Call.onInfoToast(player.con, "[scarlet]Your IP was flagged as a VPN, please join http://discord.mindustry.io and request manual verification.", 5f);

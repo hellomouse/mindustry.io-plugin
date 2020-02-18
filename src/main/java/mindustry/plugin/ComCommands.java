@@ -172,12 +172,12 @@ public class ComCommands {
                         if(ioMain.database.containsKey(player.uuid)) {
                             ioMain.database.get(player.uuid).setRank(rank);
                         } else {
-                            ioMain.database.put(player.uuid, new PlayerData(rank));
+                            ioMain.database.put(player.uuid, new PlayerData(player.usid, rank));
                         }
                         eb.setTitle("Command executed successfully");
                         eb.setDescription("Promoted " + escapeCharacters(player.name) + " to " + escapeColorCodes(rankNames.get(rank)) + ".");
                         ctx.channel.sendMessage(eb);
-                        Call.onKick(player.con, "Your rank was modified, please rejoin.");
+                        player.con.kick("Your rank was modified, please rejoin.", 0);
                     } else {
                         eb.setTitle("Command terminated");
                         eb.setDescription("Player not online or not found.");

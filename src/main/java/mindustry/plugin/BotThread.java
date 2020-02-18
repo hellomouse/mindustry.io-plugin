@@ -40,57 +40,49 @@ public class BotThread extends Thread {
             try {
                 Thread.sleep(60 * 1000);
 
-
-
                 for (Player p : Vars.playerGroup.all()) {
-                    if(ioMain.database.containsKey(p.uuid)) {
-                        PlayerData pd = ioMain.database.get(p.uuid);
-                        // increment playtime for users in-game
-                        pd.incrementPlaytime(1); // 1 minute
-                        if(pd.getRank() == 0 && pd.getPlaytime() >= activeRequirements.playtime && pd.getBuildings() >= activeRequirements.buildingsBuilt && pd.getGames() >= activeRequirements.gamesPlayed){
-                            Call.onInfoMessage(p.con, Utils.formatMessage(p, promotionMessage));
-                            pd.setRank(1);
-                        }
-                    } else {
-                        ioMain.database.put(p.uuid, new PlayerData(0));
+                    PlayerData pd = ioMain.getData(p);
+                    if (pd == null) continue;
+                    // increment playtime for users in-game
+                    pd.incrementPlaytime(1); // 1 minute
+                    if(pd.getRank() == 0 && pd.getPlaytime() >= activeRequirements.playtime && pd.getBuildings() >= activeRequirements.buildingsBuilt && pd.getGames() >= activeRequirements.gamesPlayed){
+                        Call.onInfoMessage(p.con, Utils.formatMessage(p, promotionMessage));
+                        pd.setRank(1);
                     }
                 }
 
                 // save database
-
                 try {
-                    File fileOne =new File("database.io");
-                    FileOutputStream fos=new FileOutputStream(fileOne);
-                    ObjectOutputStream oos=new ObjectOutputStream(fos);
+                    File fileOne = new File("database.io");
+                    FileOutputStream fos = new FileOutputStream(fileOne);
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
 
                     oos.writeObject(ioMain.database);
                     oos.flush();
                     oos.close();
                     fos.close();
-
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
 
-
                 // save verified ips database
-
                 try {
-                    File fileTwo =new File("ipdb.io");
-                    FileOutputStream fos=new FileOutputStream(fileTwo);
-                    ObjectOutputStream oos=new ObjectOutputStream(fos);
+                    File fileTwo = new File("ipdb.io");
+                    FileOutputStream fos = new FileOutputStream(fileTwo);
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
 
                     oos.writeObject(ioMain.verifiedIPs);
                     oos.flush();
                     oos.close();
                     fos.close();
-
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
-
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
         if (data.has("serverdown_role_id")){
             Role r = new UtilMethods().getRole(api, data.getString("serverdown_role_id"));
             TextChannel tc = new UtilMethods().getTextChannel(api, data.getString("serverdown_channel_id"));
@@ -102,7 +94,7 @@ public class BotThread extends Thread {
                 if (data.has("server_name")){
                     String serverName = data.getString("server_name");
                     new MessageBuilder()
-                            .append(String.format("%s\nServer %s is down",r.getMentionTag(),((serverName != "") ? ("**"+serverName+"**") : "")))
+                            .append(String.format("%s\nServer %s is down", r.getMentionTag(), (!serverName.isEmpty() ? ("**" + serverName + "**") : "")))
                             .send(tc);
                 } else {
                     new MessageBuilder()

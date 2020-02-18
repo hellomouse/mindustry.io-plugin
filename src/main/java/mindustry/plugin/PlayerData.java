@@ -3,19 +3,21 @@ package mindustry.plugin;
 import java.io.Serializable;
 
 public class PlayerData implements Serializable {
-    public Integer rank = 0;
-    public Integer playTime = 0;
-    public Integer buildingsBuilt = 0;
-    public Integer enemiesKilled = 0;
-    public Integer gamesPlayed = 0;
+    public int rank;
+    public int playTime = 0;
+    public int buildingsBuilt = 0;
+    public int enemiesKilled = 0;
+    public int gamesPlayed = 0;
+    public String usid;
 
-
-    public PlayerData(Integer rank, Integer playTime){
+    public PlayerData(String usid, Integer rank, Integer playTime) {
+        this.usid = usid;
         this.rank = rank;
         this.playTime = playTime;
     }
 
-    public PlayerData(int rank){
+    public PlayerData(String usid, int rank) {
+        this.usid = usid;
         this.rank = rank;
     }
 

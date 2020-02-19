@@ -4,6 +4,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
@@ -214,8 +215,15 @@ public class ioMain extends Plugin {
             player.name = player.name.replaceAll("<", "");
             player.name = player.name.replaceAll(">", "");
 
-            TempPlayerData tempData = new TempPlayerData(player);
-            tempPlayerDatas.put(player.uuid, tempData);
+            TempPlayerData tempData = tempPlayerDatas.get(player.uuid);
+            if (tempData == null) {
+                tempData = new TempPlayerData(player);
+                tempPlayerDatas.put(player.uuid, tempData);
+            } else {
+                tempData.playerRef = new WeakReference<>(player);
+                tempData.origName = player.name;
+                tempData.doRainbow = false;
+            }
 
             if(database.containsKey(player.uuid)) {
                 PlayerData data = database.get(player.uuid);
@@ -309,7 +317,8 @@ public class ioMain extends Plugin {
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
-            tempPlayerDatas.remove(event.player.uuid);
+            // commented out to prevent infinite spawning of pets by rejoining
+            // tempPlayerDatas.remove(event.player.uuid);
         });
 
         Core.app.post(this::loop);

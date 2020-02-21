@@ -331,10 +331,7 @@ public class ioMain extends Plugin {
         for (Entry<String, TempPlayerData> entry : tempPlayerDatas.entrySet()) {
             TempPlayerData tdata = entry.getValue();
             Player p = tdata.playerRef.get();
-            if (p == null) { // player gone
-                tempPlayerDatas.remove(entry.getKey());
-                continue;
-            }
+            if (p == null) continue;
 
             if (tdata.doRainbow) {
                 // update rainbows

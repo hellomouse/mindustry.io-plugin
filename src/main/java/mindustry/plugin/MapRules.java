@@ -31,10 +31,10 @@ public class MapRules {
 
         Vars.netServer.admins.addActionFilter(action -> {
             Player player = action.player;
-            // player does not exist???????
-            if (player == null) return false;
+            // action was generated locally
+            if (player == null) return true;
             String uuid = player.uuid;
-            if (uuid == null) return false;
+            if (uuid == null) return true;
 
             // disable checks for moderators and admins
             if (ioMain.getRank(player) >= 4 || player.isAdmin) return true;

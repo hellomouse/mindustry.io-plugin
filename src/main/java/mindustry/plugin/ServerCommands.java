@@ -923,13 +923,20 @@ public class ServerCommands {
                 }
                 public void run(Context ctx) {
                     EmbedBuilder eb = new EmbedBuilder();
+                    if (ctx.args.length < 2) {
+                        eb.setTitle("Command terminated");
+                        eb.setDescription("Not enough arguments");
+                        eb.setColor(Pals.error);
+                        ctx.channel.sendMessage(eb);
+                        return;
+                    }
                     String target = ctx.args[1];
                     if (ioMain.database.containsKey(target)) {
                         PlayerData data = ioMain.database.get(target);
                         Player found = playerGroup.find(p -> p.uuid.equals(target));
                         if (found != null) {
                             data.usid = found.usid;
-                            player.con.kick("Your rank was modified, please rejoin.", 0);
+                            found.con.kick("Your rank was modified, please rejoin.", 0);
                         } else {
                             data.usid = null;
                         }

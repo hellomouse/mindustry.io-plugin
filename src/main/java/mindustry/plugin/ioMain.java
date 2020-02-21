@@ -304,15 +304,17 @@ public class ioMain extends Plugin {
         Events.on(EventType.WorldLoadEvent.class, event -> {
             MapRules.run();
             intermission = false;
-            for(Player p : playerGroup.all()) {
-                Call.onInfoMessage(p.con, formatMessage(p, welcomeMessage));
+            for (Player p : playerGroup.all()) Call.onInfoMessage(p.con, formatMessage(p, welcomeMessage));
 
-                TempPlayerData tdata = tempPlayerDatas.get(p.uuid);
-                if (tdata != null) {
-                    tdata.spawnedPowerGen = false;
-                    tdata.spawnedLichPet = false;
-                    tdata.draugPets.clear();
+            for (Entry<String, TempPlayerData> entry : tempPlayerDatas.entrySet()) {
+                TempPlayerData tdata = entry.getValue();
+                if (tdata.playerRef.get() == null) {
+                    tempPlayerDatas.remove(entry.getKey());
+                    continue;
                 }
+                tdata.spawnedPowerGen = false;
+                tdata.spawnedLichPet = false;
+                tdata.draugPets.clear();
             }
         });
 
@@ -439,12 +441,14 @@ public class ioMain extends Plugin {
                             baseUnit.add();
                             tdata.draugPets.add(baseUnit);
                             Call.sendMessage(player.name + "[#b177fc] spawned in a draug pet! " + tdata.draugPets.size + "/" + rank + " spawned.");
+                        } else {
+                            player.sendMessage("[#b177fc]You already have " + rank + " draug pets active!");
                         }
                     } else {
                         player.sendMessage(noPermissionMessage);
                     }
                 } else {
-                    player.sendMessage(noPermissionMessage);
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
             });
 
@@ -468,7 +472,7 @@ public class ioMain extends Plugin {
                         player.sendMessage(noPermissionMessage);
                     }
                 } else {
-                    player.sendMessage(noPermissionMessage);
+                    player.sendMessage("[scarlet] This command is disabled on pvp.");
                 }
             });
 
@@ -489,7 +493,7 @@ public class ioMain extends Plugin {
                                 return;
                             }
 
-                            if (Build.validPlace(player.getTeam(), targetTile.x, targetTile.y, Blocks.rtgGenerator, 0)) {
+                            if (!Build.validPlace(player.getTeam(), targetTile.x, targetTile.y, Blocks.rtgGenerator, 0)) {
                                 player.sendMessage("[scarlet]Cannot place a power generator here");
                                 return;
                             }
@@ -524,13 +528,9 @@ public class ioMain extends Plugin {
 
             handler.<Player>register("spawn", "[active+] Skip the core spawning stage and spawn instantly.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {
-                    if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 1) {
-                            player.onRespawn(player.getClosestCore().tile);
-                            player.sendMessage("Spawned!");
-                        } else {
-                            player.sendMessage(noPermissionMessage);
-                        }
+                    if (getRank(player) >= 1) {
+                        player.onRespawn(player.getClosestCore().tile);
+                        player.sendMessage("Spawned!");
                     } else {
                         player.sendMessage(noPermissionMessage);
                     }
@@ -541,13 +541,9 @@ public class ioMain extends Plugin {
 
             handler.<Player>register("buildpower", "[donator+] Increase your build power 5x, making you build almost instantly.", (args, player) -> {
                 if(!state.rules.pvp || player.isAdmin) {
-                    if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 3) {
-                            player.mech.buildPower = 5f;
-                            player.sendMessage("Buildpower applied!");
-                        } else {
-                            player.sendMessage(noPermissionMessage);
-                        }
+                    if (getRank(player) >= 3) {
+                        player.mech.buildPower = 5f;
+                        player.sendMessage("Buildpower applied!");
                     } else {
                         player.sendMessage(noPermissionMessage);
                     }
@@ -581,22 +577,20 @@ public class ioMain extends Plugin {
 
             handler.<Player>register("verify", "<playerid/playername>", "<mod+> Verify the specified player and allow them to build.", (args, player) -> {
                 if(args[0].length() > 0) {
-                    if (database.containsKey(player.uuid)) {
-                        if (database.get(player.uuid).getRank() >= 4) { // 4 = moderator
-                            Player p = findPlayer(args[0]);
-                            if (p != null) {
-                                if (verifiedIPs.containsKey(p.uuid)) {
-                                    verifiedIPs.put(p.uuid, true);
-                                    player.sendMessage("[sky]Verified " + p.name + " successfully.");
-                                } else {
-                                    player.sendMessage("[scarlet]Error: uuid not found in ip database");
-                                }
+                    if (getRank(player) >= 4) { // 4 = moderator
+                        Player p = findPlayer(args[0]);
+                        if (p != null) {
+                            if (verifiedIPs.containsKey(p.uuid)) {
+                                verifiedIPs.put(p.uuid, true);
+                                player.sendMessage("[sky]Verified " + p.name + " successfully.");
                             } else {
-                                player.sendMessage("[scarlet]Error: player not found or offline");
+                                player.sendMessage("[scarlet]Error: uuid not found in ip database");
                             }
                         } else {
-                            Call.onInfoMessage(noPermissionMessage);
+                            player.sendMessage("[scarlet]Error: player not found or offline");
                         }
+                    } else {
+                        Call.onInfoMessage(noPermissionMessage);
                     }
                 } else {
                     Call.onInfoMessage(player.con, formatMessage(player, statMessage));

@@ -10,7 +10,7 @@ public class TempPlayerData implements Serializable {
     WeakReference<Player> playerRef;
     public String origName;
     public Array<BaseUnit> draugPets = new Array<>();
-    public Integer hue;
+    public int hue;
     public boolean doRainbow;
     public boolean spawnedLichPet;
     public boolean spawnedPowerGen;

@@ -334,19 +334,22 @@ public class ioMain extends Plugin {
                 continue;
             }
 
-            // update rainbows
-            String playerNameUnmodified = tdata.origName;
-            Integer hue = tdata.hue;
-            if (hue < 360) {
-                hue = hue + 1;
-            } else {
-                hue = 0;
-            }
+            if (tdata.doRainbow) {
+                // update rainbows
+                String playerNameUnmodified = tdata.origName;
+                int hue = tdata.hue;
+                if (hue < 360) {
+                    hue = hue + 1;
+                } else {
+                    hue = 0;
+                }
 
-            String hex = "#" + Integer.toHexString(Color.getHSBColor(hue / 360f, 1f, 1f).getRGB()).substring(2);
-            String[] c = playerNameUnmodified.split(" ", 2);
-            p.name = c[0] + " [" + hex + "]" + escapeColorCodes(c[1]);
-            tdata.setHue(hue);
+                String hex = "#" + Integer.toHexString(Color.getHSBColor(hue / 360f, 1f, 1f).getRGB()).substring(2);
+                String[] c = playerNameUnmodified.split(" ", 2);
+                if (c.length > 1) p.name = c[0] + " [" + hex + "]" + escapeColorCodes(c[1]);
+                else p.name = "[" + hex + "]" + escapeColorCodes(c[0]);
+                tdata.setHue(hue);
+            }
 
             // update pets
             for (BaseUnit unit : tdata.draugPets) if (!unit.isAdded()) tdata.draugPets.remove(unit);

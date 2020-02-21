@@ -762,7 +762,6 @@ public class ServerCommands {
                 }
 
                 public void run(Context ctx) {
-                    EmbedBuilder eb = new EmbedBuilder();
                     int targetRank = Integer.parseInt(ctx.args[1]);
                     if(targetRank > 0) {
                         StringBuilder msg = new StringBuilder().append("**Players with rank** `").append(rankNames.get(targetRank)).append("`:```");
@@ -779,7 +778,6 @@ public class ServerCommands {
                         ctx.reply(String.valueOf(msg));
                     }
                 }
-
             });
 
             handler.registerCommand(new RoleRestrictedCommand("spawn") {
